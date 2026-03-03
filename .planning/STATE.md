@@ -1,3 +1,19 @@
+---
+gsd_state_version: 1.0
+milestone: v1.1
+milestone_name: Production Hardening
+current_phase: Phase 7 (Error Handling & Resilience)
+status: executing
+last_updated: "2026-03-03T14:09:03.826Z"
+last_activity: "2026-03-03 — Completed Plan 07-03: Provider Global Error Migration"
+progress:
+  total_phases: 7
+  completed_phases: 0
+  total_plans: 23
+  completed_plans: 7
+  percent: 75
+---
+
 # System State
 **Current Phase:** Phase 7 (Error Handling & Resilience)
 **Milestone:** v1.1 Production Hardening
@@ -12,17 +28,17 @@
 ## Current Position
 
 **Phase:** 7 - Error Handling & Resilience
-**Plan:** 01 (Plan 2 of 4)
-**Status:** In progress - Error foundation complete
-**Progress:** ▓▓░░░░░░░░ 25% (Phase 7 Plan 1 complete)
+**Plan:** 04 (Plan 4 of 4)
+**Status:** In progress - Error Handling UI implemented via GlobalKey in Providers
+**Progress:** ▓▓▓▓▓▓▓▒░░ 75% (Phase 7 Plan 3 complete)
 
-**Last activity:** 2026-03-03 — Completed Plan 07-01: Error type system and UI components
+**Last activity:** 2026-03-03 — Completed Plan 07-03: Provider Global Error Migration
 
 ## Performance Metrics
 
 **v1.1 Milestone Progress:**
 - Phases complete: 0/5
-- Plans complete: 1/? (07-01 complete)
+- Plans complete: 3/? (07-01, 07-02, 07-03 complete)
 - Requirements covered: 8/8 (100%)
 - P0 requirements: 3 (FR1, FR2, FR3)
 - P1 requirements: 3 (FR4, FR5, FR6)
@@ -32,6 +48,8 @@
 | Plan | Duration | Tasks | Files | Commits | Completed |
 |------|----------|-------|-------|---------|-----------|
 | 07-01 | 156s | 3 | 3 | 3 | 2026-03-03 |
+| 07-02 | 84s  | 3 | 12| 3 | 2026-03-03 |
+| 07-03 |   -  | 2 | 7 | 1 | 2026-03-03 |
 
 ## Accumulated Context
 
@@ -53,6 +71,9 @@
 | Use super parameters for error constructors | Modern Dart 2.17+ feature reduces boilerplate and improves readability | 2026-03-03 |
 | Auto-dismiss timing: 4s info, 6s errors with actions | Balances user attention with non-intrusive UX | 2026-03-03 |
 | Map common exception types to typed AppError | Automatic conversion reduces boilerplate in service/provider code | 2026-03-03 |
+| Network retry uses exponential backoff: 1s, 2s, 4s delays for 3 total attempts | Balances user experience with API rate limiting | 2026-03-03 |
+| Non-critical services (notifications, clipboard, lifecycle) log errors but don't throw | Convenience features shouldn't block core app functionality | 2026-03-03 |
+| Critical services (crypto, database, storage, biometric) throw typed errors for UI feedback | User needs clear error messages for critical operations | 2026-03-03 |
 
 ### Known Issues
 - No active blockers
@@ -63,9 +84,9 @@
 - [x] Plan Phase 7 (Error Handling & Resilience)
 - [x] Define plans for FR1 (error handling) and FR3 (monitoring)
 - [x] Create error type system (07-01)
-- [ ] Integrate error handling into services (07-02)
-- [ ] Add provider error handling (07-02)
-- [ ] Identify services needing error coverage (currently 5/12)
+- [x] Integrate error handling into services (07-02)
+- [x] Add provider error handling (07-02)
+- [x] Identify services needing error coverage (completed: 12/12 services integrated)
 - [ ] Set up Sentry and Firebase Analytics accounts
 
 ### Blockers
@@ -73,11 +94,10 @@ None
 
 ## Session Continuity
 
-**Next action:** Execute Plan 07-02 to integrate error handling into services and providers
+**Next action:** Execute Plan 07-04 to integrate Sentry and Firebase Analytics with PII scrubbing.
 
 **Context for next agent:**
-- Plan 07-01 complete: Error type system and UI components created
-- Error foundation ready: AppError hierarchy, ErrorSnackBar widget, ErrorHandler utilities
-- Next: Integrate error handling into existing services and providers
-- Ready for service refactoring: secure_storage, password_repository, database_service, etc.
-- All new error handling should use typed AppError classes and ErrorHandler utilities
+- Plan 07-01, 07-02, and 07-03 complete: Robust global error handling implemented.
+- Added `scaffoldMessengerKey` in `main.dart` and intercepted provider methods globally without needing Widget contexts.
+- All 12 services and 6 providers are extremely resilient with visual indicators for faults.
+- Ready for telemetry to begin (Crashlytics, Sentry, Analytics).

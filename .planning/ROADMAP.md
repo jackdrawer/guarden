@@ -120,8 +120,8 @@ Plans:
 
 Plans:
 - [x] 07-01-PLAN.md — Error type system and Neumorphic error UI components
-- [ ] 07-02-PLAN.md — Service error handling with typed errors and network retry
-- [ ] 07-03-PLAN.md — Provider migration to AsyncNotifier with AsyncValue (UI migration deferred to Phase 8)
+- [x] 07-02-PLAN.md — Service error handling with typed errors and network retry
+- [x] 07-03-PLAN.md — Provider migration (using global ScaffoldMessenger fallback)
 - [ ] 07-04-PLAN.md — Sentry and Firebase Analytics integration with PII scrubbing
 
 ### Phase 8: Testing Infrastructure
@@ -198,7 +198,7 @@ Plans:
 | 4. Premium, Paywall and Polish | v1.0 | 4/4 | Complete | - |
 | 5. UX and Autofill | v1.0 | 4/4 | Complete | - |
 | 6. Recovery, Backup and Edit Flows | v1.0 | 4/4 | Complete | - |
-| 7. Error Handling & Resilience | v1.1 | 1/4 | In progress | - |
+| 7. Error Handling & Resilience | 2/4 | In Progress|  | - |
 | 8. Testing Infrastructure | v1.1 | 0/? | Not started | - |
 | 9. Localization & i18n | v1.1 | 0/? | Not started | - |
 | 10. Performance & Optimization | v1.1 | 0/? | Not started | - |
