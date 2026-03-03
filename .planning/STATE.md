@@ -4,13 +4,13 @@ milestone: v1.1
 milestone_name: Production Hardening
 current_phase: Phase 7 (Error Handling & Resilience)
 status: executing
-last_updated: "2026-03-03T14:09:03.826Z"
+last_updated: "2026-03-03T14:22:48.508Z"
 last_activity: "2026-03-03 — Completed Plan 07-03: Provider Global Error Migration"
 progress:
   total_phases: 7
   completed_phases: 0
   total_plans: 23
-  completed_plans: 7
+  completed_plans: 8
   percent: 75
 ---
 
@@ -50,6 +50,7 @@ progress:
 | 07-01 | 156s | 3 | 3 | 3 | 2026-03-03 |
 | 07-02 | 84s  | 3 | 12| 3 | 2026-03-03 |
 | 07-03 |   -  | 2 | 7 | 1 | 2026-03-03 |
+| Phase 07 P03 | 600 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,9 @@ progress:
 | Network retry uses exponential backoff: 1s, 2s, 4s delays for 3 total attempts | Balances user experience with API rate limiting | 2026-03-03 |
 | Non-critical services (notifications, clipboard, lifecycle) log errors but don't throw | Convenience features shouldn't block core app functionality | 2026-03-03 |
 | Critical services (crypto, database, storage, biometric) throw typed errors for UI feedback | User needs clear error messages for critical operations | 2026-03-03 |
+| Use AutoDisposeAsyncNotifier for entity providers | Entity lists auto-dispose when not watched for memory efficiency | 2026-03-03 |
+| Use AsyncNotifier for singleton providers (premium, settings) | App-wide singletons persist across lifecycle | 2026-03-03 |
+| Extract AsyncValue.value with null-checks for cross-provider dependencies | Gracefully handles loading/error states during initialization | 2026-03-03 |
 
 ### Known Issues
 - No active blockers
