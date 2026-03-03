@@ -6,7 +6,8 @@ import '../errors/app_errors.dart';
 
 import 'settings_provider.dart';
 
-class SubscriptionNotifier extends AutoDisposeAsyncNotifier<List<Subscription>> {
+class SubscriptionNotifier
+    extends AutoDisposeAsyncNotifier<List<Subscription>> {
   late final _dbService = ref.read(databaseProvider);
 
   @override
@@ -17,9 +18,10 @@ class SubscriptionNotifier extends AutoDisposeAsyncNotifier<List<Subscription>> 
 
   List<Subscription> _getItems() {
     try {
-      final settings = ref.read(settingsProvider);
+      final settingsAsync = ref.read(settingsProvider);
+      final settings = settingsAsync.value;
       var items = _dbService.subscriptionsBox.values.toList();
-      if (settings.isTravelModeActive) {
+      if (settings != null && settings.isTravelModeActive) {
         items = items
             .where((i) => !settings.travelProtectedIds.contains(i.id))
             .toList();

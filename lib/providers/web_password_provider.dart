@@ -1,25 +1,25 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../models/bank_account.dart';
+import '../models/web_password.dart';
 import '../services/database_service.dart';
 import '../widgets/error_handler.dart';
 import '../errors/app_errors.dart';
 
 import 'settings_provider.dart';
 
-class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
+class WebPasswordNotifier extends AutoDisposeAsyncNotifier<List<WebPassword>> {
   late final _dbService = ref.read(databaseProvider);
 
   @override
-  Future<List<BankAccount>> build() async {
-    ref.watch(settingsProvider); // watch settings to trigger rebuild
+  Future<List<WebPassword>> build() async {
+    ref.watch(settingsProvider);
     return _getItems();
   }
 
-  List<BankAccount> _getItems() {
+  List<WebPassword> _getItems() {
     try {
       final settingsAsync = ref.read(settingsProvider);
       final settings = settingsAsync.value;
-      var items = _dbService.bankAccountsBox.values.toList();
+      var items = _dbService.webPasswordsBox.values.toList();
       if (settings != null && settings.isTravelModeActive) {
         items = items
             .where((i) => !settings.travelProtectedIds.contains(i.id))
@@ -29,62 +29,61 @@ class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
     } catch (e) {
       ErrorHandler.handleGlobalError(
         DatabaseError(
-          'Failed to read accounts: $e',
-          userMessage: "Could not load bank accounts.",
+          'Failed to read web passwords: $e',
+          userMessage: "Could not load web passwords.",
         ),
       );
       return [];
     }
   }
 
-  void addBankAccount(BankAccount account) {
+  void addWebPassword(WebPassword pwd) {
     try {
-      _dbService.bankAccountsBox.put(account.id, account);
+      _dbService.webPasswordsBox.put(pwd.id, pwd);
       state = AsyncValue.data(_getItems());
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
         DatabaseError(
-          'Failed to add account: $e',
-          userMessage:
-              "Could not save bank account. Please check storage capacity.",
+          'Failed to add web password: $e',
+          userMessage: "Could not save web password.",
         ),
       );
     }
   }
 
-  void updateBankAccount(BankAccount account) {
+  void updateWebPassword(WebPassword pwd) {
     try {
-      _dbService.bankAccountsBox.put(account.id, account);
+      _dbService.webPasswordsBox.put(pwd.id, pwd);
       state = AsyncValue.data(_getItems());
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
         DatabaseError(
-          'Failed to update account: $e',
-          userMessage: "Could not update bank account.",
+          'Failed to update web password: $e',
+          userMessage: "Could not update web password.",
         ),
       );
     }
   }
 
-  void deleteBankAccount(String id) {
+  void deleteWebPassword(String id) {
     try {
-      _dbService.bankAccountsBox.delete(id);
+      _dbService.webPasswordsBox.delete(id);
       state = AsyncValue.data(_getItems());
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
         DatabaseError(
-          'Failed to delete account: $e',
-          userMessage: "Could not delete bank account.",
+          'Failed to delete web password: $e',
+          userMessage: "Could not delete web password.",
         ),
       );
     }
   }
 }
 
-final bankAccountProvider =
-    AsyncNotifierProvider.autoDispose<BankAccountNotifier, List<BankAccount>>(
-      BankAccountNotifier.new,
+final webPasswordProvider =
+    AsyncNotifierProvider.autoDispose<WebPasswordNotifier, List<WebPassword>>(
+      WebPasswordNotifier.new,
     );
