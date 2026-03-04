@@ -50,67 +50,74 @@ class _WebPasswordDetailScreenState
 
   Future<bool> _requestMasterPassword() async {
     final controller = TextEditingController();
-    var obscure = true;
-    final password = await showDialog<String>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              backgroundColor: AppColors.of(ctx).surface,
-              title: Text(
-                t.general.authentication,
-                style: TextStyle(color: AppColors.of(ctx).textPrimary),
-              ),
-              content: TextField(
-                controller: controller,
-                autofocus: true,
-                obscureText: obscure,
-                style: TextStyle(color: AppColors.of(ctx).textPrimary),
-                decoration: InputDecoration(
-                  labelText: t.general.master_password_hint,
-                  labelStyle: TextStyle(color: AppColors.of(ctx).textSecondary),
-                  suffixIcon: IconButton(
-                    onPressed: () => setState(() => obscure = !obscure),
-                    icon: Icon(
-                      obscure ? Icons.visibility : Icons.visibility_off,
+    try {
+      var obscure = true;
+      final password = await showDialog<String>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                backgroundColor: AppColors.of(ctx).surface,
+                title: Text(
+                  t.general.authentication,
+                  style: TextStyle(color: AppColors.of(ctx).textPrimary),
+                ),
+                content: TextField(
+                  controller: controller,
+                  autofocus: true,
+                  obscureText: obscure,
+                  style: TextStyle(color: AppColors.of(ctx).textPrimary),
+                  decoration: InputDecoration(
+                    labelText: t.general.master_password_hint,
+                    labelStyle: TextStyle(
                       color: AppColors.of(ctx).textSecondary,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        obscure ? Icons.visibility : Icons.visibility_off,
+                        color: AppColors.of(ctx).primaryAccent,
+                      ),
+                      onPressed: () => setState(() => obscure = !obscure),
                     ),
                   ),
                 ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: Text(t.general.cancel),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.of(ctx).pop(controller.text),
-                  child: Text(t.general.confirm),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    controller.dispose();
-
-    if (password == null || password.isEmpty) return false;
-
-    final isValid = await ref
-        .read(authProvider.notifier)
-        .verifyMasterPassword(password);
-
-    if (!isValid && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(t.auth_login.wrong_master_password)),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(t.general.cancel),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(context).pop(controller.text),
+                    child: Text(t.general.confirm),
+                  ),
+                ],
+              );
+            },
+          );
+        },
       );
-    }
 
-    return isValid;
+      if (password == null || password.isEmpty) return false;
+
+      final isValid = await ref
+          .read(authProvider.notifier)
+          .verifyMasterPassword(password);
+
+      if (!isValid && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t.auth_login.wrong_master_password)),
+        );
+      }
+
+      return isValid;
+    } finally {
+      // Small delay to ensure dialog animation completes before disposing controller
+      Future.delayed(const Duration(milliseconds: 200), () {
+        controller.dispose();
+      });
+    }
   }
 
   Future<void> _revealPassword(String encryptedPassword) async {

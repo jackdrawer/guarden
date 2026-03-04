@@ -1,17 +1,18 @@
 import 'dart:convert';
-import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/crypto_service.dart';
 import '../services/database_service.dart';
 import '../services/secure_storage_service.dart';
 import '../services/biometric_service.dart';
+import '../utils/crypto_utils.dart';
 import '../widgets/error_handler.dart';
 
 enum AuthState { initial, firstTime, unauthenticated, authenticated }
 
-class AuthNotifier extends AutoDisposeAsyncNotifier<AuthState> {
+class AuthNotifier extends AsyncNotifier<AuthState> {
   late SecureStorageService _secureStorage;
   late DatabaseService _databaseService;
 
@@ -31,14 +32,17 @@ class AuthNotifier extends AutoDisposeAsyncNotifier<AuthState> {
         return AuthState.unauthenticated;
       }
     } catch (e, stackTrace) {
-      state = AsyncValue.error(e, stackTrace);
+      // Defer state update to avoid modifying provider during build phase
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        state = AsyncValue.error(e, stackTrace);
+      });
       return AuthState.unauthenticated;
     }
   }
 
   Future<void> setupVault(String masterPassword) async {
     try {
-      final dbKey = _generateVaultKey();
+      final dbKey = generateSecureKey();
       await _secureStorage.saveEncryptionKey(dbKey);
       await _persistMasterPasswordVerifier(masterPassword);
 
@@ -78,16 +82,21 @@ class AuthNotifier extends AutoDisposeAsyncNotifier<AuthState> {
 
       final verifier = await _secureStorage.getMasterPasswordVerifier();
       if (verifier != null && verifier.isNotEmpty) {
-        return _constantTimeEquals(derivedBase64, verifier);
+        return constantTimeEquals(derivedBase64, verifier);
       }
 
       // Legacy fallback: previous versions compared password-derived key with
-      // the DB encryption key directly.
+      // the DB encryption key directly. This block auto-migrates to
+      // verifier-based auth and will be removed in a future release.
       final storedBase64 = await _secureStorage.getEncryptionKey();
       if (storedBase64 == null) return false;
 
-      final isLegacyMatch = _constantTimeEquals(derivedBase64, storedBase64);
+      final isLegacyMatch = constantTimeEquals(derivedBase64, storedBase64);
       if (isLegacyMatch) {
+        debugPrint(
+          '⚠️ Legacy master password verification detected — '
+          'migrating to verifier-based auth.',
+        );
         await _secureStorage.saveMasterPasswordVerifier(derivedBase64);
       }
 
@@ -126,7 +135,7 @@ class AuthNotifier extends AutoDisposeAsyncNotifier<AuthState> {
 
   Future<void> _persistMasterPasswordVerifier(String masterPassword) async {
     final crypto = CryptoService();
-    final salt = _generateSalt();
+    final salt = generateSecureSalt();
     await _secureStorage.saveSalt(salt);
 
     final derivedKey = await crypto.deriveKey(masterPassword, salt);
@@ -134,31 +143,6 @@ class AuthNotifier extends AutoDisposeAsyncNotifier<AuthState> {
     final verifier = base64Encode(keyBytes);
 
     await _secureStorage.saveMasterPasswordVerifier(verifier);
-  }
-
-  String _generateSalt({int length = 32}) {
-    final random = Random.secure();
-    final bytes = List<int>.generate(length, (_) => random.nextInt(256));
-    return base64UrlEncode(bytes);
-  }
-
-  String _generateVaultKey({int length = 32}) {
-    final random = Random.secure();
-    final bytes = List<int>.generate(length, (_) => random.nextInt(256));
-    return base64Encode(bytes);
-  }
-
-  bool _constantTimeEquals(String a, String b) {
-    final maxLength = a.length > b.length ? a.length : b.length;
-    var diff = a.length ^ b.length;
-
-    for (var i = 0; i < maxLength; i++) {
-      final aCode = i < a.length ? a.codeUnitAt(i) : 0;
-      final bCode = i < b.length ? b.codeUnitAt(i) : 0;
-      diff |= aCode ^ bCode;
-    }
-
-    return diff == 0;
   }
 
   Future<bool> canUseBiometrics() async {
@@ -188,6 +172,6 @@ class AuthNotifier extends AutoDisposeAsyncNotifier<AuthState> {
 
 final splashCompleterProvider = StateProvider<bool>((ref) => false);
 
-final authProvider = AsyncNotifierProvider.autoDispose<AuthNotifier, AuthState>(
+final authProvider = AsyncNotifierProvider<AuthNotifier, AuthState>(
   () => AuthNotifier(),
 );

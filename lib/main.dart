@@ -13,12 +13,20 @@ import 'services/telemetry_service.dart';
 import 'services/monitoring_service.dart';
 import 'services/analytics_service.dart';
 import 'widgets/error_handler.dart';
+import 'providers/theme_provider.dart';
 
 void main() async {
   const sentryDsn = String.fromEnvironment('SENTRY_DSN', defaultValue: '');
 
   if (sentryDsn.isEmpty) {
-    await _bootstrapApp();
+    runZonedGuarded(
+      () async {
+        await _bootstrapApp();
+      },
+      (error, stackTrace) {
+        MonitoringService.captureError(error, stackTrace);
+      },
+    );
     return;
   }
 
@@ -34,29 +42,24 @@ void main() async {
 
 Future<void> _bootstrapApp() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (!kIsWeb) {
-    await MobileAds.instance.initialize();
-  }
 
+  // 1. Kritik senkron iÅŸlemler (hÄ±zlÄ±)
   LocaleSettings.useDeviceLocale();
-
   await Hive.initFlutter();
 
-  await TelemetryService.instance.init();
-  await MonitoringService.init();
-  await AnalyticsService.init();
+  // 2. Ads fire-and-forget (UI'Ä± engelleme)
+  if (!kIsWeb) {
+    unawaited(MobileAds.instance.initialize());
+  }
 
-  // Run app in error zone to capture uncaught async errors
-  runZonedGuarded(
-    () {
-      runApp(
-        ProviderScope(child: TranslationProvider(child: const GuardenApp())),
-      );
-    },
-    (error, stackTrace) {
-      MonitoringService.captureError(error, stackTrace);
-    },
-  );
+  // 3. Firebase init (baÄŸÄ±mlÄ±lÄ±k zinciri baÅŸÄ± - telemetry Ã¶nce)
+  await TelemetryService.instance.init();
+
+  // 4. BaÄŸÄ±msÄ±z servisler paralel
+  unawaited(Future.wait([MonitoringService.init(), AnalyticsService.init()]));
+
+  // 5. UI'Ä± hemen gÃ¶ster
+  runApp(ProviderScope(child: TranslationProvider(child: const GuardenApp())));
 }
 
 final isAutofillProvider = StateProvider<bool>((ref) => false);
@@ -78,6 +81,7 @@ class GuardenApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
+    final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp.router(
       title: 'Guarden Password Manager',
@@ -90,6 +94,7 @@ class GuardenApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      themeMode: themeMode,
       theme: ThemeData(
         fontFamily: 'Inter',
         colorScheme: ColorScheme.fromSeed(
@@ -109,7 +114,6 @@ class GuardenApp extends ConsumerWidget {
         useMaterial3: true,
         extensions: [AppColors.dark],
       ),
-      themeMode: ThemeMode.system,
       routerConfig: router,
     );
   }

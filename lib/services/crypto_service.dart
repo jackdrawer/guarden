@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
-import 'package:bip39/bip39.dart' as bip39;
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../errors/app_errors.dart';
@@ -16,11 +15,6 @@ class CryptoService {
     iterations: 100000,
     bits: 256,
   );
-
-  /// 12 kelimelik rastgele (mnemonic) seed phrase üretir.
-  String generateSeedPhrase() {
-    return bip39.generateMnemonic();
-  }
 
   /// Master password ve salt kullanarak PBKDF2 ile 256 bitlik AES anahtarı türetir.
   Future<SecretKey> deriveKey(String password, String salt) async {

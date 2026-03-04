@@ -91,6 +91,7 @@
     "error_with_message": "Hata: $message",
     "sections": {
       "system_integration": "Sistem Entegrasyonu",
+      "appearance": "Görünüm",
       "security_privacy": "Güvenlik ve Gizlilik",
       "drive_backup": "Google Drive Yedekleme",
       "manual_import_export": "Cihaza Yedekle",
@@ -126,7 +127,14 @@
       "restore_from_drive": "Google Drive'dan önceki bir yedeği geri yükler",
       "export_file": "Şifreli yedeği cihazınıza dosya olarak kaydeder",
       "import_file": "Cihazdaki yedek dosyasını geri yükler",
-      "panic_mode": "Acil durumlarda tüm kasa verilerini (şifreler ve hesaplar dahil) kalıcı olarak siler"
+      "panic_mode": "Acil durumlarda tüm kasa verilerini (şifreler ve hesaplar dahil) kalıcı olarak siler",
+      "theme": "Uygulamanın görünüm temasını seçin"
+    },
+    "theme": {
+      "title": "Tema",
+      "light": "Aydınlık",
+      "dark": "Karanlık",
+      "system": "Sistem"
     },
     "errors": {
       "travel_mode_failed": "Seyahat modu güncellenemedi.",
@@ -289,5 +297,11 @@
       "title": "Henüz Abonelik Yok",
       "subtitle": "Aylık ödemelerinizi ve dijital platform üyeliklerinizi buradan takip edebilirsiniz."
     }
+  },
+  "notifications": {
+    "password_rotation_alert": "Şifre Rotasyonu Uyarısı!",
+    "passwords_due_for_rotation": "$count banka şifresinin rotasyonu gerekiyor. Güvenlik için güncelleyin.",
+    "password_rotation_soon": "Şifre Rotasyonu Yaklaşıyor",
+    "passwords_expiring_soon": "$count banka şifresi 7 gün içinde sona erecek."
   }
 }

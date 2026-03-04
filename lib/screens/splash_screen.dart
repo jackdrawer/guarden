@@ -21,14 +21,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1000), // 1500 -> 1000ms
     );
     _animation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOutBack,
     );
 
-    _controller.forward().then((_) {
+    // Paralel Ã§alÄ±ÅŸtÄ±r: animasyon + minimum gÃ¶sterim sÃ¼resi
+    Future.wait([
+      _controller.forward(),
+      Future.delayed(const Duration(milliseconds: 800)), // minimum 800ms
+    ]).then((_) {
       ref.read(splashCompleterProvider.notifier).state = true;
     });
   }

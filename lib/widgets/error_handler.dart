@@ -26,21 +26,28 @@ class ErrorHandler {
 
     // Defer SnackBar display to avoid modifying widget tree during build phase.
     // This prevents '_dependents.isEmpty' assertion failures when errors occur
-    // during provider rebuilds (e.g., when toggling Travel Mode).
+    // during provider rebuilds.
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Check if context is still valid before showing UI
+      if (scaffoldMessengerKey.currentState == null) return;
       _showErrorSnackBar(appError, onRetry);
     });
   }
 
   static void _showErrorSnackBar(AppError appError, VoidCallback? onRetry) {
-    // In pure unit tests there may be no WidgetsBinding/Scaffold context.
     final scaffoldMessenger = _safeScaffoldMessengerState();
-    if (scaffoldMessenger == null) {
-      debugPrint('No ScaffoldMessengerState found for error: $appError');
+    if (scaffoldMessenger == null || !scaffoldMessenger.mounted) {
+      debugPrint(
+        'No mounted ScaffoldMessengerState found for error: $appError',
+      );
       return;
     }
 
-    scaffoldMessenger.hideCurrentSnackBar();
+    try {
+      scaffoldMessenger.hideCurrentSnackBar();
+    } catch (_) {
+      // Ignore if snackbar already dismissed or state invalid
+    }
 
     // Use a variable that we assign afterwards to pass to the widget
     late ScaffoldFeatureController<SnackBar, SnackBarClosedReason> controller;

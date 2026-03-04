@@ -385,19 +385,18 @@ flutter build ipa --release \
 - **Dart** 3.8.1
 
 ### State Management
-- **Riverpod** 2.6.1
+- **flutter_riverpod** 2.6.1 (state management)
 
-### Navigation
-- **GoRouter** 17.0.0
-
-### Database
-- **Hive** 2.2.3 (encrypted local storage)
+### Database & Storage
+- **hive_flutter** 1.1.0 (local database)
+- **flutter_secure_storage** 10.0.0 (secrets)
 
 ### Security
-- **cryptography** 2.9.0 (AES-256-GCM, PBKDF2)
-- **bip39** 1.0.6 (seed phrases)
-- **flutter_secure_storage** 10.0.0 (Keychain/Keystore)
+- **cryptography** 2.9.0 (AES-256-GCM & PBKDF2)
 - **local_auth** 2.3.0 (biometric)
+
+### Observability
+- **sentry_flutter** 9.14.0 (error tracking)
 
 ### Premium & Monetization
 - **purchases_flutter** 9.12.3 (RevenueCat)

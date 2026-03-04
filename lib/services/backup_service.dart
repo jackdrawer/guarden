@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +10,7 @@ import 'crypto_service.dart';
 import 'database_service.dart';
 import '../errors/app_errors.dart';
 import '../i18n/strings.g.dart';
+import '../utils/crypto_utils.dart';
 
 final backupServiceProvider = Provider<BackupService>((ref) {
   final database = ref.read(databaseProvider);
@@ -18,12 +18,13 @@ final backupServiceProvider = Provider<BackupService>((ref) {
   return BackupService(databaseService: database, cryptoService: crypto);
 });
 
-class BackupException implements Exception {
-  final String message;
-  BackupException(this.message);
-
-  @override
-  String toString() => 'BackupException: $message';
+class BackupException extends AppError {
+  BackupException(String message, {String? userMessage})
+    : super(
+        message,
+        userMessage: userMessage ?? t.settings.errors.backup_read_failed,
+        canRetry: false,
+      );
 }
 
 class BackupDecodedPayload {
@@ -98,7 +99,7 @@ class BackupService {
       'checksum': _sha256Hex(jsonEncode(data)),
     };
 
-    final salt = _generateSalt();
+    final salt = generateSecureSalt();
     final key = await _cryptoService.deriveKey(passphrase, salt);
     final cipher = await _cryptoService.encryptText(jsonEncode(payload), key);
 
@@ -169,7 +170,7 @@ class BackupService {
     }
 
     final expectedChecksum = _sha256Hex(jsonEncode(dataRaw));
-    if (!_constantTimeEquals(checksum, expectedChecksum)) {
+    if (!constantTimeEquals(checksum, expectedChecksum)) {
       throw BackupException('Checksum verification failed.');
     }
 
@@ -470,26 +471,7 @@ class BackupService {
     }
   }
 
-  String _generateSalt({int length = 32}) {
-    final random = Random.secure();
-    final bytes = List<int>.generate(length, (_) => random.nextInt(256));
-    return base64UrlEncode(bytes);
-  }
-
   String _sha256Hex(String input) {
     return sha256.convert(utf8.encode(input)).toString();
-  }
-
-  bool _constantTimeEquals(String a, String b) {
-    final maxLength = a.length > b.length ? a.length : b.length;
-    var diff = a.length ^ b.length;
-
-    for (var i = 0; i < maxLength; i++) {
-      final aCode = i < a.length ? a.codeUnitAt(i) : 0;
-      final bCode = i < b.length ? b.codeUnitAt(i) : 0;
-      diff |= aCode ^ bCode;
-    }
-
-    return diff == 0;
   }
 }

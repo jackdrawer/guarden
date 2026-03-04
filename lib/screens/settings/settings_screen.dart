@@ -19,6 +19,7 @@ import '../../services/secure_storage_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/neumorphic/neumorphic_container.dart';
 import '../../widgets/ads/ad_banner_widget.dart';
+import '../../widgets/theme_selector.dart';
 import '../../services/google_drive_backup_service.dart';
 import '../../providers/bank_account_provider.dart';
 import '../../providers/subscription_provider.dart';
@@ -34,52 +35,57 @@ class SettingsScreen extends ConsumerWidget {
     String? title,
   }) async {
     final controller = TextEditingController();
-    var obscure = true;
+    try {
+      var obscure = true;
 
-    final result = await showDialog<String>(
-      context: context,
-      builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setState) {
-            return AlertDialog(
-              backgroundColor: AppColors.of(ctx).surface,
-              title: Text(
-                title ?? t.settings.master_password_confirmation,
-                style: TextStyle(color: AppColors.of(ctx).textPrimary),
-              ),
-              content: TextField(
-                controller: controller,
-                autofocus: true,
-                obscureText: obscure,
-                decoration: InputDecoration(
-                  labelText: t.settings.master_password,
-                  suffixIcon: IconButton(
-                    onPressed: () => setState(() => obscure = !obscure),
-                    icon: Icon(
-                      obscure ? Icons.visibility : Icons.visibility_off,
+      final result = await showDialog<String>(
+        context: context,
+        builder: (ctx) {
+          return StatefulBuilder(
+            builder: (ctx, setState) {
+              return AlertDialog(
+                backgroundColor: AppColors.of(ctx).surface,
+                title: Text(
+                  title ?? t.settings.master_password_confirmation,
+                  style: TextStyle(color: AppColors.of(ctx).textPrimary),
+                ),
+                content: TextField(
+                  controller: controller,
+                  autofocus: true,
+                  obscureText: obscure,
+                  decoration: InputDecoration(
+                    labelText: t.settings.master_password,
+                    suffixIcon: IconButton(
+                      onPressed: () => setState(() => obscure = !obscure),
+                      icon: Icon(
+                        obscure ? Icons.visibility : Icons.visibility_off,
+                      ),
                     ),
                   ),
+                  onSubmitted: (value) => Navigator.of(ctx).pop(value),
                 ),
-                onSubmitted: (value) => Navigator.of(ctx).pop(value),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: Text(t.general.cancel),
-                ),
-                FilledButton(
-                  onPressed: () => Navigator.of(ctx).pop(controller.text),
-                  child: Text(t.general.confirm),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    controller.dispose();
-    return result;
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: Text(t.general.cancel),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(ctx).pop(controller.text),
+                    child: Text(t.general.confirm),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+      return result;
+    } finally {
+      // Small delay to ensure dialog animation completes before disposing controller
+      Future.delayed(const Duration(milliseconds: 200), () {
+        controller.dispose();
+      });
+    }
   }
 
   Future<bool> _authenticate(BuildContext context, WidgetRef ref) async {
@@ -337,9 +343,11 @@ class SettingsScreen extends ConsumerWidget {
 
       if (context.mounted) {
         // Invalidate providers so UI refreshes with restored data
-        ref.invalidate(bankAccountProvider);
-        ref.invalidate(subscriptionProvider);
-        ref.invalidate(webPasswordProvider);
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.invalidate(bankAccountProvider);
+          ref.invalidate(subscriptionProvider);
+          ref.invalidate(webPasswordProvider);
+        });
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -459,9 +467,12 @@ class SettingsScreen extends ConsumerWidget {
 
       if (context.mounted) {
         // Invalidate providers so UI refreshes with restored data
-        ref.invalidate(bankAccountProvider);
-        ref.invalidate(subscriptionProvider);
-        ref.invalidate(webPasswordProvider);
+        // Defer to avoid modifying widget tree during build
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ref.invalidate(bankAccountProvider);
+          ref.invalidate(subscriptionProvider);
+          ref.invalidate(webPasswordProvider);
+        });
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -635,6 +646,19 @@ class SettingsScreen extends ConsumerWidget {
                 ],
               ),
             ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            t.settings.sections.appearance,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColors.of(context).textPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Tooltip(
+            message: t.settings.tooltips.theme,
+            child: const ThemeSelector(),
           ),
           const SizedBox(height: 24),
           Text(

@@ -11,6 +11,24 @@ import '../errors/app_errors.dart';
 ///
 /// Note: Sentry is initialized in main.dart via SentryFlutter.init.
 class MonitoringService {
+  static const _sensitiveKeywords = [
+    'password',
+    'seed',
+    'key',
+    'pin',
+    'secret',
+    'token',
+    'cipher',
+    'mnemonic',
+    'private',
+    'credential',
+  ];
+
+  static bool _containsSensitive(String text) {
+    final lower = text.toLowerCase();
+    return _sensitiveKeywords.any((kw) => lower.contains(kw));
+  }
+
   /// Initialize monitoring service.
   ///
   /// This verifies Sentry DSN is configured. Actual Sentry initialization
@@ -36,10 +54,40 @@ class MonitoringService {
   ///
   /// Use this as beforeSend callback in Sentry.init().
   static SentryEvent? scrubPII(SentryEvent event, Hint hint) {
-    // In Sentry 9.x, we can't easily modify the event object
-    // The beforeSend in main.dart will handle basic scrubbing
-    // This method exists for API compatibility with the plan
-    return event;
+    var scrubbed = event;
+
+    // Scrub exception values containing sensitive keywords
+    if (event.exceptions != null) {
+      final scrubbedExceptions = event.exceptions!.map((ex) {
+        final value = ex.value;
+        if (value != null && _containsSensitive(value)) {
+          return SentryException(
+            type: ex.type,
+            value: '[REDACTED]',
+            mechanism: ex.mechanism,
+            stackTrace: ex.stackTrace,
+            threadId: ex.threadId,
+          );
+        }
+        return ex;
+      }).toList();
+      scrubbed = scrubbed.copyWith(exceptions: scrubbedExceptions);
+    }
+
+    // Scrub breadcrumb data maps
+    if (event.breadcrumbs != null) {
+      final scrubbedBreadcrumbs = event.breadcrumbs!.map((bc) {
+        return Breadcrumb(
+          message: bc.message,
+          category: bc.category,
+          data: _scrubMap(bc.data),
+          timestamp: bc.timestamp,
+        );
+      }).toList();
+      scrubbed = scrubbed.copyWith(breadcrumbs: scrubbedBreadcrumbs);
+    }
+
+    return scrubbed;
   }
 
   /// Scrub sensitive fields from a map recursively.

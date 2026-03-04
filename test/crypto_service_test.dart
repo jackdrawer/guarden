@@ -9,13 +9,6 @@ void main() {
       cryptoService = CryptoService();
     });
 
-    test('Seed Phrase (Mnemonic) üretimi başarılı olmalı', () {
-      final phrase = cryptoService.generateSeedPhrase();
-      // Bip39 genelde 12 kelime üretir
-      expect(phrase.split(' ').length, 12);
-      expect(phrase.isNotEmpty, true);
-    });
-
     test(
       'Master şifreden key üretimi, şifreleme ve çözme döngüsü uyumlu olmalı',
       () async {

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../errors/app_errors.dart';
 import '../i18n/strings.g.dart';
+import '../models/theme_mode.dart';
 
 class SettingsService {
   static const String _boxName = 'settings_box';
@@ -13,6 +14,7 @@ class SettingsService {
   static const String _securityNotifKey = 'securityNotif';
   static const String _biometricLoginKey = 'biometricLogin';
   static const String _biometricConfirmKey = 'biometricConfirm';
+  static const String _themeModeKey = 'themeMode';
 
   late Box _box;
   bool _initialized = false;
@@ -203,6 +205,27 @@ class SettingsService {
     } catch (e) {
       throw DatabaseError(
         'Could not save setting',
+        userMessage: t.settings.errors.setting_update_failed,
+      );
+    }
+  }
+
+  // Theme mode settings
+  AppThemeMode get themeMode {
+    try {
+      final value = _box.get(_themeModeKey, defaultValue: 'system');
+      return AppThemeModeExtension.fromString(value as String?);
+    } catch (_) {
+      return AppThemeMode.system;
+    }
+  }
+
+  Future<void> setThemeMode(AppThemeMode mode) async {
+    try {
+      await _box.put(_themeModeKey, mode.name);
+    } catch (e) {
+      throw DatabaseError(
+        'Could not save theme setting',
         userMessage: t.settings.errors.setting_update_failed,
       );
     }

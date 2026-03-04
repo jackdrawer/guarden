@@ -55,9 +55,8 @@ flowchart TB
 
 1. **🔴 Kritik:** Biyometrik ayar kaydetme sorunu ( onboarding'de kayıt yok)
 2. **🟡 Yüksek:** i18n çeviri sistemi hatalı (çok sayıda missing translation)
-3. **🟡 Yüksek:** Premium/monetizasyon entegrasyonu eksik (RevenueCat altyapısı tanımlı ama aktif değil)
-4. **🟢 Orta:** HIBP (Have I Been Pwned) entegrasyonu "yakında" modunda
-5. **🟢 Orta:** Autofill framework tam test edilmemiş
+3. **🟢 Orta:** HIBP (Have I Been Pwned) entegrasyonu "yakında" modunda
+4. **🟢 Orta:** Autofill framework tam test edilmemiş
 
 ---
 
@@ -187,8 +186,7 @@ flowchart LR
 ```
 Priority 1: Kritik Hata Düzeltmeleri
 ├── Biyometrik entegrasyon tamir
-├── i18n çeviri sistemi düzeltme
-└── RevenueCat entegrasyonu tamamlama
+└── i18n çeviri sistemi düzeltme
 
 Priority 2: Güvenlik Güçlendirme
 ├── Screenshot protection (iOS/Android)
@@ -301,9 +299,8 @@ Scale:
 ### Kısa Vadeli (6 ay)
 
 1. **Teknik Borç Temizliği:** Biyometrik ve i18n sorunlarını çöz
-2. **Monetizasyon:** RevenueCat entegrasyonunu tamamla, fiyatlandırma testleri yap
-3. **ASO:** App Store ve Play Store optimizasyonu
-4. **Community:** GitHub repo'sunu açık kaynak yap, contributor guidelines oluştur
+2. **ASO:** App Store ve Play Store optimizasyonu
+3. **Community:** GitHub repo'sunu açık kaynak yap, contributor guidelines oluştur
 
 ### Orta Vadeli (1-2 yıl)
 

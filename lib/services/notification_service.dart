@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/bank_account.dart';
 import '../models/web_password.dart';
+import '../i18n/strings.g.dart';
 
 final notificationProvider = Provider<NotificationService>((ref) {
   return NotificationService();
@@ -140,17 +141,16 @@ class NotificationService {
     if (expiredCount > 0) {
       await showNotification(
         id: 100,
-        title: 'Password Rotation Alert!',
-        body:
-            '$expiredCount bank passwords are due for rotation. Please update them for security.',
+        title: t.notifications.password_rotation_alert,
+        body: t.notifications.passwords_due_for_rotation(count: expiredCount),
       );
     }
 
     if (soonCount > 0) {
       await showNotification(
         id: 101,
-        title: 'Password Rotation Coming Soon',
-        body: '$soonCount bank passwords will expire within 7 days.',
+        title: t.notifications.password_rotation_soon,
+        body: t.notifications.passwords_expiring_soon(count: soonCount),
       );
     }
   }

@@ -7,18 +7,19 @@
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
 
-**Guarden** is a secure, offline-first password vault for managing bank accounts, subscriptions, and web credentials with **AES-256-GCM encryption**, **biometric unlock**, and **premium features** powered by RevenueCat.
+**Guarden** is a secure, offline-first password vault for managing bank accounts, subscriptions, and web credentials with **AES-256-GCM encryption** and **biometric unlock**. 
+
+*This is a full open-source Flutter alternative to subscription-based password managers, designed explicitly with a zero-trust architecture where only you own your data.*
 
 ---
 
-## ✨ Features
+## 🌟 Key Features
 
-### 🔐 Security
-- **AES-256-GCM** encryption for all data
-- **PBKDF2** key derivation (100k iterations)
-- **Biometric unlock** (Face ID / Fingerprint)
-- **Master password** protection
-- **BIP39 seed phrase** recovery
+- **Offline-First Security**: Your passwords never leave your device unless you explicitly export them.
+- **Bank-Grade Encryption**: Everything is encrypted using AES-256-GCM.
+- **Google Drive Backup**: Optional, encrypted backup sink to your personal google drive.
+- **Biometric Unlock**: Fast access via Face ID / Touch ID.
+- **Local Import/Export**: Easy JSON backup management.
 - **Screenshot protection**
 - **Clipboard auto-clear**
 

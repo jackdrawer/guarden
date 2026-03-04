@@ -24,11 +24,14 @@ class DatabaseService {
   static const String webPasswordsBoxName = 'web_passwords';
 
   /// Hive'Ä± baÅŸlatÄ±r ve gÃ¼venli kutularÄ± (Boxes) aÃ§ar.
+  ///
+  /// Not: Hive.initFlutter() main.dart'ta Ã§aÄŸrÄ±lÄ±r, burada tekrar Ã§aÄŸrÄ±lmaz.
   Future<void> initDatabase() async {
     if (_isInitialized) return;
 
     try {
-      await Hive.initFlutter();
+      // Hive.initFlutter() main.dart'ta zaten Ã§aÄŸrÄ±ldÄ±
+      // await Hive.initFlutter(); // KALDIRILDI - redundant
 
       // Type Adapter kayÄ±tlarÄ± (Daha Ã¶nce kaydedilmemiÅŸse)
       if (!Hive.isAdapterRegistered(0)) {

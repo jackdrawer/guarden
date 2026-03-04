@@ -6,19 +6,10 @@
 - Dart SDK 3.8.1+
 - Android Studio (for Android builds)
 - Xcode (for iOS builds)
-- RevenueCat account (for premium features)
 
 ---
 
 ## 🔑 API Keys Configuration
-
-### 1. RevenueCat Setup
-
-1. Create account at [RevenueCat](https://app.revenuecat.com/)
-2. Create a new project
-3. Get your API keys:
-   - **Google Play Store** API key
-   - **Apple App Store** API key
 
 ### 2. Configure Locally
 
@@ -188,30 +179,18 @@ flutter run --dart-define=RC_GOOGLE_API_KEY=your_key
 
 **Problem:** Build fails with "key.properties not found".
 
-**Solution:** Create `android/key.properties` following step 2 above.
-
 ### Hive encryption error
 
 **Problem:** "DB Encryption Key not found" on login.
 
-**Solution:** This is expected on first launch. The app will prompt for master password setup.
+**Solution:** This is expected on first launch. The app will prompt for master password setup. Check `adb logcat` output. Usually indicates either `.env` file parsing failure or `sentry.properties` missing locally.
 
-### Biometric auth not working
-
-**Problem:** Face ID/Fingerprint doesn't work.
-
-**Cause:** Simulator doesn't support biometric auth.
-
-**Solution:** Test on real device.
-
----
-
-## 📚 Additional Resources
+## Important Links
 
 - [Flutter Documentation](https://flutter.dev/docs)
-- [RevenueCat Docs](https://docs.revenuecat.com/)
+- [Local Auth Plugin](https://pub.dev/packages/local_auth)
 - [Hive Documentation](https://docs.hivedb.dev/)
-- [Riverpod Guide](https://riverpod.dev/)
+- [Sentry Flutter](https://docs.sentry.io/platforms/flutter/)
 
 ---
 

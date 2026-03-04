@@ -91,6 +91,7 @@
     "error_with_message": "Error: $message",
     "sections": {
       "system_integration": "System Integration",
+      "appearance": "Appearance",
       "security_privacy": "Security and Privacy",
       "drive_backup": "Google Drive Backup",
       "manual_import_export": "Device Backup",
@@ -126,7 +127,14 @@
       "restore_from_drive": "Restores a previous backup from Google Drive",
       "export_file": "Saves encrypted backup as a file on your device",
       "import_file": "Restores backup file from your device",
-      "panic_mode": "Permanently deletes all vault data including passwords and accounts in emergency situations"
+      "panic_mode": "Permanently deletes all vault data including passwords and accounts in emergency situations",
+      "theme": "Choose the app appearance theme"
+    },
+    "theme": {
+      "title": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
     },
     "errors": {
       "travel_mode_failed": "Could not update travel mode.",
@@ -289,5 +297,11 @@
       "title": "No Subscriptions Yet",
       "subtitle": "Track your monthly payments and digital platform memberships here."
     }
+  },
+  "notifications": {
+    "password_rotation_alert": "Password Rotation Alert!",
+    "passwords_due_for_rotation": "$count bank passwords are due for rotation. Please update them for security.",
+    "password_rotation_soon": "Password Rotation Coming Soon",
+    "passwords_expiring_soon": "$count bank passwords will expire within 7 days."
   }
 }
