@@ -12,20 +12,37 @@ class SubscriptionNotifier
     extends AutoDisposeAsyncNotifier<List<Subscription>> {
   late final DatabaseService _dbService = ref.read(databaseProvider);
 
+  static const String _legacyTextRepairKey = 'subscription_text_repair_v1_done';
+
+  // Travel mode settings cached from build() to avoid watching all settings
+  late bool _isTravelModeActive;
+  late List<String> _travelProtectedIds;
+
   @override
   Future<List<Subscription>> build() async {
-    ref.watch(settingsProvider);
+    final travelModeSettings = await ref.watch(
+      settingsProvider.selectAsync(
+        (s) => (
+          isActive: s.isTravelModeActive,
+          protectedIds: s.travelProtectedIds,
+        ),
+      ),
+    );
+    // Cache travel mode settings for use in CRUD operations
+    _isTravelModeActive = travelModeSettings.isActive;
+    _travelProtectedIds = travelModeSettings.protectedIds;
     return _getItems();
   }
 
   List<Subscription> _getItems() {
+    final isTravelModeActive = _isTravelModeActive;
+    final travelProtectedIds = _travelProtectedIds;
     try {
-      final settings = ref.read(settingsProvider).valueOrNull;
       var items = _dbService.subscriptionsBox.values.toList();
       _repairLegacyText(items);
-      if (settings != null && settings.isTravelModeActive) {
+      if (isTravelModeActive) {
         items = items
-            .where((item) => !settings.travelProtectedIds.contains(item.id))
+            .where((item) => !travelProtectedIds.contains(item.id))
             .toList();
       }
       return items;
@@ -41,6 +58,14 @@ class SubscriptionNotifier
   }
 
   void _repairLegacyText(List<Subscription> items) {
+    // Check if migration already completed
+    final isMigrationDone =
+        _dbService.settingsBox.get(_legacyTextRepairKey) as bool?;
+    if (isMigrationDone == true) {
+      return;
+    }
+
+    // Perform migration only once
     for (final item in items) {
       final repairedName = TextSanitizer.normalizeDisplayText(item.serviceName);
       final repairedUrl = TextSanitizer.normalizeDisplayText(item.url);
@@ -53,6 +78,9 @@ class SubscriptionNotifier
       item.url = repairedUrl;
       _dbService.subscriptionsBox.put(item.id, item);
     }
+
+    // Mark migration as complete
+    _dbService.settingsBox.put(_legacyTextRepairKey, true);
   }
 
   void addSubscription(Subscription item) {

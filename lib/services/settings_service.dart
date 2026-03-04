@@ -15,6 +15,7 @@ class SettingsService {
   static const String _biometricLoginKey = 'biometricLogin';
   static const String _biometricConfirmKey = 'biometricConfirm';
   static const String _themeModeKey = 'themeMode';
+  static const String _lastMasterPasswordEntryKey = 'lastMasterPasswordEntry';
 
   late Box _box;
   bool _initialized = false;
@@ -30,6 +31,27 @@ class SettingsService {
         'Settings box init failed: $e',
         userMessage: t.settings.errors.db_open_failed,
         canRetry: true,
+      );
+    }
+  }
+
+  DateTime? get lastMasterPasswordEntry {
+    try {
+      final isoString = _box.get(_lastMasterPasswordEntryKey);
+      if (isoString == null) return null;
+      return DateTime.parse(isoString);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> setLastMasterPasswordEntry(DateTime date) async {
+    try {
+      await _box.put(_lastMasterPasswordEntryKey, date.toIso8601String());
+    } catch (e) {
+      throw DatabaseError(
+        'Could not save last password entry date',
+        userMessage: t.settings.errors.setting_update_failed,
       );
     }
   }

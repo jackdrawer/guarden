@@ -16,6 +16,7 @@ import '../../providers/settings_provider.dart';
 import '../../services/backup_service.dart';
 import '../../services/biometric_service.dart';
 import '../../services/secure_storage_service.dart';
+import 'package:intl/intl.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/neumorphic/neumorphic_container.dart';
 import '../../widgets/ads/ad_banner_widget.dart';
@@ -25,10 +26,39 @@ import '../../providers/bank_account_provider.dart';
 import '../../providers/subscription_provider.dart';
 import '../../providers/web_password_provider.dart';
 
-class SettingsScreen extends ConsumerWidget {
-  SettingsScreen({super.key});
+class SettingsScreen extends ConsumerStatefulWidget {
+  const SettingsScreen({super.key});
 
+  @override
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final BiometricService _biometricService = BiometricService();
+  List<BackupMetadata> _backupList = [];
+  bool _isLoadingBackups = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBackupList();
+  }
+
+  Future<void> _loadBackupList() async {
+    setState(() => _isLoadingBackups = true);
+    try {
+      final backups = await ref.read(backupServiceProvider).getBackupList();
+      if (mounted) {
+        setState(() => _backupList = backups);
+      }
+    } catch (e) {
+      debugPrint('Failed to load backup list: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingBackups = false);
+      }
+    }
+  }
 
   Future<String?> _requestPasswordConfirmation(
     BuildContext context, {
@@ -88,7 +118,7 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
-  Future<bool> _authenticate(BuildContext context, WidgetRef ref) async {
+  Future<bool> _authenticate(BuildContext context) async {
     final settings =
         ref.read(settingsProvider).valueOrNull ?? SettingsState.initial();
 
@@ -124,10 +154,7 @@ class SettingsScreen extends ConsumerWidget {
     return isValid;
   }
 
-  Future<String?> _authenticateAndGetPassword(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
+  Future<String?> _authenticateAndGetPassword(BuildContext context) async {
     if (!context.mounted) return null;
 
     // We need raw master password text to encrypt/decrypt backup.
@@ -150,7 +177,7 @@ class SettingsScreen extends ConsumerWidget {
     return password;
   }
 
-  Future<void> _handlePanicMode(BuildContext context, WidgetRef ref) async {
+  Future<void> _handlePanicMode(BuildContext context) async {
     final confirmed =
         await showDialog<bool>(
           context: context,
@@ -180,7 +207,7 @@ class SettingsScreen extends ConsumerWidget {
 
     if (!confirmed || !context.mounted) return;
 
-    final authPassed = await _authenticate(context, ref);
+    final authPassed = await _authenticate(context);
     if (!authPassed) return;
 
     await ref.read(secureStorageProvider).deleteVaultAccessData();
@@ -286,14 +313,110 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _handleExportBackup(BuildContext context, WidgetRef ref) async {
-    final passphrase = await _authenticateAndGetPassword(context, ref);
+  Future<void> _showBackupListDialog(BuildContext context) async {
+    await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.of(ctx).surface,
+        title: Text(
+          'Yedekleme Geçmişi',
+          style: TextStyle(color: AppColors.of(ctx).textPrimary),
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: _isLoadingBackups
+              ? const Center(child: CircularProgressIndicator())
+              : _backupList.isEmpty
+              ? Text(
+                  'Henüz yedekleme yapılmamış.',
+                  style: TextStyle(color: AppColors.of(ctx).textSecondary),
+                )
+              : ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: _backupList.length,
+                  itemBuilder: (context, index) {
+                    final backup = _backupList[index];
+                    final dateFormat = DateFormat('dd.MM.yyyy HH:mm');
+                    final backupService = ref.read(backupServiceProvider);
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(
+                        Icons.backup,
+                        color: AppColors.of(context).primaryAccent,
+                      ),
+                      title: Text(
+                        backup.name,
+                        style: TextStyle(
+                          color: AppColors.of(context).textPrimary,
+                          fontSize: 14,
+                        ),
+                      ),
+                      subtitle: Text(
+                        '${dateFormat.format(backup.createdAt)} • ${backupService.formatFileSize(backup.sizeInBytes)}',
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
+                          fontSize: 12,
+                        ),
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(
+                          Icons.delete_outline,
+                          color: AppColors.of(context).error,
+                        ),
+                        onPressed: () async {
+                          await backupService.deleteBackupMetadata(backup.id);
+                          await _loadBackupList();
+                        },
+                      ),
+                    );
+                  },
+                ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(t.general.close),
+          ),
+          if (_backupList.isNotEmpty)
+            TextButton(
+              onPressed: () async {
+                final backupService = ref.read(backupServiceProvider);
+                for (final backup in _backupList) {
+                  await backupService.deleteBackupMetadata(backup.id);
+                }
+                await _loadBackupList();
+              },
+              child: Text(
+                'Tümünü Temizle',
+                style: TextStyle(color: AppColors.of(context).error),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleExportBackup(BuildContext context) async {
+    final passphrase = await _authenticateAndGetPassword(context);
     if (passphrase == null || !context.mounted) return;
 
     try {
-      final backupText = await ref
-          .read(backupServiceProvider)
-          .exportEncryptedBackup(passphrase: passphrase);
+      final backupService = ref.read(backupServiceProvider);
+      final backupText = await backupService.exportEncryptedBackup(
+        passphrase: passphrase,
+      );
+
+      // Save backup metadata
+      final metadata = BackupMetadata(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: 'Guarden Backup',
+        createdAt: DateTime.now(),
+        sizeInBytes: backupText.length,
+        location: 'local',
+      );
+      await backupService.saveBackupMetadata(metadata);
+      await _loadBackupList();
+
       if (!context.mounted) return;
       await _exportBackupToFile(context, backupText);
     } on BackupException catch (e) {
@@ -317,8 +440,8 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _handleRestoreBackup(BuildContext context, WidgetRef ref) async {
-    final passphrase = await _authenticateAndGetPassword(context, ref);
+  Future<void> _handleRestoreBackup(BuildContext context) async {
+    final passphrase = await _authenticateAndGetPassword(context);
     if (passphrase == null || !context.mounted) return;
 
     final backupText = await _requestRestoreInputText(context);
@@ -382,11 +505,8 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _handleDriveExportBackup(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
-    final passphrase = await _authenticateAndGetPassword(context, ref);
+  Future<void> _handleDriveExportBackup(BuildContext context) async {
+    final passphrase = await _authenticateAndGetPassword(context);
     if (passphrase == null || !context.mounted) return;
 
     // Show loading
@@ -397,13 +517,25 @@ class SettingsScreen extends ConsumerWidget {
     );
 
     try {
-      final backupText = await ref
-          .read(backupServiceProvider)
-          .exportEncryptedBackup(passphrase: passphrase);
+      final backupService = ref.read(backupServiceProvider);
+      final backupText = await backupService.exportEncryptedBackup(
+        passphrase: passphrase,
+      );
 
       await ref
           .read(googleDriveBackupServiceProvider)
           .uploadBackupToDrive(backupText);
+
+      // Save backup metadata
+      final metadata = BackupMetadata(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: 'Guarden Backup (Drive)',
+        createdAt: DateTime.now(),
+        sizeInBytes: backupText.length,
+        location: 'drive',
+      );
+      await backupService.saveBackupMetadata(metadata);
+      await _loadBackupList();
 
       if (!context.mounted) return;
       Navigator.of(context, rootNavigator: true).pop(); // close loader
@@ -421,11 +553,8 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _handleDriveRestoreBackup(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
-    final passphrase = await _authenticateAndGetPassword(context, ref);
+  Future<void> _handleDriveRestoreBackup(BuildContext context) async {
+    final passphrase = await _authenticateAndGetPassword(context);
     if (passphrase == null || !context.mounted) return;
 
     showDialog(
@@ -587,7 +716,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final settingsArgs =
         ref.watch(settingsProvider).valueOrNull ?? SettingsState.initial();
 
@@ -685,7 +814,7 @@ class SettingsScreen extends ConsumerWidget {
                     value: settingsArgs.isTravelModeActive,
                     activeColor: AppColors.of(context).primaryAccent,
                     onChanged: (val) async {
-                      final authOk = await _authenticate(context, ref);
+                      final authOk = await _authenticate(context);
                       if (authOk) {
                         ref.read(settingsProvider.notifier).toggleTravelMode();
                       }
@@ -731,7 +860,7 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: t.settings.labels.backup_to_drive_subtitle,
             titleColor: AppColors.of(context).primaryAccent,
             tooltip: t.settings.tooltips.backup_to_drive,
-            onTap: () => _handleDriveExportBackup(context, ref),
+            onTap: () => _handleDriveExportBackup(context),
           ),
           const SizedBox(height: 12),
           _buildActionTile(
@@ -741,7 +870,7 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: t.settings.labels.restore_from_drive_subtitle,
             titleColor: AppColors.of(context).primaryAccent,
             tooltip: t.settings.tooltips.restore_from_drive,
-            onTap: () => _handleDriveRestoreBackup(context, ref),
+            onTap: () => _handleDriveRestoreBackup(context),
           ),
           const SizedBox(height: 24),
           Text(
@@ -758,7 +887,7 @@ class SettingsScreen extends ConsumerWidget {
             title: t.settings.labels.copy_to_clipboard,
             subtitle: t.settings.labels.copy_to_clipboard_subtitle,
             tooltip: t.settings.tooltips.export_file,
-            onTap: () => _handleExportBackup(context, ref),
+            onTap: () => _handleExportBackup(context),
           ),
           const SizedBox(height: 12),
           _buildActionTile(
@@ -767,7 +896,18 @@ class SettingsScreen extends ConsumerWidget {
             title: t.settings.labels.restore_from_clipboard,
             subtitle: t.settings.labels.restore_from_clipboard_subtitle,
             tooltip: t.settings.tooltips.import_file,
-            onTap: () => _handleRestoreBackup(context, ref),
+            onTap: () => _handleRestoreBackup(context),
+          ),
+          const SizedBox(height: 12),
+          _buildActionTile(
+            context: context,
+            icon: Icons.history,
+            title: 'Yedekleme Geçmişi',
+            subtitle: _backupList.isEmpty
+                ? 'Henüz yedekleme yapılmamış'
+                : '${_backupList.length} yedekleme kaydedilmiş',
+            tooltip: 'Önceki yedeklemeleri görüntüle ve yönet',
+            onTap: () => _showBackupListDialog(context),
           ),
           const SizedBox(height: 12),
           _buildActionTile(
@@ -778,7 +918,7 @@ class SettingsScreen extends ConsumerWidget {
             titleColor: AppColors.of(context).error,
             tooltip: t.settings.tooltips.panic_mode,
             onTap: () async {
-              await _handlePanicMode(context, ref);
+              await _handlePanicMode(context);
             },
           ),
           const SizedBox(height: 24),

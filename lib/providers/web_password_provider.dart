@@ -10,19 +10,34 @@ import 'settings_provider.dart';
 class WebPasswordNotifier extends AutoDisposeAsyncNotifier<List<WebPassword>> {
   late final DatabaseService _dbService = ref.read(databaseProvider);
 
+  // Travel mode settings cached from build() to avoid watching all settings
+  late bool _isTravelModeActive;
+  late List<String> _travelProtectedIds;
+
   @override
   Future<List<WebPassword>> build() async {
-    ref.watch(settingsProvider);
+    final travelModeSettings = await ref.watch(
+      settingsProvider.selectAsync(
+        (s) => (
+          isActive: s.isTravelModeActive,
+          protectedIds: s.travelProtectedIds,
+        ),
+      ),
+    );
+    // Cache travel mode settings for use in CRUD operations
+    _isTravelModeActive = travelModeSettings.isActive;
+    _travelProtectedIds = travelModeSettings.protectedIds;
     return _getItems();
   }
 
   List<WebPassword> _getItems() {
+    final isTravelModeActive = _isTravelModeActive;
+    final travelProtectedIds = _travelProtectedIds;
     try {
-      final settings = ref.read(settingsProvider).valueOrNull;
       var items = _dbService.webPasswordsBox.values.toList();
-      if (settings != null && settings.isTravelModeActive) {
+      if (isTravelModeActive) {
         items = items
-            .where((item) => !settings.travelProtectedIds.contains(item.id))
+            .where((item) => !travelProtectedIds.contains(item.id))
             .toList();
       }
       return items;

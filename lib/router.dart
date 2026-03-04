@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'providers/auth_provider.dart';
+import 'services/app_lifecycle_service.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/onboarding/welcome_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
@@ -20,17 +21,55 @@ import 'screens/splash_screen.dart';
 import 'screens/autofill_screen.dart';
 import 'main.dart';
 
+/// A [Listenable] that notifies when auth state changes.
+/// Used with GoRouter's `refreshListenable` parameter to trigger redirects
+/// without recreating the router instance.
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Ref ref) {
+    // Listen to auth state changes
+    _authSubscription = ref.listen(
+      authProvider.select((value) => value.valueOrNull),
+      (previous, next) {
+        notifyListeners();
+      },
+    );
+    // Listen to app lock state changes
+    _lockSubscription = ref.listen(isLockedProvider, (previous, next) {
+      notifyListeners();
+    });
+  }
+
+  late final ProviderSubscription<AuthState?> _authSubscription;
+  late final ProviderSubscription<bool> _lockSubscription;
+
+  @override
+  void dispose() {
+    _authSubscription.close();
+    _lockSubscription.close();
+    super.dispose();
+  }
+}
+
 final routerProvider = Provider<GoRouter>((ref) {
-  final authStateAsync = ref.watch(authProvider);
-  final authState = authStateAsync.valueOrNull ?? AuthState.initial;
-  final splashCompleted = ref.watch(splashCompleterProvider);
-  final isAutofill = ref.watch(isAutofillProvider);
+  final refreshStream = GoRouterRefreshStream(ref);
 
   return GoRouter(
     initialLocation: '/',
+    refreshListenable: refreshStream,
     redirect: (context, state) {
+      final authStateAsync = ref.read(authProvider);
+      final authState = authStateAsync.valueOrNull ?? AuthState.initial;
+      final splashCompleted = ref.read(splashCompleterProvider);
+      final isAutofill = ref.read(isAutofillProvider);
+      final isLocked = ref.read(isLockedProvider);
+
       if (!splashCompleted) {
         return state.uri.path == '/splash' ? null : '/splash';
+      }
+
+      // App lock check - redirect to login if locked and authenticated
+      if (isLocked && authState == AuthState.authenticated) {
+        return state.uri.path == '/login' ? null : '/login';
       }
 
       if (authState == AuthState.initial) {
@@ -84,6 +123,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/',
         builder: (context, state) {
+          final authStateAsync = ref.read(authProvider);
+          final authState = authStateAsync.valueOrNull ?? AuthState.initial;
           if (authState == AuthState.initial) {
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),

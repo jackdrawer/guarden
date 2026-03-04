@@ -29,7 +29,247 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _checkNotifications();
+      _checkMasterPasswordReminder();
     });
+  }
+
+  Future<void> _checkMasterPasswordReminder() async {
+    final settings =
+        ref.read(settingsProvider).valueOrNull ?? SettingsState.initial();
+
+    // Yalnızca biyometrik ile giriş yapılıyorsa ve ayar açıksa mantıklı
+    if (!settings.biometricLogin) return;
+
+    final lastEntry = settings.lastMasterPasswordEntry;
+    if (lastEntry == null) return;
+
+    final daysPassed = DateTime.now().difference(lastEntry).inDays;
+
+    // 14 Günden fazla geçmişse hatırlat (Test için && !kDebugMode silinebilir veya daysPassed 0 verilebilir ama biz 14 gün bırakıyoruz. )
+    if (daysPassed >= 14) {
+      _showMasterPasswordReminderDialog();
+    }
+  }
+
+  void _showMasterPasswordReminderDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: AppColors.of(context).background,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: AppColors.of(context).neumorphicShadows,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.security_rounded,
+                size: 48,
+                color: AppColors.of(context).primaryAccent,
+              ),
+              const SizedBox(height: 16),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'assets/images/security_key.png',
+                  height: 120,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                t.settings.labels.security_reminder ?? 'Security Reminder',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.of(context).textPrimary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Uzun zamandır sadece Biyometrik ile giriş yapıyorsunuz. Master şifreniz güvenlik için şarttır, onu hatırlıyor musunuz?\n\nUnutmayın: Güvenliğiniz için Master Şifrenizi sadece fiziksel bir kağıda yazıp, güvenli bir yerde saklayın.',
+                style: TextStyle(
+                  fontSize: 14,
+                  height: 1.5,
+                  color: AppColors.of(context).textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextButton(
+                      onPressed: () =>
+                          Navigator.of(ctx).pop(), // Kapat ve daha sonra sor
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: Text(
+                        'Daha Sonra',
+                        style: TextStyle(
+                          color: AppColors.of(context).textSecondary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        _testMasterPassword();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.of(context).primaryAccent,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text('Doğrula'),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _testMasterPassword() async {
+    final controller = TextEditingController();
+    bool obscure = true;
+    String? error;
+
+    final success = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: AppColors.of(context).background,
+              title: Text(
+                'Master Şifrenizi Girin',
+                style: TextStyle(color: AppColors.of(context).textPrimary),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (error != null) ...[
+                    Text(
+                      error!,
+                      style: TextStyle(
+                        color: AppColors.of(context).error,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
+                  TextField(
+                    controller: controller,
+                    obscureText: obscure,
+                    style: TextStyle(color: AppColors.of(context).textPrimary),
+                    decoration: InputDecoration(
+                      hintText: 'Master Şifre',
+                      hintStyle: TextStyle(
+                        color: AppColors.of(
+                          context,
+                        ).textSecondary.withValues(alpha: 0.5),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          obscure ? Icons.visibility : Icons.visibility_off,
+                          color: AppColors.of(context).textSecondary,
+                        ),
+                        onPressed: () => setState(() => obscure = !obscure),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: AppColors.of(
+                            context,
+                          ).textSecondary.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: AppColors.of(context).primaryAccent,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, false),
+                  child: Text(
+                    'İptal',
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
+                    ),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    final authNotifier = ref.read(authProvider.notifier);
+                    final isCorrect = await authNotifier.verifyMasterPassword(
+                      controller.text,
+                    );
+                    if (isCorrect) {
+                      if (ctx.mounted) Navigator.pop(ctx, true);
+                    } else {
+                      setState(
+                        () => error = 'Yanlış şifre. Lütfen tekrar deneyin.',
+                      );
+                      controller.clear();
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.of(context).primaryAccent,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('Doğrula'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    if (success == true) {
+      await ref
+          .read(settingsProvider.notifier)
+          .setLastMasterPasswordEntry(DateTime.now());
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Harika! Şifrenizi hatırlıyorsunuz.'),
+            backgroundColor: AppColors.of(context).success,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _checkNotifications() async {

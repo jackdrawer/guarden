@@ -127,6 +127,39 @@ class SecureStorageService {
     }
   }
 
+  /// Generic method to save a value with any key
+  Future<void> writeValue(String key, String value) async {
+    try {
+      await _storage.write(key: key, value: value);
+    } on PlatformException catch (e) {
+      throw _platformStorageError('writing value', e);
+    } catch (e) {
+      throw StorageError('Value could not be saved: $e');
+    }
+  }
+
+  /// Generic method to read a value by key
+  Future<String?> readValue(String key) async {
+    try {
+      return await _storage.read(key: key);
+    } on PlatformException catch (e) {
+      throw _platformStorageError('reading value', e);
+    } catch (e) {
+      throw StorageError('Value could not be read: $e');
+    }
+  }
+
+  /// Generic method to delete a value by key
+  Future<void> deleteValue(String key) async {
+    try {
+      await _storage.delete(key: key);
+    } on PlatformException catch (e) {
+      throw _platformStorageError('deleting value', e);
+    } catch (e) {
+      throw StorageError('Value could not be deleted: $e');
+    }
+  }
+
   StorageError _platformStorageError(String action, PlatformException e) {
     return StorageError(
       'Platform error $action: $e',

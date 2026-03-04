@@ -11,20 +11,37 @@ import 'settings_provider.dart';
 class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
   late final DatabaseService _dbService = ref.read(databaseProvider);
 
+  static const String _legacyTextRepairKey = 'legacy_text_repair_v1_done';
+
+  // Travel mode settings cached from build() to avoid watching all settings
+  late bool _isTravelModeActive;
+  late List<String> _travelProtectedIds;
+
   @override
   Future<List<BankAccount>> build() async {
-    ref.watch(settingsProvider);
+    final travelModeSettings = await ref.watch(
+      settingsProvider.selectAsync(
+        (s) => (
+          isActive: s.isTravelModeActive,
+          protectedIds: s.travelProtectedIds,
+        ),
+      ),
+    );
+    // Cache travel mode settings for use in CRUD operations
+    _isTravelModeActive = travelModeSettings.isActive;
+    _travelProtectedIds = travelModeSettings.protectedIds;
     return _getItems();
   }
 
   List<BankAccount> _getItems() {
+    final isTravelModeActive = _isTravelModeActive;
+    final travelProtectedIds = _travelProtectedIds;
     try {
-      final settings = ref.read(settingsProvider).valueOrNull;
       var items = _dbService.bankAccountsBox.values.toList();
       _repairLegacyText(items);
-      if (settings != null && settings.isTravelModeActive) {
+      if (isTravelModeActive) {
         items = items
-            .where((item) => !settings.travelProtectedIds.contains(item.id))
+            .where((item) => !travelProtectedIds.contains(item.id))
             .toList();
       }
       return items;
@@ -40,6 +57,14 @@ class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
   }
 
   void _repairLegacyText(List<BankAccount> items) {
+    // Check if migration already completed
+    final isMigrationDone =
+        _dbService.settingsBox.get(_legacyTextRepairKey) as bool?;
+    if (isMigrationDone == true) {
+      return;
+    }
+
+    // Perform migration only once
     for (final item in items) {
       final repairedName = TextSanitizer.normalizeDisplayText(item.bankName);
       final repairedUrl = TextSanitizer.normalizeDisplayText(item.url);
@@ -52,6 +77,9 @@ class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
       item.url = repairedUrl;
       _dbService.bankAccountsBox.put(item.id, item);
     }
+
+    // Mark migration as complete
+    _dbService.settingsBox.put(_legacyTextRepairKey, true);
   }
 
   void addBankAccount(BankAccount account) {

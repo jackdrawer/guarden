@@ -47,7 +47,7 @@ class _SubscriptionDetailScreenState
                 ),
                 content: TextField(
                   controller: controller,
-                  autofocus: true,
+                  autofocus: false,
                   obscureText: obscure,
                   style: TextStyle(color: AppColors.of(ctx).textPrimary),
                   decoration: InputDecoration(

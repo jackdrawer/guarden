@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../i18n/strings.g.dart';
 import '../../services/biometric_service.dart';
-import '../../services/settings_service.dart';
+import '../../providers/settings_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/neumorphic/neumorphic_button.dart';
 import '../../widgets/neumorphic/neumorphic_container.dart';
@@ -43,9 +43,8 @@ class _BiometricOptInScreenState extends ConsumerState<BiometricOptInScreen> {
   void _enableBiometrics() async {
     final success = await _biometricService.authenticate();
     if (success) {
-      // CRITICAL FIX: Save biometric login setting
-      final settingsService = ref.read(settingsServiceProvider);
-      await settingsService.setBiometricLogin(true);
+      // CRITICAL FIX: Save biometric login setting via notifier to update state
+      await ref.read(settingsProvider.notifier).toggleBiometricLogin(true);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

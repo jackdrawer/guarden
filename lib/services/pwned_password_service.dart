@@ -20,6 +20,9 @@ class PwnedResult {
 class PwnedPasswordService {
   static const String _baseUrl = 'https://api.pwnedpasswords.com/range';
 
+  // Reusable HTTP client for better performance
+  final http.Client _httpClient = http.Client();
+
   Future<T> _retryWithBackoff<T>(
     Future<T> Function() operation,
     int maxAttempts,
@@ -57,7 +60,7 @@ class PwnedPasswordService {
 
     try {
       final response = await _retryWithBackoff(
-        () => http.get(
+        () => _httpClient.get(
           Uri.parse('$_baseUrl/$prefix'),
           headers: {'User-Agent': 'Guarden-PW-Manager'},
         ),

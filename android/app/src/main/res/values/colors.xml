@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Splash screen background color - matches the light theme background -->
+    <color name="splash_background">#FFE0E5EC</color>
+</resources>

@@ -17,6 +17,7 @@ class SettingsState {
   final bool biometricLogin;
   final bool biometricConfirm;
   final AppThemeMode themeMode;
+  final DateTime? lastMasterPasswordEntry;
 
   SettingsState({
     required this.isTravelModeActive,
@@ -29,6 +30,7 @@ class SettingsState {
     this.biometricLogin = false,
     this.biometricConfirm = false,
     this.themeMode = AppThemeMode.system,
+    this.lastMasterPasswordEntry,
   });
 
   factory SettingsState.initial() => SettingsState(
@@ -49,6 +51,7 @@ class SettingsState {
     bool? biometricLogin,
     bool? biometricConfirm,
     AppThemeMode? themeMode,
+    DateTime? lastMasterPasswordEntry,
   }) {
     return SettingsState(
       isTravelModeActive: isTravelModeActive ?? this.isTravelModeActive,
@@ -61,6 +64,8 @@ class SettingsState {
       biometricLogin: biometricLogin ?? this.biometricLogin,
       biometricConfirm: biometricConfirm ?? this.biometricConfirm,
       themeMode: themeMode ?? this.themeMode,
+      lastMasterPasswordEntry:
+          lastMasterPasswordEntry ?? this.lastMasterPasswordEntry,
     );
   }
 }
@@ -87,6 +92,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
         biometricLogin: _settingsService.biometricLogin,
         biometricConfirm: _settingsService.biometricConfirm,
         themeMode: _settingsService.themeMode,
+        lastMasterPasswordEntry: _settingsService.lastMasterPasswordEntry,
         isInitialized: true,
       );
     } catch (e, stackTrace) {
@@ -240,6 +246,22 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
           userMessage: t.settings.errors.setting_update_failed,
         ),
       );
+    }
+  }
+
+  Future<void> setLastMasterPasswordEntry(DateTime date) async {
+    try {
+      await _settingsService.init();
+      await _settingsService.setLastMasterPasswordEntry(date);
+      final currentValue = state.value;
+      if (currentValue != null) {
+        state = AsyncValue.data(
+          currentValue.copyWith(lastMasterPasswordEntry: date),
+        );
+      }
+    } catch (e) {
+      // Sadece arka plan logu tut, kullanıcıya göstermeye gerek yok (kritik değil)
+      debugPrint('Failed to update lastMasterPasswordEntry: $e');
     }
   }
 

@@ -20,7 +20,28 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
-  bool _isBiometricChecked = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkBiometricsOnLoad();
+    });
+  }
+
+  Future<void> _checkBiometricsOnLoad() async {
+    try {
+      final settings = await ref.read(settingsProvider.future);
+      if (settings.biometricLogin) {
+        final canUse = await ref.read(authProvider.notifier).canUseBiometrics();
+        if (canUse && mounted) {
+          await ref.read(authProvider.notifier).biometricUnlock();
+        }
+      }
+    } catch (e) {
+      debugPrint('Biometric load check failed: $e');
+    }
+  }
 
   Future<void> _handleBiometricLogin() async {
     final canUse = await ref.read(authProvider.notifier).canUseBiometrics();
@@ -68,20 +89,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ref.listen(settingsProvider, (previous, next) async {
-      if (!_isBiometricChecked && next.hasValue) {
-        _isBiometricChecked = true;
-        if (next.value!.biometricLogin) {
-          final canUse = await ref
-              .read(authProvider.notifier)
-              .canUseBiometrics();
-          if (canUse) {
-            await ref.read(authProvider.notifier).biometricUnlock();
-          }
-        }
-      }
-    });
-
     return Scaffold(
       backgroundColor: AppColors.of(context).background,
       body: SafeArea(

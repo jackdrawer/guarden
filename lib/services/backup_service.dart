@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/bank_account.dart';
@@ -8,6 +9,7 @@ import '../models/subscription.dart';
 import '../models/web_password.dart';
 import 'crypto_service.dart';
 import 'database_service.dart';
+import 'secure_storage_service.dart';
 import '../errors/app_errors.dart';
 import '../i18n/strings.g.dart';
 import '../utils/crypto_utils.dart';
@@ -76,15 +78,111 @@ class BackupApplyResult {
   int get processed => created + overwritten + skipped;
 }
 
+/// Metadata for a backup file
+class BackupMetadata {
+  final String id;
+  final String name;
+  final DateTime createdAt;
+  final int sizeInBytes;
+  final String? location; // 'local', 'drive', etc.
+
+  BackupMetadata({
+    required this.id,
+    required this.name,
+    required this.createdAt,
+    required this.sizeInBytes,
+    this.location,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'name': name,
+    'created_at': createdAt.toUtc().toIso8601String(),
+    'size_in_bytes': sizeInBytes,
+    'location': location,
+  };
+
+  factory BackupMetadata.fromJson(Map<String, dynamic> json) => BackupMetadata(
+    id: json['id'] as String,
+    name: json['name'] as String,
+    createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
+    sizeInBytes: json['size_in_bytes'] as int,
+    location: json['location'] as String?,
+  );
+}
+
 class BackupService {
   final DatabaseService? _databaseService;
   final CryptoService _cryptoService;
+  final SecureStorageService _secureStorage;
+
+  static const String _backupMetadataKey = 'backup_metadata_list';
 
   BackupService({
     DatabaseService? databaseService,
     CryptoService? cryptoService,
+    SecureStorageService? secureStorage,
   }) : _databaseService = databaseService,
-       _cryptoService = cryptoService ?? CryptoService();
+       _cryptoService = cryptoService ?? CryptoService(),
+       _secureStorage = secureStorage ?? SecureStorageService();
+
+  /// Saves backup metadata to secure storage
+  Future<void> saveBackupMetadata(BackupMetadata metadata) async {
+    try {
+      final existing = await getBackupList();
+      // Remove duplicate if exists (same id)
+      final filtered = existing.where((b) => b.id != metadata.id).toList();
+      filtered.add(metadata);
+      // Sort by date, newest first
+      filtered.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      // Keep only last 50 backups
+      final trimmed = filtered.take(50).toList();
+
+      final jsonList = trimmed.map((b) => b.toJson()).toList();
+      await _secureStorage.writeValue(_backupMetadataKey, jsonEncode(jsonList));
+    } catch (e) {
+      debugPrint('Failed to save backup metadata: $e');
+    }
+  }
+
+  /// Gets the list of saved backups
+  Future<List<BackupMetadata>> getBackupList() async {
+    try {
+      final jsonStr = await _secureStorage.readValue(_backupMetadataKey);
+      if (jsonStr == null || jsonStr.isEmpty) return [];
+
+      final decoded = jsonDecode(jsonStr);
+      if (decoded is! List) return [];
+
+      return decoded
+          .whereType<Map>()
+          .map((item) => Map<String, dynamic>.from(item))
+          .map(BackupMetadata.fromJson)
+          .toList();
+    } catch (e) {
+      debugPrint('Failed to load backup metadata: $e');
+      return [];
+    }
+  }
+
+  /// Deletes a backup from the metadata list
+  Future<void> deleteBackupMetadata(String id) async {
+    try {
+      final existing = await getBackupList();
+      final filtered = existing.where((b) => b.id != id).toList();
+      final jsonList = filtered.map((b) => b.toJson()).toList();
+      await _secureStorage.writeValue(_backupMetadataKey, jsonEncode(jsonList));
+    } catch (e) {
+      debugPrint('Failed to delete backup metadata: $e');
+    }
+  }
+
+  /// Formats file size in human-readable format
+  String formatFileSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+  }
 
   Future<String> encryptBackupData({
     required String passphrase,

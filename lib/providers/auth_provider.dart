@@ -9,6 +9,7 @@ import '../services/secure_storage_service.dart';
 import '../services/biometric_service.dart';
 import '../utils/crypto_utils.dart';
 import '../widgets/error_handler.dart';
+import 'settings_provider.dart';
 
 enum AuthState { initial, firstTime, unauthenticated, authenticated }
 
@@ -47,6 +48,12 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       await _persistMasterPasswordVerifier(masterPassword);
 
       await _databaseService.initDatabase();
+
+      // Setup successful, update last usage
+      await ref
+          .read(settingsProvider.notifier)
+          .setLastMasterPasswordEntry(DateTime.now());
+
       state = AsyncValue.data(AuthState.authenticated);
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
@@ -60,6 +67,12 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
       if (!isValid) return false;
 
       await _databaseService.initDatabase();
+
+      // Login with password successful, update last usage
+      await ref
+          .read(settingsProvider.notifier)
+          .setLastMasterPasswordEntry(DateTime.now());
+
       state = AsyncValue.data(AuthState.authenticated);
       return true;
     } catch (e, stackTrace) {

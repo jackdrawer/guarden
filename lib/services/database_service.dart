@@ -120,6 +120,18 @@ class DatabaseService {
     return Hive.box<WebPassword>(webPasswordsBoxName);
   }
 
+  /// Settings box for migration flags and general settings
+  /// Note: This box is opened by SettingsService, we just provide access to it
+  Box get settingsBox {
+    if (!Hive.isBoxOpen('settings_box')) {
+      throw DatabaseError(
+        'Settings box not initialized',
+        userMessage: t.settings.errors.db_not_ready,
+      );
+    }
+    return Hive.box('settings_box');
+  }
+
   /// Tüm kutuları kapatır (Lock Vault)
   Future<void> closeDatabase() async {
     try {
