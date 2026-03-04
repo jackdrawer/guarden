@@ -5,6 +5,7 @@ import 'package:bip39/bip39.dart' as bip39;
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../errors/app_errors.dart';
+import '../i18n/strings.g.dart';
 
 final cryptoProvider = Provider<CryptoService>((ref) => CryptoService());
 
@@ -56,7 +57,7 @@ class CryptoService {
     } catch (e) {
       throw CryptoError(
         'Failed to encrypt: $e',
-        userMessage: "Couldn't encrypt data. Your information is safe.",
+        userMessage: t.settings.errors.encryption_failed,
       );
     }
   }
@@ -86,17 +87,17 @@ class CryptoService {
     } on ArgumentError catch (e) {
       throw CryptoError(
         'Failed to decrypt (invalid payload): $e',
-        userMessage: "Couldn't decrypt data. Master password may be incorrect.",
+        userMessage: t.settings.errors.decryption_failed,
       );
     } on FormatException catch (e) {
       throw CryptoError(
         'Failed to decrypt (format error): $e',
-        userMessage: "Couldn't decrypt data. Data format corrupted.",
+        userMessage: t.settings.errors.generic,
       );
     } catch (e) {
       throw CryptoError(
         'Failed to decrypt: $e',
-        userMessage: "Couldn't decrypt data. An unknown error occurred.",
+        userMessage: t.settings.errors.generic,
       );
     }
   }

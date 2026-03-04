@@ -1,70 +1,80 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:local_auth/local_auth.dart';
 import 'package:local_auth/error_codes.dart' as auth_error;
+import 'package:local_auth/local_auth.dart';
+
 import '../errors/app_errors.dart';
 
 class BiometricService {
   final LocalAuthentication _auth = LocalAuthentication();
 
-  /// Cihazda biyometrik donanımın desteklenip desteklenmediğini kontrol eder
+  /// Returns whether biometric auth is available on this device.
   Future<bool> canCheckBiometrics() async {
+    if (kIsWeb) return false;
+
     try {
       final canCheck = await _auth.canCheckBiometrics;
       final isDeviceSupported = await _auth.isDeviceSupported();
       return canCheck || isDeviceSupported;
+    } on MissingPluginException catch (_) {
+      return false;
     } on PlatformException catch (_) {
       return false;
     }
   }
 
-  /// Hangi biyometrik türlerin var olduğunu (Face, Fingerprint vb) liste halinde döner
+  /// Returns enrolled biometric types (face, fingerprint, etc).
   Future<List<BiometricType>> getAvailableBiometrics() async {
+    if (kIsWeb) return <BiometricType>[];
+
     try {
       return await _auth.getAvailableBiometrics();
+    } on MissingPluginException catch (_) {
+      return <BiometricType>[];
     } on PlatformException catch (_) {
       return <BiometricType>[];
     }
   }
 
-  /// Kullanıcıyı biyometrik doğrulama ile onaylar
-  /// [reason] : "Lütfen kasanızı açmak için onay verin" gibi işletim sisteminde görünen yazı
+  /// Prompts biometric authentication and returns auth result.
   Future<bool> authenticate({
-    String reason = 'Parola kasanıza erişmek için lütfen doğrulama yapın',
+    String reason = 'Please authenticate to access your vault',
   }) async {
-    bool authenticated = false;
+    if (kIsWeb) return false;
+
     try {
-      authenticated = await _auth.authenticate(
+      return await _auth.authenticate(
         localizedReason: reason,
         options: const AuthenticationOptions(
           useErrorDialogs: true,
-          stickyAuth: true, // Uygulama arkaplanda iken auth isteğini tutar
-          biometricOnly: false, // Eğer pin kodu vb. fallback olacaksa false
+          stickyAuth: true,
+          biometricOnly: false,
         ),
       );
+    } on MissingPluginException catch (_) {
+      return false;
     } on PlatformException catch (e) {
       if (e.code == auth_error.notAvailable) {
-        // cihazda hardware yok - log but don't throw
         if (kDebugMode) {
-          print('Biometric auth failed: hardware not available');
+          debugPrint('Biometric auth failed: hardware not available');
         }
-      } else if (e.code == auth_error.notEnrolled) {
-        // şifre veya yüz kaydedilmemiş - log but don't throw
-        if (kDebugMode) {
-          print('Biometric auth failed: not enrolled');
-        }
-      } else {
-        // Other platform errors - throw BiometricError
-        throw BiometricError(
-          'Biometric authentication failed: ${e.message}',
-          userMessage:
-              "Biometric authentication failed. Try again or use master password.",
-          canRetry: true,
-          action: "retry",
-        );
+        return false;
       }
-      return false;
+
+      if (e.code == auth_error.notEnrolled) {
+        if (kDebugMode) {
+          debugPrint('Biometric auth failed: not enrolled');
+        }
+        return false;
+      }
+
+      throw BiometricError(
+        'Biometric authentication failed: ${e.message}',
+        userMessage:
+            'Biometric authentication failed. Try again or use master password.',
+        canRetry: true,
+        action: 'retry',
+      );
     }
-    return authenticated;
   }
 }

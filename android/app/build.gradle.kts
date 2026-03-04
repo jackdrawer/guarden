@@ -7,7 +7,7 @@ plugins {
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
     // Google Services plugin for Firebase
-    id("com.google.gms.google-services")
+    // id("com.google.gms.google-services") // Gecici olarak kaldirildi
 }
 
 val keystoreProperties = Properties()

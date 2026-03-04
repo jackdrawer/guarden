@@ -6,9 +6,8 @@ import '../providers/settings_provider.dart';
 
 /// Analytics service for Firebase Analytics with privacy controls.
 ///
-/// Integrates with Travel Mode (premium privacy feature) to disable
-/// behavioral tracking when privacy mode is active. Crash reporting via
-/// Sentry remains active regardless of Travel Mode.
+/// Behavioral tracking is enabled by default. Crash reporting via
+/// Sentry remains active.
 ///
 /// All analytics events are scrubbed of PII before sending.
 class AnalyticsService {
@@ -66,10 +65,7 @@ class AnalyticsService {
     }
   }
 
-  /// Check if Travel Mode is active (privacy feature).
-  ///
-  /// When Travel Mode is active, analytics tracking is disabled to protect
-  /// user privacy. This is a premium feature.
+  /// user privacy.
   bool get _isTravelModeActive {
     final settings = _ref.read(settingsProvider).value;
     return settings?.isTravelModeActive ?? false;
@@ -99,12 +95,11 @@ class AnalyticsService {
       // Scrub parameters to prevent PII leakage
       final safeParams = _scrubParameters(parameters);
 
-      await analytics.logEvent(
-        name: eventName,
-        parameters: safeParams,
-      );
+      await analytics.logEvent(name: eventName, parameters: safeParams);
 
-      debugPrint('📊 Analytics event: $eventName ${safeParams != null ? '($safeParams)' : ''}');
+      debugPrint(
+        '📊 Analytics event: $eventName ${safeParams != null ? '($safeParams)' : ''}',
+      );
     } catch (e) {
       debugPrint('⚠️  Failed to log analytics event: $e');
     }
@@ -167,11 +162,6 @@ class AnalyticsService {
     await logEvent('password_added', parameters: {'type': type});
   }
 
-  /// Log premium purchase event.
-  Future<void> logPremiumPurchased(String productId) async {
-    await logEvent('premium_purchased', parameters: {'product_id': productId});
-  }
-
   /// Log backup created event.
   Future<void> logBackupCreated() async {
     await logEvent('backup_created');
@@ -185,7 +175,7 @@ class AnalyticsService {
   /// Set user property for segmentation.
   ///
   /// Checks Travel Mode before setting. Only non-identifying properties
-  /// are allowed: user_type (free|premium), locale, app_version.
+  /// are allowed: locale, app_version.
   Future<void> setUserProperty(String name, String value) async {
     // Check Travel Mode
     if (_isTravelModeActive) {
@@ -198,7 +188,7 @@ class AnalyticsService {
       if (analytics == null) return;
 
       // Only allow safe user properties
-      final allowedProperties = ['user_type', 'locale', 'app_version'];
+      final allowedProperties = ['locale', 'app_version'];
       if (!allowedProperties.contains(name)) {
         debugPrint('⚠️  Rejected user property (not whitelisted): $name');
         return;

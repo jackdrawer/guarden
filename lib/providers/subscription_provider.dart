@@ -1,14 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../errors/app_errors.dart';
 import '../models/subscription.dart';
 import '../services/database_service.dart';
+import '../services/text_sanitizer.dart';
 import '../widgets/error_handler.dart';
-import '../errors/app_errors.dart';
-
+import '../i18n/strings.g.dart';
 import 'settings_provider.dart';
 
 class SubscriptionNotifier
     extends AutoDisposeAsyncNotifier<List<Subscription>> {
-  late final _dbService = ref.read(databaseProvider);
+  late final DatabaseService _dbService = ref.read(databaseProvider);
 
   @override
   Future<List<Subscription>> build() async {
@@ -18,12 +20,12 @@ class SubscriptionNotifier
 
   List<Subscription> _getItems() {
     try {
-      final settingsAsync = ref.read(settingsProvider);
-      final settings = settingsAsync.value;
+      final settings = ref.read(settingsProvider).valueOrNull;
       var items = _dbService.subscriptionsBox.values.toList();
+      _repairLegacyText(items);
       if (settings != null && settings.isTravelModeActive) {
         items = items
-            .where((i) => !settings.travelProtectedIds.contains(i.id))
+            .where((item) => !settings.travelProtectedIds.contains(item.id))
             .toList();
       }
       return items;
@@ -31,38 +33,53 @@ class SubscriptionNotifier
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to read subscriptions: $e',
-          userMessage: "Could not load subscriptions.",
+          userMessage: t.settings.errors.load_failed,
         ),
       );
       return [];
     }
   }
 
-  void addSubscription(Subscription sub) {
+  void _repairLegacyText(List<Subscription> items) {
+    for (final item in items) {
+      final repairedName = TextSanitizer.normalizeDisplayText(item.serviceName);
+      final repairedUrl = TextSanitizer.normalizeDisplayText(item.url);
+
+      if (repairedName == item.serviceName && repairedUrl == item.url) {
+        continue;
+      }
+
+      item.serviceName = repairedName;
+      item.url = repairedUrl;
+      _dbService.subscriptionsBox.put(item.id, item);
+    }
+  }
+
+  void addSubscription(Subscription item) {
     try {
-      _dbService.subscriptionsBox.put(sub.id, sub);
+      _dbService.subscriptionsBox.put(item.id, item);
       state = AsyncValue.data(_getItems());
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to add subscription: $e',
-          userMessage: "Could not save subscription.",
+          userMessage: t.settings.errors.setting_update_failed,
         ),
       );
     }
   }
 
-  void updateSubscription(Subscription sub) {
+  void updateSubscription(Subscription item) {
     try {
-      _dbService.subscriptionsBox.put(sub.id, sub);
+      _dbService.subscriptionsBox.put(item.id, item);
       state = AsyncValue.data(_getItems());
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to update subscription: $e',
-          userMessage: "Could not update subscription.",
+          userMessage: t.settings.errors.setting_update_failed,
         ),
       );
     }
@@ -77,7 +94,7 @@ class SubscriptionNotifier
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to delete subscription: $e',
-          userMessage: "Could not delete subscription.",
+          userMessage: t.settings.errors.setting_update_failed,
         ),
       );
     }

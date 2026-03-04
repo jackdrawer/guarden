@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/settings_service.dart';
 import '../widgets/error_handler.dart';
 import '../errors/app_errors.dart';
+import '../i18n/strings.g.dart';
 
 class SettingsState {
   final bool isTravelModeActive;
@@ -11,6 +12,8 @@ class SettingsState {
   final bool bankRotationNotif;
   final bool subscriptionNotif;
   final bool securityNotif;
+  final bool biometricLogin;
+  final bool biometricConfirm;
 
   SettingsState({
     required this.isTravelModeActive,
@@ -20,6 +23,8 @@ class SettingsState {
     this.bankRotationNotif = true,
     this.subscriptionNotif = true,
     this.securityNotif = true,
+    this.biometricLogin = false,
+    this.biometricConfirm = false,
   });
 
   factory SettingsState.initial() => SettingsState(
@@ -36,6 +41,8 @@ class SettingsState {
     bool? bankRotationNotif,
     bool? subscriptionNotif,
     bool? securityNotif,
+    bool? biometricLogin,
+    bool? biometricConfirm,
   }) {
     return SettingsState(
       isTravelModeActive: isTravelModeActive ?? this.isTravelModeActive,
@@ -45,6 +52,8 @@ class SettingsState {
       bankRotationNotif: bankRotationNotif ?? this.bankRotationNotif,
       subscriptionNotif: subscriptionNotif ?? this.subscriptionNotif,
       securityNotif: securityNotif ?? this.securityNotif,
+      biometricLogin: biometricLogin ?? this.biometricLogin,
+      biometricConfirm: biometricConfirm ?? this.biometricConfirm,
     );
   }
 }
@@ -68,6 +77,8 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
         bankRotationNotif: _settingsService.bankRotationNotif,
         subscriptionNotif: _settingsService.subscriptionNotif,
         securityNotif: _settingsService.securityNotif,
+        biometricLogin: _settingsService.biometricLogin,
+        biometricConfirm: _settingsService.biometricConfirm,
         isInitialized: true,
       );
     } catch (e, stackTrace) {
@@ -75,7 +86,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to load settings: $e',
-          userMessage: "Could not load settings.",
+          userMessage: t.settings.errors.setting_update_failed,
         ),
       );
       return SettingsState.initial().copyWith(isInitialized: true);
@@ -84,18 +95,21 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
 
   Future<void> toggleTravelMode() async {
     try {
+      await _settingsService.init();
       final currentValue = state.value;
       if (currentValue == null) return;
 
       final newValue = !currentValue.isTravelModeActive;
       await _settingsService.setTravelModeActive(newValue);
-      state = AsyncValue.data(currentValue.copyWith(isTravelModeActive: newValue));
+      state = AsyncValue.data(
+        currentValue.copyWith(isTravelModeActive: newValue),
+      );
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to toggle travel mode: $e',
-          userMessage: "Could not update travel mode.",
+          userMessage: t.settings.errors.travel_mode_failed,
         ),
       );
     }
@@ -103,6 +117,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
 
   Future<void> toggleTravelProtection(String id, bool protect) async {
     try {
+      await _settingsService.init();
       if (protect) {
         await _settingsService.addTravelProtectedId(id);
       } else {
@@ -121,7 +136,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to update travel protection: $e',
-          userMessage: "Could not update travel protection.",
+          userMessage: t.settings.errors.setting_update_failed,
         ),
       );
     }
@@ -133,17 +148,20 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
 
   Future<void> toggleNotificationsEnabled(bool value) async {
     try {
+      await _settingsService.init();
       await _settingsService.setNotificationsEnabled(value);
       final currentValue = state.value;
       if (currentValue != null) {
-        state = AsyncValue.data(currentValue.copyWith(notificationsEnabled: value));
+        state = AsyncValue.data(
+          currentValue.copyWith(notificationsEnabled: value),
+        );
       }
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to update notifications: $e',
-          userMessage: "Could not update notification settings.",
+          userMessage: t.settings.errors.setting_update_failed,
         ),
       );
     }
@@ -151,17 +169,20 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
 
   Future<void> toggleBankRotationNotif(bool value) async {
     try {
+      await _settingsService.init();
       await _settingsService.setBankRotationNotif(value);
       final currentValue = state.value;
       if (currentValue != null) {
-        state = AsyncValue.data(currentValue.copyWith(bankRotationNotif: value));
+        state = AsyncValue.data(
+          currentValue.copyWith(bankRotationNotif: value),
+        );
       }
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to update bank rotation notifications: $e',
-          userMessage: "Could not update notification settings.",
+          userMessage: t.settings.errors.setting_update_failed,
         ),
       );
     }
@@ -169,17 +190,20 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
 
   Future<void> toggleSubscriptionNotif(bool value) async {
     try {
+      await _settingsService.init();
       await _settingsService.setSubscriptionNotif(value);
       final currentValue = state.value;
       if (currentValue != null) {
-        state = AsyncValue.data(currentValue.copyWith(subscriptionNotif: value));
+        state = AsyncValue.data(
+          currentValue.copyWith(subscriptionNotif: value),
+        );
       }
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to update subscription notifications: $e',
-          userMessage: "Could not update notification settings.",
+          userMessage: t.settings.errors.setting_update_failed,
         ),
       );
     }
@@ -187,6 +211,7 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
 
   Future<void> toggleSecurityNotif(bool value) async {
     try {
+      await _settingsService.init();
       await _settingsService.setSecurityNotif(value);
       final currentValue = state.value;
       if (currentValue != null) {
@@ -197,7 +222,45 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to update security notifications: $e',
-          userMessage: "Could not update notification settings.",
+          userMessage: t.settings.errors.setting_update_failed,
+        ),
+      );
+    }
+  }
+
+  Future<void> toggleBiometricLogin(bool value) async {
+    try {
+      await _settingsService.init();
+      await _settingsService.setBiometricLogin(value);
+      final currentValue = state.value;
+      if (currentValue != null) {
+        state = AsyncValue.data(currentValue.copyWith(biometricLogin: value));
+      }
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+      ErrorHandler.handleGlobalError(
+        DatabaseError(
+          'Failed to update biometric login: $e',
+          userMessage: t.settings.errors.setting_update_failed,
+        ),
+      );
+    }
+  }
+
+  Future<void> toggleBiometricConfirm(bool value) async {
+    try {
+      await _settingsService.init();
+      await _settingsService.setBiometricConfirm(value);
+      final currentValue = state.value;
+      if (currentValue != null) {
+        state = AsyncValue.data(currentValue.copyWith(biometricConfirm: value));
+      }
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+      ErrorHandler.handleGlobalError(
+        DatabaseError(
+          'Failed to update biometric confirmation: $e',
+          userMessage: t.settings.errors.setting_update_failed,
         ),
       );
     }
@@ -205,14 +268,17 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
 
   Future<void> resetSettings() async {
     try {
+      await _settingsService.init();
       await _settingsService.clearSettings();
-      state = AsyncValue.data(SettingsState.initial().copyWith(isInitialized: true));
+      state = AsyncValue.data(
+        SettingsState.initial().copyWith(isInitialized: true),
+      );
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to reset settings: $e',
-          userMessage: "Could not reset settings.",
+          userMessage: t.settings.errors.setting_update_failed,
         ),
       );
     }

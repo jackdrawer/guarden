@@ -1,4 +1,4 @@
-import 'dart:io';
+// dart:io kaldirildi
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../errors/app_errors.dart';
@@ -24,6 +24,15 @@ class ErrorHandler {
     debugPrint('Global AppError Handled: ${appError.toString()}');
     TelemetryService.instance.recordException(error);
 
+    // Defer SnackBar display to avoid modifying widget tree during build phase.
+    // This prevents '_dependents.isEmpty' assertion failures when errors occur
+    // during provider rebuilds (e.g., when toggling Travel Mode).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showErrorSnackBar(appError, onRetry);
+    });
+  }
+
+  static void _showErrorSnackBar(AppError appError, VoidCallback? onRetry) {
     // In pure unit tests there may be no WidgetsBinding/Scaffold context.
     final scaffoldMessenger = _safeScaffoldMessengerState();
     if (scaffoldMessenger == null) {
@@ -59,10 +68,8 @@ class ErrorHandler {
   }
 
   static ScaffoldMessengerState? _safeScaffoldMessengerState() {
-    if (WidgetsBinding.instanceOrNull == null) {
-      return null;
-    }
     try {
+      WidgetsBinding.instance;
       return scaffoldMessengerKey.currentState;
     } catch (_) {
       return null;
@@ -94,7 +101,7 @@ class ErrorHandler {
       return exception;
     }
 
-    if (exception is SocketException) {
+    if (exception.toString().contains('SocketException')) {
       return NetworkError(exception.toString());
     }
 

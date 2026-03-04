@@ -1,13 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../errors/app_errors.dart';
 import '../models/web_password.dart';
 import '../services/database_service.dart';
 import '../widgets/error_handler.dart';
-import '../errors/app_errors.dart';
-
+import '../i18n/strings.g.dart';
 import 'settings_provider.dart';
 
 class WebPasswordNotifier extends AutoDisposeAsyncNotifier<List<WebPassword>> {
-  late final _dbService = ref.read(databaseProvider);
+  late final DatabaseService _dbService = ref.read(databaseProvider);
 
   @override
   Future<List<WebPassword>> build() async {
@@ -17,12 +18,11 @@ class WebPasswordNotifier extends AutoDisposeAsyncNotifier<List<WebPassword>> {
 
   List<WebPassword> _getItems() {
     try {
-      final settingsAsync = ref.read(settingsProvider);
-      final settings = settingsAsync.value;
+      final settings = ref.read(settingsProvider).valueOrNull;
       var items = _dbService.webPasswordsBox.values.toList();
       if (settings != null && settings.isTravelModeActive) {
         items = items
-            .where((i) => !settings.travelProtectedIds.contains(i.id))
+            .where((item) => !settings.travelProtectedIds.contains(item.id))
             .toList();
       }
       return items;
@@ -30,38 +30,38 @@ class WebPasswordNotifier extends AutoDisposeAsyncNotifier<List<WebPassword>> {
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to read web passwords: $e',
-          userMessage: "Could not load web passwords.",
+          userMessage: t.settings.errors.load_failed,
         ),
       );
       return [];
     }
   }
 
-  void addWebPassword(WebPassword pwd) {
+  void addWebPassword(WebPassword item) {
     try {
-      _dbService.webPasswordsBox.put(pwd.id, pwd);
+      _dbService.webPasswordsBox.put(item.id, item);
       state = AsyncValue.data(_getItems());
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to add web password: $e',
-          userMessage: "Could not save web password.",
+          userMessage: t.settings.errors.setting_update_failed,
         ),
       );
     }
   }
 
-  void updateWebPassword(WebPassword pwd) {
+  void updateWebPassword(WebPassword item) {
     try {
-      _dbService.webPasswordsBox.put(pwd.id, pwd);
+      _dbService.webPasswordsBox.put(item.id, item);
       state = AsyncValue.data(_getItems());
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to update web password: $e',
-          userMessage: "Could not update web password.",
+          userMessage: t.settings.errors.setting_update_failed,
         ),
       );
     }
@@ -76,7 +76,7 @@ class WebPasswordNotifier extends AutoDisposeAsyncNotifier<List<WebPassword>> {
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to delete web password: $e',
-          userMessage: "Could not delete web password.",
+          userMessage: t.settings.errors.setting_update_failed,
         ),
       );
     }

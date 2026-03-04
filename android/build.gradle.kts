@@ -1,9 +1,4 @@
-buildscript {
-    dependencies {
-        // Google Services plugin for Firebase
-        classpath("com.google.gms:google-services:4.4.1")
-    }
-}
+// Google Services plugin kaldirildi
 
 allprojects {
     repositories {

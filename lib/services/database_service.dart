@@ -6,6 +6,7 @@ import '../models/bank_account.dart';
 import '../models/subscription.dart';
 import '../models/web_password.dart';
 import '../errors/app_errors.dart';
+import '../i18n/strings.g.dart';
 
 final databaseProvider = Provider<DatabaseService>((ref) {
   final secureStorage = ref.read(secureStorageProvider);
@@ -22,14 +23,14 @@ class DatabaseService {
   static const String subscriptionsBoxName = 'subscriptions';
   static const String webPasswordsBoxName = 'web_passwords';
 
-  /// Hive'ı başlatır ve güvenli kutuları (Boxes) açar.
+  /// Hive'Ä± baÅŸlatÄ±r ve gÃ¼venli kutularÄ± (Boxes) aÃ§ar.
   Future<void> initDatabase() async {
     if (_isInitialized) return;
 
     try {
       await Hive.initFlutter();
 
-      // Type Adapter kayıtları (Daha önce kaydedilmemişse)
+      // Type Adapter kayÄ±tlarÄ± (Daha Ã¶nce kaydedilmemiÅŸse)
       if (!Hive.isAdapterRegistered(0)) {
         Hive.registerAdapter(BankAccountAdapter());
       }
@@ -40,20 +41,20 @@ class DatabaseService {
         Hive.registerAdapter(WebPasswordAdapter());
       }
 
-      // 1. Storage'dan şifreleme key'ini al
+      // 1. Storage'dan ÅŸifreleme key'ini al
       String? encryptionKeyBase64 = await _secureStorage.getEncryptionKey();
 
       if (encryptionKeyBase64 == null) {
         throw StorageError(
-          'DB Encryption Key bulunamadı. Lütfen Master Şifre belirleyin.',
+          'DB encryption key was not found. Please set a master password.',
         );
       }
 
       final encryptionKey = base64Decode(
         encryptionKeyBase64,
-      ); // base64Decode kullanılmalı
+      ); // base64Decode kullanÄ±lmalÄ±
 
-      // 3. AES şifreli olarak kutuları aç
+      // 3. AES ÅŸifreli olarak kutularÄ± aÃ§
       final cipher = HiveAesCipher(encryptionKey);
       await Hive.openBox<BankAccount>(
         bankAccountsBoxName,
@@ -72,7 +73,7 @@ class DatabaseService {
     } on HiveError catch (e) {
       throw DatabaseError(
         'Hive init failed: $e',
-        userMessage: "Couldn't open database. Check storage permissions.",
+        userMessage: t.settings.errors.db_open_failed,
         canRetry: true,
         action: 'retry',
       );
@@ -81,7 +82,7 @@ class DatabaseService {
     } catch (e) {
       throw DatabaseError(
         'Database initialization failed: $e',
-        userMessage: "An unexpected error occurred opening the database.",
+        userMessage: t.settings.errors.db_open_failed,
       );
     }
   }
@@ -90,7 +91,7 @@ class DatabaseService {
     if (!_isInitialized) {
       throw DatabaseError(
         'Database not initialized',
-        userMessage: 'Database not ready',
+        userMessage: t.settings.errors.db_not_ready,
       );
     }
     return Hive.box<BankAccount>(bankAccountsBoxName);
@@ -100,7 +101,7 @@ class DatabaseService {
     if (!_isInitialized) {
       throw DatabaseError(
         'Database not initialized',
-        userMessage: 'Database not ready',
+        userMessage: t.settings.errors.db_not_ready,
       );
     }
     return Hive.box<Subscription>(subscriptionsBoxName);
@@ -110,7 +111,7 @@ class DatabaseService {
     if (!_isInitialized) {
       throw DatabaseError(
         'Database not initialized',
-        userMessage: 'Database not ready',
+        userMessage: t.settings.errors.db_not_ready,
       );
     }
     return Hive.box<WebPassword>(webPasswordsBoxName);
@@ -124,7 +125,7 @@ class DatabaseService {
     } catch (e) {
       throw DatabaseError(
         'Failed to close database: $e',
-        userMessage: 'Couldn\'t safely close the vault.',
+        userMessage: t.settings.errors.generic,
       );
     }
   }
@@ -132,14 +133,16 @@ class DatabaseService {
   /// Bütün verileri siler (Panic Mode / Reset)
   Future<void> deleteDatabase() async {
     try {
+      await Hive.close(); // Boxes must be closed before deletion
       await Hive.deleteBoxFromDisk(bankAccountsBoxName);
       await Hive.deleteBoxFromDisk(subscriptionsBoxName);
       await Hive.deleteBoxFromDisk(webPasswordsBoxName);
+      await Hive.deleteBoxFromDisk('settings_box');
       _isInitialized = false;
     } catch (e) {
       throw DatabaseError(
         'Failed to delete database: $e',
-        userMessage: 'Couldn\'t erase the vault.',
+        userMessage: t.settings.errors.generic,
       );
     }
   }

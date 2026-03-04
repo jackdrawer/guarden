@@ -1,0 +1,293 @@
+{
+  "general": {
+    "save": "Kaydet",
+    "edit": "Düzenle",
+    "delete": "Sil",
+    "cancel": "İptal",
+    "done": "Bitti",
+    "error": "Hata",
+    "loading": "Yükleniyor...",
+    "confirm": "Onayla",
+    "copy": "Kopyala",
+    "close": "Kapat",
+    "continue": "Devam",
+    "apply": "Uygula",
+    "update": "Güncelle",
+    "unlock": "Kilidi Aç",
+    "enable": "Etkinleştir",
+    "later": "Daha Sonra",
+    "authentication": "Doğrulama",
+    "authentication_required_view_password": "Şifreyi görmek için doğrulama gerekli.",
+    "master_password_hint": "Master Şifre",
+    "show_password": "Şifreyi Göster",
+    "hide_password": "Şifreyi Gizle",
+    "generate_password": "Şifre Üret",
+    "hide_in_travel_mode": "Seyahat Modunda Gizle",
+    "record_not_found": "Kayıt bulunamadı",
+    "copied_label": "$label kopyalandı",
+    "delete_record": "Kaydı Sil",
+    "confirm_delete_title": "Silmek istediğinize emin misiniz?",
+    "confirm_delete_message": "Bu işlem geri alınamaz.",
+    "password": "Şifre",
+    "notes": "Notlar",
+    "username_email": "Kullanıcı Adı / E-posta",
+    "login_url": "Giriş URL",
+    "password_decrypt_failed": "Şifre çözümlenemedi.",
+    "record_to_edit_not_found": "Düzenlenecek kayıt bulunamadı."
+  },
+  "home": {
+    "add_bank": "Banka Ekle",
+    "add_subscription": "Abonelik Ekle",
+    "add_web_password": "Web Sifresi Ekle",
+    "settings_tooltip": "Ayarlar"
+  },
+  "nav": {
+    "dashboard": "Kumanda",
+    "banks": "Bankalar",
+    "subscriptions": "Abonelikler",
+    "web": "Web"
+  },
+  "dashboard": {
+    "title": "Hoş Geldiniz",
+    "subtitle": "Güvenli kasanız",
+    "command_center": "Kumanda Merkezi",
+    "total_budget": "Aylık Toplam Gider",
+    "monthly_cost": "Aylık Maliyet",
+    "alert_title": "Güvenlik Uyarısı",
+    "alerts": {
+      "expired_banks": "Süresi dolan $count hesap parolanız var!"
+    },
+    "security_audit": {
+      "title": "Güvenlik Taraması",
+      "subtitle": "Web şifrelerinizin veri sızıntılarında ifşa olup olmadığını kontrol edin."
+    }
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "master_password_confirmation": "Master şifre onayı",
+    "master_password": "Master şifre",
+    "secure_action_reason": "Güvenli işlem için doğrulama yapın",
+    "master_password_for_security": "Güvenlik için Master şifre",
+    "master_password_wrong": "Master şifre hatalı.",
+    "panic_mode_title": "Panik Modu",
+    "panic_mode_confirm_message": "⚠️ KRİTİK UYARI: Bu işlem tüm kasa verilerini (banka hesapları, abonelikler ve web şifreleri dahil) kalıcı olarak silecek. Bu işlem geri alınamaz. Devam etmek istediğinize emin misiniz?",
+    "delete_keys": "Tüm Verileri Sil",
+    "backup_ready": "Yedek hazır",
+    "backup_text_copied": "Yedek metni kopyalandı.",
+    "enter_backup_text": "Yedek metnini girin",
+    "backup_text": "Yedek metni",
+    "backup_text_required": "Yedek metni zorunludur.",
+    "dry_run_report": "Dry-run raporu",
+    "total_incoming": "Toplam gelen: $count",
+    "total_conflicts": "Toplam çakışmanın sayısı: $count",
+    "new_records": "Yeni kayıt: $count",
+    "overwrite_conflicts": "Çakışan kayıtların üzerine yaz",
+    "backup_export_failed": "Yedek alma işlemi başarısız oldu.",
+    "restore_completed": "Geri yükleme tamamlandı. Yeni: $created, Üzerine yazılan: $overwritten, Atlanan: $skipped",
+    "restore_from_backup_failed": "Yedekten geri yükleme başarısız oldu.",
+    "backup_uploaded_drive": "Yedek başarıyla Google Drive'a yüklendi.",
+    "no_backup_in_drive": "Google Drive'da herhangi bir yedek bulunamadı.",
+    "restore_failed_with_error": "Geri yükleme başarısız oldu: $error",
+    "error_with_message": "Hata: $message",
+    "sections": {
+      "system_integration": "Sistem Entegrasyonu",
+      "security_privacy": "Güvenlik ve Gizlilik",
+      "drive_backup": "Google Drive Yedekleme",
+      "manual_import_export": "Cihaza Yedekle",
+      "notifications": "Bildirimler"
+    },
+    "labels": {
+      "autofill": "Otomatik Doldurma",
+      "set": "Ayarla",
+      "travel_mode": "Seyahat modu",
+      "biometric_unlock": "Biyometrik Kilit Açma",
+      "sensitive_action_confirmation": "Hassas İşlem Onayı",
+      "backup_to_drive": "Drive'a Yedekle",
+      "backup_to_drive_subtitle": "Şifreli yedeği kişisel Drive alanınıza aktarır",
+      "restore_from_drive": "Drive'dan Getir",
+      "restore_from_drive_subtitle": "Kendi Google hesabınızdan yedeği çeker",
+      "copy_to_clipboard": "Dosyaya Aktar",
+      "copy_to_clipboard_subtitle": "Şifreli yedek JSON dosyası oluştur (Offline).",
+      "restore_from_clipboard": "Dosyadan Oku",
+      "restore_from_clipboard_subtitle": "Cihazdaki JSON yedeğini okuyarak onar.",
+      "panic_mode": "Panik Modu",
+      "panic_mode_subtitle": "Acil durumlarda tüm kasa verilerini kalıcı olarak sil.",
+      "enable_notifications": "Bildirimleri aç",
+      "bank_password_rotation": "Banka şifre rotasyonu",
+      "subscription_renewal": "Abonelik yenileme",
+      "security_alerts": "Güvenlik uyarıları"
+    },
+    "tooltips": {
+      "autofill": "Diğer uygulamalarda şifrelerinizi otomatik doldurmayı etkinleştirir",
+      "travel_mode": "Sınır geçişlerinde ek güvenlik için tüm verileri gizler",
+      "biometric_unlock": "Parmak izi veya yüz tanıma ile hızlı giriş",
+      "sensitive_action_confirmation": "Önemli işlemler için ek biyometrik doğrulama ister",
+      "backup_to_drive": "Şifrelenmiş yedeğinizi Google Drive'a yükler",
+      "restore_from_drive": "Google Drive'dan önceki bir yedeği geri yükler",
+      "export_file": "Şifreli yedeği cihazınıza dosya olarak kaydeder",
+      "import_file": "Cihazdaki yedek dosyasını geri yükler",
+      "panic_mode": "Acil durumlarda tüm kasa verilerini (şifreler ve hesaplar dahil) kalıcı olarak siler"
+    },
+    "errors": {
+      "travel_mode_failed": "Seyahat modu güncellenemedi.",
+      "setting_update_failed": "Ayar kaydedilemedi.",
+      "load_failed": "Veriler yüklenemedi.",
+      "storage_access_failed": "Güvenli depolamaya erişilemedi.",
+      "db_open_failed": "Veritabanı açılamadı. İzinleri kontrol edin.",
+      "db_not_ready": "Veritabanı henüz hazır değil.",
+      "encryption_failed": "Veri şifrelenemedi.",
+      "decryption_failed": "Veri çözülemedi. Master şifre hatalı olabilir.",
+      "backup_export_failed": "Yedek dosyası oluşturulamadı.",
+      "backup_read_failed": "Yedek dosyası okunamadı.",
+      "gdrive_auth_failed": "Google hesabına bağlanırken bir hata oluştu.",
+      "gdrive_permission_denied": "Google Drive izni reddedildi.",
+      "pwned_check_failed": "Şifre güvenliği kontrol edilemedi. İnterneti kontrol edin.",
+      "generic": "Bir hata oluştu. Lütfen tekrar deneyin."
+    },
+    "web_not_supported": "Web tarayıcıda desteklenmiyor."
+  },
+  "auth_login": {
+    "biometric_unavailable": "Biyometrik doğrulama kullanılamıyor.",
+    "biometric_failed": "Biyometrik doğrulama başarısız oldu.",
+    "wrong_master_password": "Master şifre hatalı.",
+    "subtitle": "Kasanızı açmak için master şifrenizi girin.",
+    "unlock_button": "Kilidi Aç",
+    "use_biometrics": "Biyometri Kullan",
+    "forgot_master_password": "Master şifremi unuttum",
+    "forgot_dialog_body": "Master şifrenizi unuttuysanız, kasanıza erişmenin tek yolu tüm verileri cihazdan silmek ve bir yedekle (varsa) geri yüklemektir. Gizliliğiniz gereği şifreniz hiçbir yerde saklanmaz.",
+    "reset_device_panic": "Cihazı Sıfırla (Panik)",
+    "master_password_tooltip": "Kasanızı açmak için kullandığınız ana şifre",
+    "biometric_tooltip": "Parmak izi veya yüz tanıma ile hızlı giriş"
+  },
+  "welcome": {
+    "title": "Guarden'a Hoş Geldiniz",
+    "subtitle": "Banka hesaplarınız, dijital abonelikleriniz ve tüm şifreleriniz artık güvende. Şimdi kişisel offline kasanızı oluşturalım.",
+    "get_started": "Başlayalım"
+  },
+  "onboarding_setup": {
+    "password_too_short": "Şifre en az 8 karakter olmalı.",
+    "passwords_do_not_match": "Şifreler eşleşmiyor.",
+    "title": "Guarden Kurulumu",
+    "subtitle": "Tüm kimlik bilgilerinizi korumak için bir Master Şifre belirleyin.",
+    "confirm_password_hint": "Şifreyi Onayla",
+    "create_vault": "Kasayı Oluştur"
+  },
+  "onboarding_biometric": {
+    "enabled_message": "Biyometrik giriş etkinleştirildi.",
+    "failed_message": "Biyometrik doğrulama iptal edildi veya başarısız oldu.",
+    "title": "Biyometrik Giriş",
+    "subtitle": "Her seferinde master şifre girmek yerine kasanızı Face ID veya parmak iziyle hızlı açabilirsiniz."
+  },
+  "bank_form": {
+    "required_fields": "Banka adı ve şifre zorunludur.",
+    "save_failed": "Banka hesabı kaydedilemedi. Lütfen tekrar deneyin.",
+    "title_add": "Banka Hesabı Ekle",
+    "title_edit": "Banka Hesabını Düzenle",
+    "bank_name_label": "Banka / Kurum Adı",
+    "bank_name_hint": "ör. Garanti BBVA",
+    "username_national_id_label": "Kullanıcı Adı / TCKN",
+    "username_national_id_hint": "Müşteri no veya TCKN",
+    "password_rotation_period": "Şifre Değiştirme Periyodu",
+    "period_months": "$count ay",
+    "notes_hint": "Kart PIN, müşteri numarası vb."
+  },
+  "bank_detail": {
+    "title": "Banka Detayı",
+    "username_national_id_label": "Kullanıcı Adı / TCKN"
+  },
+  "subscription_form": {
+    "required_fields": "Servis adı ve tutar zorunludur.",
+    "save_failed": "Abonelik kaydedilemedi. Lütfen tekrar deneyin.",
+    "title_add": "Abonelik Ekle",
+    "title_edit": "Aboneliği Düzenle",
+    "service_name_label": "Servis / Yayıncı (Netflix, Spotify vb.)",
+    "service_name_hint": "ör. Netflix",
+    "monthly_cost_label": "Aylık Tutar (TRY)",
+    "monthly_cost_hint": "ör. 149.99",
+    "next_billing_date": "Sonraki Fatura Tarihi",
+    "email_hint": "Hesap e-posta adresiniz"
+  },
+  "subscription_detail": {
+    "title": "Abonelik Detayı",
+    "next_billing_date_label": "Sonraki Fatura Tarihi"
+  },
+  "web_form": {
+    "required_fields": "Başlık ve şifre zorunludur.",
+    "save_failed": "Kayıt kaydedilemedi. Lütfen tekrar deneyin.",
+    "title_add": "Web Şifresi Ekle",
+    "title_edit": "Web Şifresini Düzenle",
+    "app_site_title_label": "Uygulama / Site Başlığı",
+    "app_site_title_hint": "ör. Amazon, GitHub",
+    "website_url_label": "Web Sitesi URL",
+    "website_url_hint": "ör. amazon.com",
+    "username_hint": "isim@alanadi.com",
+    "notes_hint": "Ek detaylar..."
+  },
+  "web_detail": {
+    "title": "Web Şifresi",
+    "delete_success": "Kayıt başarıyla silindi.",
+    "check_password_security": "Şifre Güvenliğini Denetle"
+  },
+  "password_generator": {
+    "title": "Şifre Üretici",
+    "weak": "Zayıf",
+    "strong": "Güçlü",
+    "excellent": "Mükemmel",
+    "refresh": "Yenile",
+    "copied": "Kopyalandı!",
+    "copy_action": "Kopyala",
+    "length": "Uzunluk: $count",
+    "uppercase": "Büyük Harfler (A-Z)",
+    "lowercase": "Küçük Harfler (a-z)",
+    "numbers": "Rakamlar (0-9)",
+    "symbols": "Semboller (!@#)",
+    "use_this_password": "Bu Şifreyi Kullan"
+  },
+  "security_audit": {
+    "title": "Kasa Sağlık Taraması",
+    "scan_failed": "Tarama başarısız oldu.",
+    "great": "Harika!",
+    "safe_message": "Şifreleriniz güvenli görünüyor.",
+    "weak_or_risky_passwords": "Zayıf veya riskli şifreler",
+    "security_score": "Güvenlik skoru",
+    "scanned": "Taranan",
+    "weak": "Zayıf",
+    "reused": "Tekrar Eden"
+  },
+  "compromised_accounts": {
+    "title": "İfşa Olmuş Hesaplar",
+    "adding_all_issues": "Tüm sorunlar listeye ekleniyor...",
+    "fix_all": "Tümünü Düzelt",
+    "fix_now": "Şimdi Düzelt"
+  },
+  "web_passwords": {
+    "title": "Web Şifreleri",
+    "count_limit": "$current/$max Şifre",
+    "empty": {
+      "title": "Henüz Web Şifresi Yok",
+      "subtitle": "İnternet sitelerindeki ve uygulamalardaki şifrelerinizi askeri seviyede güvenlik ile burada saklayın."
+    },
+    "copy_success": "Şifre kopyalandı!",
+    "copy_error": "Kopyalama hatası: $error",
+    "tooltip_copy": "Şifreyi Kopyala",
+    "no_key_error": "Şifreleme anahtarı bulunamadı."
+  },
+  "bank_accounts": {
+    "title": "Banka & Finans",
+    "count_limit": "$current/$max Kasa",
+    "empty": {
+      "title": "Henüz Banka Hesabı Yok",
+      "subtitle": "Burada finansal kurumlarınızı ve IBAN bilgilerinizi yüksek güvenlikle saklayabilirsiniz."
+    }
+  },
+  "subscriptions": {
+    "title": "Abonelikler",
+    "count_limit": "$current/$max Plan",
+    "monthly_total": "Aylık Toplam:",
+    "per_month": "/ay",
+    "empty": {
+      "title": "Henüz Abonelik Yok",
+      "subtitle": "Aylık ödemelerinizi ve dijital platform üyeliklerinizi buradan takip edebilirsiniz."
+    }
+  }
+}

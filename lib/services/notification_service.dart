@@ -86,8 +86,8 @@ class NotificationService {
       const AndroidNotificationDetails androidPlatformChannelSpecifics =
           AndroidNotificationDetails(
             'guarden_expiration_channel',
-            'Şifre Rotasyon Bildirimleri',
-            channelDescription: 'Süresi dolan şifrelerinizi hatırlatır.',
+            'Password Rotation Notifications',
+            channelDescription: 'Reminds you of expiring passwords.',
             importance: Importance.max,
             priority: Priority.high,
             ticker: 'ticker',
@@ -140,17 +140,17 @@ class NotificationService {
     if (expiredCount > 0) {
       await showNotification(
         id: 100,
-        title: 'Şifre Rotasyon Uyarısı!',
+        title: 'Password Rotation Alert!',
         body:
-            '$expiredCount adet banka şifrenizin değiştirilme vakti geldi. Lütfen güvenlik için şifrelerinizi güncelleyin.',
+            '$expiredCount bank passwords are due for rotation. Please update them for security.',
       );
     }
 
     if (soonCount > 0) {
       await showNotification(
         id: 101,
-        title: 'Şifre Değişimi Yaklaşıyor',
-        body: '$soonCount adet banka şifrenizin süresi 7 gün içinde dolacak.',
+        title: 'Password Rotation Coming Soon',
+        body: '$soonCount bank passwords will expire within 7 days.',
       );
     }
   }

@@ -1,0 +1,293 @@
+{
+  "general": {
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "done": "Done",
+    "error": "Error",
+    "loading": "Loading...",
+    "confirm": "Confirm",
+    "copy": "Copy",
+    "close": "Close",
+    "continue": "Continue",
+    "apply": "Apply",
+    "update": "Update",
+    "unlock": "Unlock",
+    "enable": "Enable",
+    "later": "Later",
+    "authentication": "Authentication",
+    "authentication_required_view_password": "Authentication is required to view the password.",
+    "master_password_hint": "Master Password",
+    "show_password": "Show Password",
+    "hide_password": "Hide Password",
+    "generate_password": "Generate Password",
+    "hide_in_travel_mode": "Hide in Travel Mode",
+    "record_not_found": "Record not found",
+    "copied_label": "$label copied",
+    "delete_record": "Delete Record",
+    "confirm_delete_title": "Are you sure you want to delete?",
+    "confirm_delete_message": "This action cannot be undone.",
+    "password": "Password",
+    "notes": "Notes",
+    "username_email": "Username / Email",
+    "login_url": "Login URL",
+    "password_decrypt_failed": "Password could not be decrypted.",
+    "record_to_edit_not_found": "Record to edit was not found."
+  },
+  "home": {
+    "add_bank": "Add Bank",
+    "add_subscription": "Add Subscription",
+    "add_web_password": "Add Web Password",
+    "settings_tooltip": "Settings"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "banks": "Banks",
+    "subscriptions": "Subscriptions",
+    "web": "Web"
+  },
+  "dashboard": {
+    "title": "Welcome",
+    "subtitle": "Your safe vault",
+    "command_center": "Control Center",
+    "total_budget": "Total Budget",
+    "monthly_cost": "Monthly Cost",
+    "alert_title": "Security Alert",
+    "alerts": {
+      "expired_banks": "You have $count expired bank passwords!"
+    },
+    "security_audit": {
+      "title": "Security Check",
+      "subtitle": "Check if your passwords are leaked in data breaches."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "master_password_confirmation": "Master password confirmation",
+    "master_password": "Master password",
+    "secure_action_reason": "Authenticate for secure action",
+    "master_password_for_security": "Master password for security",
+    "master_password_wrong": "Master password is incorrect.",
+    "panic_mode_title": "Panic Mode",
+    "panic_mode_confirm_message": "⚠️ CRITICAL WARNING: This will permanently delete ALL vault data including bank accounts, subscriptions, and web passwords. This action cannot be undone. Are you sure you want to continue?",
+    "delete_keys": "Delete All Data",
+    "backup_ready": "Backup ready",
+    "backup_text_copied": "Backup text copied.",
+    "enter_backup_text": "Enter backup text",
+    "backup_text": "Backup text",
+    "backup_text_required": "Backup text is required.",
+    "dry_run_report": "Dry-run report",
+    "total_incoming": "Total incoming: $count",
+    "total_conflicts": "Total conflicts: $count",
+    "new_records": "New records: $count",
+    "overwrite_conflicts": "Overwrite conflicting records",
+    "backup_export_failed": "Backup export failed.",
+    "restore_completed": "Restore completed. New: $created, Overwritten: $overwritten, Skipped: $skipped",
+    "restore_from_backup_failed": "Restore from backup failed.",
+    "backup_uploaded_drive": "Backup uploaded to Google Drive successfully.",
+    "no_backup_in_drive": "No backup found in Google Drive.",
+    "restore_failed_with_error": "Restore failed: $error",
+    "error_with_message": "Error: $message",
+    "sections": {
+      "system_integration": "System Integration",
+      "security_privacy": "Security and Privacy",
+      "drive_backup": "Google Drive Backup",
+      "manual_import_export": "Device Backup",
+      "notifications": "Notifications"
+    },
+    "labels": {
+      "autofill": "Autofill",
+      "set": "Set",
+      "travel_mode": "Travel mode",
+      "biometric_unlock": "Biometric unlock",
+      "sensitive_action_confirmation": "Sensitive action confirmation",
+      "backup_to_drive": "Backup to Drive",
+      "backup_to_drive_subtitle": "Uploads encrypted backup to your personal Drive space",
+      "restore_from_drive": "Restore from Drive",
+      "restore_from_drive_subtitle": "Downloads backup from your own Google account",
+      "copy_to_clipboard": "Export to File",
+      "copy_to_clipboard_subtitle": "Create encrypted backup JSON file (offline).",
+      "restore_from_clipboard": "Import from File",
+      "restore_from_clipboard_subtitle": "Restore by reading a JSON backup from device.",
+      "panic_mode": "Panic Mode",
+      "panic_mode_subtitle": "Permanently delete all vault data in emergency situations.",
+      "enable_notifications": "Enable notifications",
+      "bank_password_rotation": "Bank password rotation",
+      "subscription_renewal": "Subscription renewal",
+      "security_alerts": "Security alerts"
+    },
+    "tooltips": {
+      "autofill": "Enables automatic password filling in other apps",
+      "travel_mode": "Hides all data for extra security during border crossings",
+      "biometric_unlock": "Quick login with fingerprint or face recognition",
+      "sensitive_action_confirmation": "Requires additional biometric verification for important actions",
+      "backup_to_drive": "Uploads encrypted backup to your Google Drive",
+      "restore_from_drive": "Restores a previous backup from Google Drive",
+      "export_file": "Saves encrypted backup as a file on your device",
+      "import_file": "Restores backup file from your device",
+      "panic_mode": "Permanently deletes all vault data including passwords and accounts in emergency situations"
+    },
+    "errors": {
+      "travel_mode_failed": "Could not update travel mode.",
+      "setting_update_failed": "Could not save setting.",
+      "load_failed": "Could not load data.",
+      "storage_access_failed": "Could not access secure storage.",
+      "db_open_failed": "Could not open database. Check permissions.",
+      "db_not_ready": "Database is not ready yet.",
+      "encryption_failed": "Could not encrypt data.",
+      "decryption_failed": "Could not decrypt data. Master password may be incorrect.",
+      "backup_export_failed": "Could not export backup.",
+      "backup_read_failed": "Could not read backup file.",
+      "gdrive_auth_failed": "An error occurred while connecting to Google account.",
+      "gdrive_permission_denied": "Google Drive permission was denied.",
+      "pwned_check_failed": "Could not check password security. Check your internet.",
+      "generic": "Something went wrong. Please try again."
+    },
+    "web_not_supported": "Not supported in web browser."
+  },
+  "auth_login": {
+    "biometric_unavailable": "Biometric authentication is not available.",
+    "biometric_failed": "Biometric authentication failed.",
+    "wrong_master_password": "Wrong master password.",
+    "subtitle": "Enter your master password to unlock your vault.",
+    "unlock_button": "Unlock",
+    "use_biometrics": "Use Biometrics",
+    "forgot_master_password": "I forgot my master password",
+    "forgot_dialog_body": "If you forgot your master password, the only way to access your vault is to delete all data from the device and restore from a backup (if available). For your privacy, your password is not stored anywhere.",
+    "reset_device_panic": "Reset Device (Panic)",
+    "master_password_tooltip": "The main password you use to unlock your vault",
+    "biometric_tooltip": "Quick login with fingerprint or face recognition"
+  },
+  "welcome": {
+    "title": "Welcome to Guarden",
+    "subtitle": "Your bank accounts, digital subscriptions, and all passwords are now secure. Let us create your personal offline vault.",
+    "get_started": "Get Started"
+  },
+  "onboarding_setup": {
+    "password_too_short": "Password must be at least 8 characters.",
+    "passwords_do_not_match": "Passwords do not match.",
+    "title": "Guarden Setup",
+    "subtitle": "Set a Master Password to protect all your credentials.",
+    "confirm_password_hint": "Confirm Password",
+    "create_vault": "Create Vault"
+  },
+  "onboarding_biometric": {
+    "enabled_message": "Biometric login enabled.",
+    "failed_message": "Biometric authentication was canceled or failed.",
+    "title": "Biometric Login",
+    "subtitle": "Instead of entering your master password every time, you can quickly unlock your vault using Face ID or fingerprint."
+  },
+  "bank_form": {
+    "required_fields": "Bank name and password are required.",
+    "save_failed": "Bank account could not be saved. Please try again.",
+    "title_add": "Add Bank Account",
+    "title_edit": "Edit Bank Account",
+    "bank_name_label": "Bank / Institution Name",
+    "bank_name_hint": "e.g. Garanti BBVA",
+    "username_national_id_label": "Username / National ID",
+    "username_national_id_hint": "Customer no or National ID",
+    "password_rotation_period": "Password Rotation Period",
+    "period_months": "$count mo",
+    "notes_hint": "Card PIN, customer number, etc."
+  },
+  "bank_detail": {
+    "title": "Bank Details",
+    "username_national_id_label": "Username / National ID"
+  },
+  "subscription_form": {
+    "required_fields": "Service name and cost are required.",
+    "save_failed": "Subscription could not be saved. Please try again.",
+    "title_add": "Add Subscription",
+    "title_edit": "Edit Subscription",
+    "service_name_label": "Service / Publisher (Netflix, Spotify etc.)",
+    "service_name_hint": "e.g. Netflix",
+    "monthly_cost_label": "Monthly Cost (TRY)",
+    "monthly_cost_hint": "e.g. 149.99",
+    "next_billing_date": "Next Billing Date",
+    "email_hint": "Your account email address"
+  },
+  "subscription_detail": {
+    "title": "Subscription Details",
+    "next_billing_date_label": "Next Billing Date"
+  },
+  "web_form": {
+    "required_fields": "Title and password are required.",
+    "save_failed": "Record could not be saved. Please try again.",
+    "title_add": "Add Web Password",
+    "title_edit": "Edit Web Password",
+    "app_site_title_label": "App / Site Title",
+    "app_site_title_hint": "e.g. Amazon, GitHub",
+    "website_url_label": "Website URL",
+    "website_url_hint": "e.g. amazon.com",
+    "username_hint": "name@domain.com",
+    "notes_hint": "Extra details..."
+  },
+  "web_detail": {
+    "title": "Web Password",
+    "delete_success": "Record deleted successfully.",
+    "check_password_security": "Check Password Security"
+  },
+  "password_generator": {
+    "title": "Password Generator",
+    "weak": "Weak",
+    "strong": "Strong",
+    "excellent": "Excellent",
+    "refresh": "Refresh",
+    "copied": "Copied!",
+    "copy_action": "Copy",
+    "length": "Length: $count",
+    "uppercase": "Uppercase Letters (A-Z)",
+    "lowercase": "Lowercase Letters (a-z)",
+    "numbers": "Numbers (0-9)",
+    "symbols": "Symbols (!@#)",
+    "use_this_password": "Use This Password"
+  },
+  "security_audit": {
+    "title": "Vault Health Scan",
+    "scan_failed": "Scan failed.",
+    "great": "Great!",
+    "safe_message": "Your passwords look safe.",
+    "weak_or_risky_passwords": "Weak or risky passwords",
+    "security_score": "Security score",
+    "scanned": "Scanned",
+    "weak": "Weak",
+    "reused": "Reused"
+  },
+  "compromised_accounts": {
+    "title": "Compromised Accounts",
+    "adding_all_issues": "Adding all issues to the list...",
+    "fix_all": "Fix All",
+    "fix_now": "Fix Now"
+  },
+  "web_passwords": {
+    "title": "Web Passwords",
+    "count_limit": "$current/$max Passwords",
+    "empty": {
+      "title": "No Web Passwords Yet",
+      "subtitle": "Store your passwords for websites and apps here with military-grade security."
+    },
+    "copy_success": "Password copied!",
+    "copy_error": "Copy error: $error",
+    "tooltip_copy": "Copy Password",
+    "no_key_error": "Encryption key not found."
+  },
+  "bank_accounts": {
+    "title": "Banking & Finance",
+    "count_limit": "$current/$max Vaults",
+    "empty": {
+      "title": "No Bank Accounts Yet",
+      "subtitle": "Store your financial institutions and IBAN information securely here."
+    }
+  },
+  "subscriptions": {
+    "title": "Subscriptions",
+    "count_limit": "$current/$max Plans",
+    "monthly_total": "Monthly Total:",
+    "per_month": "/month",
+    "empty": {
+      "title": "No Subscriptions Yet",
+      "subtitle": "Track your monthly payments and digital platform memberships here."
+    }
+  }
+}

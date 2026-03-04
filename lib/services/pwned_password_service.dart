@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
 import '../errors/app_errors.dart';
+import '../i18n/strings.g.dart';
 
 final pwnedPasswordProvider = Provider<PwnedPasswordService>((ref) {
   return PwnedPasswordService();
@@ -76,7 +77,7 @@ class PwnedPasswordService {
       } else {
         throw NetworkError(
           'Pwned API returned status code ${response.statusCode}',
-          userMessage: "Couldn't check password security. Check your internet.",
+          userMessage: t.settings.errors.pwned_check_failed,
           canRetry: true,
           action: "retry",
         );
@@ -84,7 +85,7 @@ class PwnedPasswordService {
     } catch (e) {
       throw NetworkError(
         'Pwned API request failed: $e',
-        userMessage: "Couldn't check password security. Check your internet.",
+        userMessage: t.settings.errors.pwned_check_failed,
         canRetry: true,
         action: "retry",
       );

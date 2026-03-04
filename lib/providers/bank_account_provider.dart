@@ -1,28 +1,30 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../errors/app_errors.dart';
 import '../models/bank_account.dart';
 import '../services/database_service.dart';
+import '../services/text_sanitizer.dart';
 import '../widgets/error_handler.dart';
-import '../errors/app_errors.dart';
-
+import '../i18n/strings.g.dart';
 import 'settings_provider.dart';
 
 class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
-  late final _dbService = ref.read(databaseProvider);
+  late final DatabaseService _dbService = ref.read(databaseProvider);
 
   @override
   Future<List<BankAccount>> build() async {
-    ref.watch(settingsProvider); // watch settings to trigger rebuild
+    ref.watch(settingsProvider);
     return _getItems();
   }
 
   List<BankAccount> _getItems() {
     try {
-      final settingsAsync = ref.read(settingsProvider);
-      final settings = settingsAsync.value;
+      final settings = ref.read(settingsProvider).valueOrNull;
       var items = _dbService.bankAccountsBox.values.toList();
+      _repairLegacyText(items);
       if (settings != null && settings.isTravelModeActive) {
         items = items
-            .where((i) => !settings.travelProtectedIds.contains(i.id))
+            .where((item) => !settings.travelProtectedIds.contains(item.id))
             .toList();
       }
       return items;
@@ -30,10 +32,25 @@ class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to read accounts: $e',
-          userMessage: "Could not load bank accounts.",
+          userMessage: t.settings.errors.load_failed,
         ),
       );
       return [];
+    }
+  }
+
+  void _repairLegacyText(List<BankAccount> items) {
+    for (final item in items) {
+      final repairedName = TextSanitizer.normalizeDisplayText(item.bankName);
+      final repairedUrl = TextSanitizer.normalizeDisplayText(item.url);
+
+      if (repairedName == item.bankName && repairedUrl == item.url) {
+        continue;
+      }
+
+      item.bankName = repairedName;
+      item.url = repairedUrl;
+      _dbService.bankAccountsBox.put(item.id, item);
     }
   }
 
@@ -46,8 +63,7 @@ class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to add account: $e',
-          userMessage:
-              "Could not save bank account. Please check storage capacity.",
+          userMessage: t.settings.errors.setting_update_failed,
         ),
       );
     }
@@ -62,7 +78,7 @@ class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to update account: $e',
-          userMessage: "Could not update bank account.",
+          userMessage: t.settings.errors.setting_update_failed,
         ),
       );
     }
@@ -77,7 +93,7 @@ class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to delete account: $e',
-          userMessage: "Could not delete bank account.",
+          userMessage: t.settings.errors.setting_update_failed,
         ),
       );
     }

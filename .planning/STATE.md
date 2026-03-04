@@ -4,14 +4,14 @@ milestone: v1.1
 milestone_name: Production Hardening
 current_phase: Phase 7 (Error Handling & Resilience)
 status: executing
-last_updated: "2026-03-03T14:22:48.508Z"
-last_activity: "2026-03-03 — Completed Plan 07-03: Provider Global Error Migration"
+last_updated: "2026-03-03T23:12:00.000Z"
+last_activity: "2026-03-03 — Updated pending todos based on code analysis"
 progress:
-  total_phases: 7
-  completed_phases: 0
-  total_plans: 23
-  completed_plans: 8
-  percent: 75
+  total_phases: 6
+  completed_phases: 5
+  total_plans: 19
+  completed_plans: 14
+  percent: 74
 ---
 
 # System State
@@ -30,18 +30,18 @@ progress:
 **Phase:** 7 - Error Handling & Resilience
 **Plan:** 04 (Plan 4 of 4)
 **Status:** In progress - Error Handling UI implemented via GlobalKey in Providers
-**Progress:** ▓▓▓▓▓▓▓▒░░ 75% (Phase 7 Plan 3 complete)
+**Progress:** [██████████░░░░░░░░░░] 74%
 
-**Last activity:** 2026-03-03 — Completed Plan 07-03: Provider Global Error Migration
+**Last activity:** 2026-03-03 — Updated progress metrics after feature scope changes
 
 ## Performance Metrics
 
 **v1.1 Milestone Progress:**
-- Phases complete: 0/5
-- Plans complete: 3/? (07-01, 07-02, 07-03 complete)
+- Phases complete: 5/6 (Phase 4 - Premium Paywall kaldırıldı)
+- Plans complete: 14/19 (07-01, 07-02, 07-03 tamam; 07-04 devam ediyor)
 - Requirements covered: 8/8 (100%)
 - P0 requirements: 3 (FR1, FR2, FR3)
-- P1 requirements: 3 (FR4, FR5, FR6)
+- P1 requirements: 2 (FR4, FR5) - FR6 kaldırıldı (Premium)
 - P2 requirements: 2 (NFR1, NFR2)
 
 **Phase 7 Metrics:**
@@ -51,14 +51,16 @@ progress:
 | 07-02 | 84s  | 3 | 12| 3 | 2026-03-03 |
 | 07-03 |   -  | 2 | 7 | 1 | 2026-03-03 |
 | Phase 07 P03 | 600 | 2 tasks | 7 files |
+| Phase 07 P04 | 465 | 4 tasks | 10 files |
 
 ## Accumulated Context
 
 ### Session History
-- v1.0 milestone completed (Phases 1-6: Foundation, Auth, Core UI, Premium Features, UX/Autofill, Recovery/Backup)
+- v1.0 milestone completed (Phases 1-6: Foundation, Auth, Core UI, ~~Premium Features~~, UX/Autofill, Recovery/Backup)
+- **NOT:** Phase 4 (Premium Paywall) ve Phase 6'daki Seed Phrase Recovery kaldırıldı
 - Comprehensive code analysis revealed production readiness gaps
 - v1.1 milestone initiated: error handling, testing, monitoring, i18n, optimization, security
-- Requirements defined with 8 requirements (3 P0, 3 P1, 2 P2)
+- Requirements defined with 8 requirements (3 P0, 2 P1, 2 P2) - Premium requirement kaldırıldı
 - Roadmap created with 5 phases (7-11) balancing priority and logical grouping
 
 ### Key Decisions (v1.1)
@@ -91,7 +93,20 @@ progress:
 - [x] Integrate error handling into services (07-02)
 - [x] Add provider error handling (07-02)
 - [x] Identify services needing error coverage (completed: 12/12 services integrated)
+- [x] Fix `flutter analyze` issues (5 info remaining, 0 errors)
+- [x] Fix `flutter test` failures (9/9 tests passing)
+- [x] Fix compile blockers in `main.dart`
+- [x] Make `ErrorHandler.handleGlobalError` binding-safe
+- [x] Fix widget test bootstrap with `TranslationProvider`
+- [x] Localizasyonları genişlet (i18n + banka logoları)
+- [x] Animasyonları genişlet (motion tokens + transitions)
+- [x] Kod kalitesi ve hata gidermeleri
+- [x] ~~Implement Seed Phrase Recovery~~ (KALDIRILDI)
+- [x] ~~Premium satın alma entegrasyonu~~ (KALDIRILDI)
 - [ ] Set up Sentry and Firebase Analytics accounts
+- [ ] Remove raw `$e` from user-visible snackbars
+- [ ] Complete FR3 telemetry wiring (Ghost Mode, event mapping)
+- [ ] Add responsive layout support
 
 ### Blockers
 None

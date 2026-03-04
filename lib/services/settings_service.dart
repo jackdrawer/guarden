@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../errors/app_errors.dart';
+import '../i18n/strings.g.dart';
 
 class SettingsService {
   static const String _boxName = 'settings_box';
@@ -10,16 +11,22 @@ class SettingsService {
   static const String _bankRotationNotifKey = 'bankRotationNotif';
   static const String _subscriptionNotifKey = 'subscriptionNotif';
   static const String _securityNotifKey = 'securityNotif';
+  static const String _biometricLoginKey = 'biometricLogin';
+  static const String _biometricConfirmKey = 'biometricConfirm';
 
   late Box _box;
+  bool _initialized = false;
 
   Future<void> init() async {
+    if (_initialized && _box.isOpen) return;
     try {
       _box = await Hive.openBox(_boxName);
+      _initialized = true;
     } catch (e) {
+      _initialized = false;
       throw DatabaseError(
         'Settings box init failed: $e',
-        userMessage: "Couldn't load settings.",
+        userMessage: t.settings.errors.db_open_failed,
         canRetry: true,
       );
     }
@@ -39,7 +46,7 @@ class SettingsService {
     } catch (e) {
       throw DatabaseError(
         'Could not save setting',
-        userMessage: "Couldn't save settings.",
+        userMessage: t.settings.errors.setting_update_failed,
       );
     }
   }
@@ -66,7 +73,7 @@ class SettingsService {
     } catch (e) {
       throw DatabaseError(
         'Could not save setting',
-        userMessage: "Couldn't save settings.",
+        userMessage: t.settings.errors.setting_update_failed,
       );
     }
   }
@@ -81,7 +88,7 @@ class SettingsService {
     } catch (e) {
       throw DatabaseError(
         'Could not save setting',
-        userMessage: "Couldn't save settings.",
+        userMessage: t.settings.errors.setting_update_failed,
       );
     }
   }
@@ -101,7 +108,7 @@ class SettingsService {
     } catch (e) {
       throw DatabaseError(
         'Could not save setting',
-        userMessage: "Couldn't save settings.",
+        userMessage: t.settings.errors.setting_update_failed,
       );
     }
   }
@@ -120,7 +127,7 @@ class SettingsService {
     } catch (e) {
       throw DatabaseError(
         'Could not save setting',
-        userMessage: "Couldn't save settings.",
+        userMessage: t.settings.errors.setting_update_failed,
       );
     }
   }
@@ -139,7 +146,7 @@ class SettingsService {
     } catch (e) {
       throw DatabaseError(
         'Could not save setting',
-        userMessage: "Couldn't save settings.",
+        userMessage: t.settings.errors.setting_update_failed,
       );
     }
   }
@@ -158,7 +165,45 @@ class SettingsService {
     } catch (e) {
       throw DatabaseError(
         'Could not save setting',
-        userMessage: "Couldn't save settings.",
+        userMessage: t.settings.errors.setting_update_failed,
+      );
+    }
+  }
+
+  bool get biometricLogin {
+    try {
+      return _box.get(_biometricLoginKey, defaultValue: false);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> setBiometricLogin(bool value) async {
+    try {
+      await _box.put(_biometricLoginKey, value);
+    } catch (e) {
+      throw DatabaseError(
+        'Could not save setting',
+        userMessage: t.settings.errors.setting_update_failed,
+      );
+    }
+  }
+
+  bool get biometricConfirm {
+    try {
+      return _box.get(_biometricConfirmKey, defaultValue: false);
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> setBiometricConfirm(bool value) async {
+    try {
+      await _box.put(_biometricConfirmKey, value);
+    } catch (e) {
+      throw DatabaseError(
+        'Could not save setting',
+        userMessage: t.settings.errors.setting_update_failed,
       );
     }
   }
@@ -169,7 +214,7 @@ class SettingsService {
     } catch (e) {
       throw DatabaseError(
         'Could not clear settings',
-        userMessage: "Couldn't save settings.",
+        userMessage: t.settings.errors.setting_update_failed,
       );
     }
   }

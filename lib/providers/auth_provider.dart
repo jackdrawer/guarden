@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/crypto_service.dart';
 import '../services/database_service.dart';
 import '../services/secure_storage_service.dart';
+import '../services/biometric_service.dart';
 import '../widgets/error_handler.dart';
 
 enum AuthState { initial, firstTime, unauthenticated, authenticated }
@@ -35,20 +36,11 @@ class AuthNotifier extends AutoDisposeAsyncNotifier<AuthState> {
     }
   }
 
-  Future<void> setupVault(String masterPassword, {String? seedPhrase}) async {
+  Future<void> setupVault(String masterPassword) async {
     try {
       final dbKey = _generateVaultKey();
       await _secureStorage.saveEncryptionKey(dbKey);
       await _persistMasterPasswordVerifier(masterPassword);
-
-      final normalizedSeed = _normalizeSeedPhrase(seedPhrase ?? '');
-      if (normalizedSeed.isNotEmpty) {
-        final recoveryBundle = await _buildRecoveryBundle(
-          normalizedSeed,
-          dbKey,
-        );
-        await _secureStorage.saveRecoveryBundle(recoveryBundle);
-      }
 
       await _databaseService.initDatabase();
       state = AsyncValue.data(AuthState.authenticated);
@@ -107,50 +99,6 @@ class AuthNotifier extends AutoDisposeAsyncNotifier<AuthState> {
     }
   }
 
-  Future<bool> recoverWithSeedPhrase(
-    String seedPhrase,
-    String newMasterPassword,
-  ) async {
-    if (newMasterPassword.length < 8) {
-      return false;
-    }
-
-    final normalizedSeed = _normalizeSeedPhrase(seedPhrase);
-    if (normalizedSeed.isEmpty) {
-      return false;
-    }
-
-    try {
-      final bundle = await _secureStorage.getRecoveryBundle();
-      if (bundle == null || bundle.isEmpty) {
-        return false;
-      }
-
-      final recoveredDbKey = await _extractVaultKeyFromBundle(
-        bundle: bundle,
-        normalizedSeed: normalizedSeed,
-      );
-      if (recoveredDbKey == null || recoveredDbKey.isEmpty) {
-        return false;
-      }
-
-      try {
-        await _databaseService.closeDatabase();
-      } catch (_) {}
-
-      await _secureStorage.saveEncryptionKey(recoveredDbKey);
-      await _persistMasterPasswordVerifier(newMasterPassword);
-
-      await _databaseService.initDatabase();
-      state = AsyncValue.data(AuthState.authenticated);
-      return true;
-    } catch (e, stackTrace) {
-      state = AsyncValue.error(e, stackTrace);
-      ErrorHandler.handleGlobalError(e);
-      return false;
-    }
-  }
-
   Future<void> lock() async {
     try {
       await _databaseService.closeDatabase();
@@ -161,9 +109,14 @@ class AuthNotifier extends AutoDisposeAsyncNotifier<AuthState> {
     }
   }
 
+  /// Resets the vault after panic mode activation.
+  ///
+  /// WARNING: This permanently DELETES all vault data including bank accounts,
+  /// subscriptions, and web passwords. This is a destructive operation intended
+  /// for emergency situations (e.g., duress/compromised device).
   Future<void> resetAfterPanic() async {
     try {
-      await _databaseService.closeDatabase();
+      await _databaseService.deleteDatabase();
       state = AsyncValue.data(AuthState.firstTime);
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
@@ -181,52 +134,6 @@ class AuthNotifier extends AutoDisposeAsyncNotifier<AuthState> {
     final verifier = base64Encode(keyBytes);
 
     await _secureStorage.saveMasterPasswordVerifier(verifier);
-  }
-
-  Future<String> _buildRecoveryBundle(
-    String normalizedSeed,
-    String dbKey,
-  ) async {
-    final crypto = CryptoService();
-    final recoverySalt = _generateSalt();
-    final recoveryKey = await crypto.deriveKey(normalizedSeed, recoverySalt);
-
-    final payload = jsonEncode({'dbKey': dbKey});
-    final encryptedPayload = await crypto.encryptText(payload, recoveryKey);
-
-    return jsonEncode({
-      'v': 1,
-      'salt': recoverySalt,
-      'cipher': encryptedPayload,
-    });
-  }
-
-  Future<String?> _extractVaultKeyFromBundle({
-    required String bundle,
-    required String normalizedSeed,
-  }) async {
-    final crypto = CryptoService();
-    final decodedBundle = jsonDecode(bundle);
-    if (decodedBundle is! Map<String, dynamic>) return null;
-
-    final salt = decodedBundle['salt'];
-    final cipher = decodedBundle['cipher'];
-    if (salt is! String || cipher is! String) return null;
-
-    final recoveryKey = await crypto.deriveKey(normalizedSeed, salt);
-    final payload = await crypto.decryptText(cipher, recoveryKey);
-
-    final decodedPayload = jsonDecode(payload);
-    if (decodedPayload is! Map<String, dynamic>) return null;
-
-    final dbKey = decodedPayload['dbKey'];
-    if (dbKey is! String || dbKey.isEmpty) return null;
-
-    return dbKey;
-  }
-
-  String _normalizeSeedPhrase(String seedPhrase) {
-    return seedPhrase.trim().toLowerCase().split(RegExp(r'\s+')).join(' ');
   }
 
   String _generateSalt({int length = 32}) {
@@ -252,6 +159,30 @@ class AuthNotifier extends AutoDisposeAsyncNotifier<AuthState> {
     }
 
     return diff == 0;
+  }
+
+  Future<bool> canUseBiometrics() async {
+    final service = BiometricService();
+    return await service.canCheckBiometrics();
+  }
+
+  Future<bool> biometricUnlock() async {
+    final service = BiometricService();
+    try {
+      final success = await service.authenticate(
+        reason: 'Authenticate to access your vault',
+      );
+      if (success) {
+        await _databaseService.initDatabase();
+        state = AsyncValue.data(AuthState.authenticated);
+        return true;
+      }
+      return false;
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+      ErrorHandler.handleGlobalError(e);
+      return false;
+    }
   }
 }
 

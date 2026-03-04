@@ -23,7 +23,9 @@ class MonitoringService {
       return;
     }
 
-    debugPrint('✅ MonitoringService ready (${kDebugMode ? 'development' : 'production'})');
+    debugPrint(
+      '✅ MonitoringService ready (${kDebugMode ? 'development' : 'production'})',
+    );
   }
 
   /// Scrub PII from Sentry events before sending.

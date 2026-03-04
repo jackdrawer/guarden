@@ -10,6 +10,7 @@ import '../models/web_password.dart';
 import 'crypto_service.dart';
 import 'database_service.dart';
 import '../errors/app_errors.dart';
+import '../i18n/strings.g.dart';
 
 final backupServiceProvider = Provider<BackupService>((ref) {
   final database = ref.read(databaseProvider);
@@ -121,18 +122,18 @@ class BackupService {
     try {
       final decoded = jsonDecode(encryptedBackup);
       if (decoded is! Map<String, dynamic>) {
-        throw BackupException('Backup formati gecersiz.');
+        throw BackupException('Invalid backup format.');
       }
       envelope = decoded;
     } on FormatException {
-      throw BackupException('Backup JSON formati gecersiz.');
+      throw BackupException('Invalid backup JSON format.');
     }
 
     final format = envelope['format'];
     final salt = envelope['salt'];
     final cipher = envelope['cipher'];
     if (format != 'guarden-backup-v1' || salt is! String || cipher is! String) {
-      throw BackupException('Backup envelope alanlari eksik veya hatali.');
+      throw BackupException('Backup envelope fields are missing or invalid.');
     }
 
     late final String payloadJson;
@@ -140,18 +141,20 @@ class BackupService {
       final key = await _cryptoService.deriveKey(passphrase, salt);
       payloadJson = await _cryptoService.decryptText(cipher, key);
     } catch (_) {
-      throw BackupException('Backup sifresi hatali veya dosya bozuk.');
+      throw BackupException(
+        'Backup password is incorrect or file is corrupted.',
+      );
     }
 
     late final Map<String, dynamic> payload;
     try {
       final decoded = jsonDecode(payloadJson);
       if (decoded is! Map<String, dynamic>) {
-        throw BackupException('Payload formati gecersiz.');
+        throw BackupException('Invalid payload format.');
       }
       payload = decoded;
     } on FormatException {
-      throw BackupException('Payload JSON formati gecersiz.');
+      throw BackupException('Invalid payload JSON format.');
     }
 
     final version = payload['version'];
@@ -162,12 +165,12 @@ class BackupService {
     if (version is! int ||
         dataRaw is! Map<String, dynamic> ||
         checksum is! String) {
-      throw BackupException('Payload alanlari eksik veya hatali.');
+      throw BackupException('Payload fields are missing or invalid.');
     }
 
     final expectedChecksum = _sha256Hex(jsonEncode(dataRaw));
     if (!_constantTimeEquals(checksum, expectedChecksum)) {
-      throw BackupException('Checksum dogrulamasi basarisiz.');
+      throw BackupException('Checksum verification failed.');
     }
 
     DateTime createdAt;
@@ -189,7 +192,7 @@ class BackupService {
     try {
       final database = _databaseService;
       if (database == null) {
-        throw BackupException('Veritabani servisi bagli degil.');
+        throw BackupException('Database service is not attached.');
       }
 
       final data = <String, dynamic>{
@@ -211,7 +214,7 @@ class BackupService {
       }
       throw DatabaseError(
         'Backup export failed: $e',
-        userMessage: "Couldn't export backup. Check storage space.",
+        userMessage: t.settings.errors.backup_export_failed,
       );
     }
   }
@@ -223,7 +226,7 @@ class BackupService {
     try {
       final database = _databaseService;
       if (database == null) {
-        throw BackupException('Veritabani servisi bagli degil.');
+        throw BackupException('Database service is not attached.');
       }
 
       final decoded = await decryptBackupData(
@@ -257,7 +260,7 @@ class BackupService {
       if (e is BackupException || e is CryptoError) rethrow;
       throw DatabaseError(
         'Backup dry run failed: $e',
-        userMessage: "Couldn't read backup data.",
+        userMessage: t.settings.errors.backup_read_failed,
       );
     }
   }
@@ -337,7 +340,7 @@ class BackupService {
       if (e is BackupException || e is CryptoError) rethrow;
       throw DatabaseError(
         'Backup restore failed: $e',
-        userMessage: "Couldn't restore backup. File may be corrupted.",
+        userMessage: t.settings.errors.backup_read_failed,
       );
     }
   }
@@ -463,7 +466,7 @@ class BackupService {
 
   void _validatePassphrase(String passphrase) {
     if (passphrase.trim().length < 8) {
-      throw BackupException('Backup sifresi en az 8 karakter olmali.');
+      throw BackupException('Backup password must be at least 8 characters.');
     }
   }
 

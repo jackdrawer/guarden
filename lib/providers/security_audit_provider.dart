@@ -55,13 +55,13 @@ final securityAuditProvider = FutureProvider.autoDispose<SecurityAuditReport>((
   final websAsync = ref.watch(webPasswordProvider);
   final subsAsync = ref.watch(subscriptionProvider);
 
-  final banks = banksAsync.value ?? [];
-  final webs = websAsync.value ?? [];
-  final subs = subsAsync.value ?? [];
+  final banks = banksAsync.valueOrNull ?? [];
+  final webs = websAsync.valueOrNull ?? [];
+  final subs = subsAsync.valueOrNull ?? [];
 
   final base64Key = await secureStorage.getEncryptionKey();
   if (base64Key == null || base64Key.isEmpty) {
-    throw Exception('Sifreleme anahtari bulunamadi.');
+    throw Exception('Encryption key not found.');
   }
 
   var totalChecked = 0;
@@ -104,7 +104,7 @@ final securityAuditProvider = FutureProvider.autoDispose<SecurityAuditReport>((
             id: id,
             title: title,
             type: type,
-            reason: 'Zayif sifre',
+            reason: 'Weak password',
           ),
         );
       }
@@ -116,11 +116,11 @@ final securityAuditProvider = FutureProvider.autoDispose<SecurityAuditReport>((
   }
 
   for (final item in banks) {
-    await processItem(item.encryptedPassword, item.id, item.bankName, 'Banka');
+    await processItem(item.encryptedPassword, item.id, item.bankName, 'bank');
   }
 
   for (final item in webs) {
-    await processItem(item.encryptedPassword, item.id, item.title, 'Web');
+    await processItem(item.encryptedPassword, item.id, item.title, 'web');
   }
 
   for (final item in subs) {
@@ -128,7 +128,7 @@ final securityAuditProvider = FutureProvider.autoDispose<SecurityAuditReport>((
       item.encryptedPassword,
       item.id,
       item.serviceName,
-      'Abonelik',
+      'subscription',
     );
   }
 
@@ -142,14 +142,14 @@ final securityAuditProvider = FutureProvider.autoDispose<SecurityAuditReport>((
     for (final item in items) {
       final existingIndex = vulnerableItems.indexWhere((v) => v.id == item.id);
       if (existingIndex != -1) {
-        vulnerableItems[existingIndex].reason += ', tekrar ediyor';
+        vulnerableItems[existingIndex].reason += ', reused';
       } else {
         vulnerableItems.add(
           VulnerableItem(
             id: item.id,
             title: item.title,
             type: item.type,
-            reason: 'Tekrar eden parola',
+            reason: 'Reused password',
           ),
         );
       }
@@ -157,7 +157,7 @@ final securityAuditProvider = FutureProvider.autoDispose<SecurityAuditReport>((
   });
 
   final weakCount = vulnerableItems
-      .where((v) => v.reason.toLowerCase().contains('zayif'))
+      .where((v) => v.reason.toLowerCase().contains('weak'))
       .length;
 
   final penalty = (weakCount * 10) + (duplicatedCount * 5);
