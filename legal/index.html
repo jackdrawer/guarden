@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guarden PW Manager - Legal Documents</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #2E7D32;
+        }
+
+        .links {
+            margin-top: 30px;
+        }
+
+        .links a {
+            display: block;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f5f5f5;
+            text-decoration: none;
+            color: #333;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+
+        .links a:hover {
+            background: #e8f5e9;
+        }
+
+        .lang {
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+    <script>
+        // Simple language detection
+        var userLang = navigator.language || navigator.userLanguage;
+        if (userLang.startsWith('tr')) {
+            window.location.href = 'privacy-policy.html';
+        } else {
+            window.location.href = 'privacy-policy-en.html';
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Guarden PW Manager</h1>
+    <p>Legal Documents</p>
+    <div class="links">
+        <a href="privacy-policy.html">🇹🇷 Gizlilik Politikası</a>
+        <a href="privacy-policy-en.html">🇬🇧 Privacy Policy</a>
+    </div>
+    <noscript>
+        <p>Please select your language:</p>
+        <div class="links">
+            <a href="privacy-policy.html">🇹🇷 Turkish</a>
+            <a href="privacy-policy-en.html">🇬🇧 English</a>
+        </div>
+    </noscript>
+</body>
+
+</html>
