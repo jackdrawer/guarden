@@ -1,2 +1,2 @@
 # guarden
-Guarden Premium Pravicy
+Guarden Premium Privacy
