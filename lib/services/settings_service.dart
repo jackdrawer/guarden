@@ -16,6 +16,12 @@ class SettingsService {
   static const String _biometricConfirmKey = 'biometricConfirm';
   static const String _themeModeKey = 'themeMode';
   static const String _lastMasterPasswordEntryKey = 'lastMasterPasswordEntry';
+  static const String _languageCodeKey = 'languageCode';
+  static const String _defaultCurrencyKey = 'defaultCurrency';
+  static const String _autoBackupFrequencyKey = 'autoBackupFrequency';
+  static const String _lastSyncTimestampKey = 'lastSyncTimestamp';
+  static const String _backupOnlyOnWifiKey = 'backupOnlyOnWifi';
+  static const String _backupOnlyWhileChargingKey = 'backupOnlyWhileCharging';
 
   late Box _box;
   bool _initialized = false;
@@ -262,6 +268,93 @@ class SettingsService {
         userMessage: t.settings.errors.setting_update_failed,
       );
     }
+  }
+
+  // Language setting (null = follow device locale)
+  String? get languageCode {
+    try {
+      return _box.get(_languageCodeKey) as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> setLanguageCode(String? code) async {
+    try {
+      if (code == null) {
+        await _box.delete(_languageCodeKey);
+      } else {
+        await _box.put(_languageCodeKey, code);
+      }
+    } catch (e) {
+      throw DatabaseError(
+        'Could not save language setting',
+        userMessage: t.settings.errors.setting_update_failed,
+      );
+    }
+  }
+
+  // Default currency preference (null = use locale default)
+  String? get defaultCurrency {
+    try {
+      return _box.get(_defaultCurrencyKey) as String?;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> setDefaultCurrency(String? code) async {
+    try {
+      if (code == null) {
+        await _box.delete(_defaultCurrencyKey);
+      } else {
+        await _box.put(_defaultCurrencyKey, code);
+      }
+    } catch (e) {
+      throw DatabaseError(
+        'Could not save currency setting',
+        userMessage: t.settings.errors.setting_update_failed,
+      );
+    }
+  }
+
+  // Phase 13: Auto-Backup settings
+  String get autoBackupFrequency {
+    return _box.get(_autoBackupFrequencyKey, defaultValue: 'off');
+  }
+
+  String getAutoBackupFrequency() {
+    return _box.get(_autoBackupFrequencyKey, defaultValue: 'off');
+  }
+
+  Future<void> setAutoBackupFrequency(String frequency) async {
+    await _box.put(_autoBackupFrequencyKey, frequency);
+  }
+
+  DateTime? get lastSyncTimestamp {
+    final val = _box.get(_lastSyncTimestampKey);
+    if (val == null) return null;
+    return DateTime.tryParse(val.toString());
+  }
+
+  Future<void> setLastSyncTimestamp(DateTime timestamp) async {
+    await _box.put(_lastSyncTimestampKey, timestamp.toIso8601String());
+  }
+
+  bool get backupOnlyOnWifi {
+    return _box.get(_backupOnlyOnWifiKey, defaultValue: true);
+  }
+
+  Future<void> setBackupOnlyOnWifi(bool value) async {
+    await _box.put(_backupOnlyOnWifiKey, value);
+  }
+
+  bool get backupOnlyWhileCharging {
+    return _box.get(_backupOnlyWhileChargingKey, defaultValue: false);
+  }
+
+  Future<void> setBackupOnlyWhileCharging(bool value) async {
+    await _box.put(_backupOnlyWhileChargingKey, value);
   }
 }
 

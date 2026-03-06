@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
@@ -15,6 +16,8 @@ import '../../widgets/neumorphic/neumorphic_button.dart';
 import '../../widgets/neumorphic/neumorphic_input.dart';
 import '../../widgets/neumorphic/neumorphic_typeahead.dart';
 import '../../widgets/password_generator_dialog.dart';
+import '../../utils/currency_utils.dart';
+import '../../widgets/category/category_widgets.dart';
 
 class SubscriptionFormScreen extends ConsumerStatefulWidget {
   final String? subscriptionId;
@@ -37,6 +40,9 @@ class _SubscriptionFormScreenState
   bool _travelProtected = false;
   bool _isLoadingExisting = false;
   String _selectedLogoUrl = '';
+  String? _selectedCurrency;
+  String _billingCycle = 'monthly'; // 'monthly' or 'yearly'
+  String? _selectedCategory;
   DateTime _nextBillingDate = DateTime.now().add(const Duration(days: 30));
 
   bool get _isEditMode => widget.subscriptionId != null;
@@ -46,6 +52,8 @@ class _SubscriptionFormScreenState
     super.initState();
     if (_isEditMode) {
       Future.microtask(_loadExistingValues);
+    } else {
+      _selectedCurrency = CurrencyUtils.getDefaultCurrency();
     }
   }
 
@@ -84,6 +92,9 @@ class _SubscriptionFormScreenState
     _emailController.text = existing.emailOrUsername;
     _costController.text = existing.monthlyCost.toStringAsFixed(2);
     _selectedLogoUrl = existing.url;
+    _selectedCurrency = existing.currency;
+    _billingCycle = existing.billingCycle;
+    _selectedCategory = existing.category;
     _nextBillingDate = existing.nextBillingDate;
     final settings = ref.read(settingsProvider).valueOrNull;
     _travelProtected =
@@ -149,6 +160,13 @@ class _SubscriptionFormScreenState
 
     final cost = double.tryParse(costText.replaceAll(',', '.')) ?? 0.0;
 
+    if (cost > 10000000) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(t.subscription_form.save_failed)));
+      return;
+    }
+
     try {
       final base64Key = await secureStorage.getEncryptionKey();
       if (base64Key == null) throw Exception('Encryption key not found.');
@@ -177,9 +195,11 @@ class _SubscriptionFormScreenState
         emailOrUsername: _emailController.text.trim(),
         encryptedPassword: encPassword,
         monthlyCost: cost,
-        currency: existing?.currency ?? 'TRY',
+        currency: _selectedCurrency ?? 'TRY',
         nextBillingDate: _nextBillingDate,
         createdAt: existing?.createdAt ?? DateTime.now(),
+        billingCycle: _billingCycle,
+        category: _selectedCategory ?? '',
       );
 
       if (_isEditMode) {
@@ -247,13 +267,206 @@ class _SubscriptionFormScreenState
                           },
                         ),
                         const SizedBox(height: 16),
-                        NeumorphicInput(
-                          label: t.subscription_form.monthly_cost_label,
-                          controller: _costController,
-                          hintText: t.subscription_form.monthly_cost_hint,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    t.subscription_form.currency_label,
+                                    style: TextStyle(
+                                      color: AppColors.of(context).textPrimary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.of(context).background,
+                                      borderRadius: BorderRadius.circular(16),
+                                      boxShadow: AppColors.of(
+                                        context,
+                                      ).neumorphicShadows,
+                                    ),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<String>(
+                                        value: _selectedCurrency,
+                                        isExpanded: true,
+                                        dropdownColor: AppColors.of(
+                                          context,
+                                        ).background,
+                                        items:
+                                            CurrencyUtils.getCommonCurrencies()
+                                                .map(
+                                                  (c) => DropdownMenuItem(
+                                                    value: c,
+                                                    child: Text(
+                                                      c,
+                                                      style: TextStyle(
+                                                        color: AppColors.of(
+                                                          context,
+                                                        ).textPrimary,
+                                                        fontSize: 14,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                )
+                                                .toList(),
+                                        onChanged: (val) {
+                                          if (val != null) {
+                                            setState(
+                                              () => _selectedCurrency = val,
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              flex: 2,
+                              child: NeumorphicInput(
+                                label: t.subscription_form.monthly_cost_label,
+                                controller: _costController,
+                                hintText: t.subscription_form.monthly_cost_hint,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d*[.,]?\d{0,2}'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          t.subscription_form.billing_cycle_label,
+                          style: TextStyle(
+                            color: AppColors.of(context).textPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
                           ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () =>
+                                    setState(() => _billingCycle = 'monthly'),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _billingCycle == 'monthly'
+                                        ? AppColors.of(
+                                            context,
+                                          ).primaryAccent.withValues(alpha: 0.1)
+                                        : AppColors.of(context).background,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: _billingCycle == 'monthly'
+                                          ? AppColors.of(context).primaryAccent
+                                          : AppColors.of(
+                                              context,
+                                            ).shadowDark.withValues(alpha: 0.2),
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      t.subscription_form.monthly,
+                                      style: TextStyle(
+                                        color: _billingCycle == 'monthly'
+                                            ? AppColors.of(
+                                                context,
+                                              ).primaryAccent
+                                            : AppColors.of(
+                                                context,
+                                              ).textSecondary,
+                                        fontWeight: _billingCycle == 'monthly'
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: () =>
+                                    setState(() => _billingCycle = 'yearly'),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: _billingCycle == 'yearly'
+                                        ? AppColors.of(
+                                            context,
+                                          ).primaryAccent.withValues(alpha: 0.1)
+                                        : AppColors.of(context).background,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: _billingCycle == 'yearly'
+                                          ? AppColors.of(context).primaryAccent
+                                          : AppColors.of(
+                                              context,
+                                            ).shadowDark.withValues(alpha: 0.2),
+                                    ),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      t.subscription_form.yearly,
+                                      style: TextStyle(
+                                        color: _billingCycle == 'yearly'
+                                            ? AppColors.of(
+                                                context,
+                                              ).primaryAccent
+                                            : AppColors.of(
+                                                context,
+                                              ).textSecondary,
+                                        fontWeight: _billingCycle == 'yearly'
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          t.general.category,
+                          style: TextStyle(
+                            color: AppColors.of(context).textPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        CategorySelector(
+                          selected: _selectedCategory,
+                          onChanged: (cat) =>
+                              setState(() => _selectedCategory = cat),
                         ),
                         const SizedBox(height: 16),
                         Text(

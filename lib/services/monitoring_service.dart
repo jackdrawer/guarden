@@ -71,7 +71,7 @@ class MonitoringService {
         }
         return ex;
       }).toList();
-      scrubbed = scrubbed.copyWith(exceptions: scrubbedExceptions);
+      scrubbed.exceptions = scrubbedExceptions;
     }
 
     // Scrub breadcrumb data maps
@@ -84,7 +84,7 @@ class MonitoringService {
           timestamp: bc.timestamp,
         );
       }).toList();
-      scrubbed = scrubbed.copyWith(breadcrumbs: scrubbedBreadcrumbs);
+      scrubbed.breadcrumbs = scrubbedBreadcrumbs;
     }
 
     return scrubbed;
@@ -94,26 +94,13 @@ class MonitoringService {
   static Map<String, dynamic>? _scrubMap(Map<String, dynamic>? data) {
     if (data == null) return null;
 
-    final sensitiveKeywords = [
-      'password',
-      'seed',
-      'key',
-      'pin',
-      'secret',
-      'token',
-      'cipher',
-      'mnemonic',
-      'private',
-      'credential',
-    ];
-
     final scrubbed = <String, dynamic>{};
 
     data.forEach((key, value) {
       final lowerKey = key.toLowerCase();
 
-      // Check if key contains sensitive keywords
-      final containsSensitive = sensitiveKeywords.any(
+      // Check if key contains sensitive keywords (using shared static list)
+      final containsSensitive = _sensitiveKeywords.any(
         (keyword) => lowerKey.contains(keyword),
       );
 

@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../services/secure_storage_service.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/lottie_animation_widget.dart';
 import '../../widgets/neumorphic/neumorphic_button.dart';
 import '../../widgets/neumorphic/neumorphic_container.dart';
 import '../../widgets/neumorphic/neumorphic_textfield.dart';
@@ -113,12 +114,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Guarden',
+                    t.general.app_name,
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 22,
                       fontWeight: FontWeight.bold,
                       color: AppColors.of(context).textPrimary,
-                      letterSpacing: 2.0,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -159,15 +159,80 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                         ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   Tooltip(
                     message: t.auth_login.biometric_tooltip,
-                    child: TextButton(
+                    child: NeumorphicButton(
                       onPressed: _handleBiometricLogin,
-                      child: Text(
-                        t.auth_login.use_biometrics,
-                        style: TextStyle(
-                          color: AppColors.of(context).textSecondary,
+                      semanticLabel: t.auth_login.use_biometrics,
+                      padding: EdgeInsets.zero,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 14,
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 68,
+                              height: 68,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                gradient: RadialGradient(
+                                  colors: [
+                                    AppColors.of(
+                                      context,
+                                    ).primaryAccent.withValues(alpha: 0.22),
+                                    AppColors.of(
+                                      context,
+                                    ).primaryAccent.withValues(alpha: 0.05),
+                                  ],
+                                ),
+                                border: Border.all(
+                                  color: AppColors.of(
+                                    context,
+                                  ).primaryAccent.withValues(alpha: 0.28),
+                                ),
+                              ),
+                              child: LottieAnimationWidget(
+                                animation: GuardenAnimation.fingerprintScan,
+                                size: 46,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    t.auth_login.use_biometrics,
+                                    style: TextStyle(
+                                      color: AppColors.of(context).textPrimary,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    t.auth_login.biometric_tooltip,
+                                    style: TextStyle(
+                                      color: AppColors.of(
+                                        context,
+                                      ).textSecondary,
+                                      fontSize: 12,
+                                      height: 1.35,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 18,
+                              color: AppColors.of(context).primaryAccent,
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -214,6 +279,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
             onPressed: () async {
               Navigator.of(ctx).pop();
+              final confirmed = await _showResetConfirmationDialog(context);
+              if (!confirmed) return;
               await ref.read(secureStorageProvider).deleteVaultAccessData();
               await ref.read(authProvider.notifier).resetAfterPanic();
             },
@@ -222,5 +289,48 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ],
       ),
     );
+  }
+
+  Future<bool> _showResetConfirmationDialog(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            backgroundColor: AppColors.of(ctx).surface,
+            title: Row(
+              children: [
+                Icon(
+                  Icons.warning_rounded,
+                  color: AppColors.of(ctx).error,
+                  size: 22,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    t.auth_login.reset_device_confirm_title,
+                    style: TextStyle(color: AppColors.of(ctx).error),
+                  ),
+                ),
+              ],
+            ),
+            content: Text(
+              t.auth_login.reset_device_confirm_body,
+              style: TextStyle(color: AppColors.of(ctx).textSecondary),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(false),
+                child: Text(t.general.cancel),
+              ),
+              FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.of(ctx).error,
+                ),
+                onPressed: () => Navigator.of(ctx).pop(true),
+                child: Text(t.auth_login.reset_device_confirm_action),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 }

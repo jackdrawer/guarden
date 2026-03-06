@@ -81,7 +81,8 @@ class CompromisedAccountsScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
+        error: (e, st) =>
+            Center(child: Text(t.settings.error_with_message(message: '$e'))),
       ),
     );
   }
@@ -94,7 +95,7 @@ class CompromisedAccountsScreen extends ConsumerWidget {
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
-          // Sol BaÅŸ Harf GrafiÄŸi
+          // Sol Baş Harf Grafiği
           Container(
             width: 48,
             height: 48,
@@ -164,15 +165,18 @@ class CompromisedAccountsScreen extends ConsumerWidget {
           ElevatedButton(
             onPressed: () {
               HapticFeedback.lightImpact();
+              switch (item.type) {
+                case 'bank':
+                  context.push('/edit-bank/${item.id}');
+                  break;
+                case 'subscription':
+                  context.push('/edit-subscription/${item.id}');
+                  break;
+                case 'web':
+                  context.push('/edit-web-password/${item.id}');
+                  break;
+              }
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.of(context).error,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 4,
-            ),
             child: Text(t.compromised_accounts.fix_now),
           ),
         ],

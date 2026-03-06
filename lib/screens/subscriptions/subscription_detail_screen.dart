@@ -13,6 +13,8 @@ import '../../services/secure_storage_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/neumorphic/neumorphic_button.dart';
 import '../../widgets/neumorphic/neumorphic_container.dart';
+import '../../widgets/lottie_animation_widget.dart';
+import '../../utils/currency_utils.dart';
 
 class SubscriptionDetailScreen extends ConsumerStatefulWidget {
   final String subscriptionId;
@@ -295,7 +297,7 @@ class _SubscriptionDetailScreenState
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '${sub.currency} ${sub.monthlyCost.toStringAsFixed(2)}',
+                    '${CurrencyUtils.formatAmount(sub.monthlyCost, sub.currency)} ${sub.billingCycle == 'yearly' ? t.subscription_form.yearly : t.subscriptions.per_month}',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
@@ -360,11 +362,22 @@ class _SubscriptionDetailScreenState
                         color: AppColors.of(context).textPrimary,
                       ),
                     ),
-                    content: Text(
-                      t.general.confirm_delete_message,
-                      style: TextStyle(
-                        color: AppColors.of(context).textSecondary,
-                      ),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const LottieAnimationWidget(
+                          animation: GuardenAnimation.deleteItem,
+                          size: 100,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          t.general.confirm_delete_message,
+                          style: TextStyle(
+                            color: AppColors.of(context).textSecondary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
                     actions: [
                       TextButton(

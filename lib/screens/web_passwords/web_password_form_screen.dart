@@ -13,6 +13,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/neumorphic/neumorphic_button.dart';
 import '../../widgets/neumorphic/neumorphic_input.dart';
 import '../../widgets/password_generator_dialog.dart';
+import '../../widgets/category/category_widgets.dart';
 
 class WebPasswordFormScreen extends ConsumerStatefulWidget {
   final String? webPasswordId;
@@ -34,6 +35,7 @@ class _WebPasswordFormScreenState extends ConsumerState<WebPasswordFormScreen> {
   bool _obscurePassword = true;
   bool _travelProtected = false;
   bool _isLoadingExisting = false;
+  String? _selectedCategory;
 
   bool get _isEditMode => widget.webPasswordId != null;
 
@@ -80,6 +82,7 @@ class _WebPasswordFormScreenState extends ConsumerState<WebPasswordFormScreen> {
     _titleController.text = existing.title;
     _urlController.text = existing.url;
     _usernameController.text = existing.username;
+    _selectedCategory = existing.category;
     final settings = ref.read(settingsProvider).valueOrNull;
     _travelProtected =
         settings?.travelProtectedIds.contains(existing.id) ?? false;
@@ -157,6 +160,7 @@ class _WebPasswordFormScreenState extends ConsumerState<WebPasswordFormScreen> {
         encryptedNotes: encNotes,
         createdAt: existing?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
+        category: _selectedCategory ?? '',
       );
 
       if (_isEditMode) {
@@ -281,6 +285,20 @@ class _WebPasswordFormScreenState extends ConsumerState<WebPasswordFormScreen> {
                           controller: _notesController,
                           hintText: t.web_form.notes_hint,
                           maxLines: 3,
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          t.general.category,
+                          style: TextStyle(
+                            color: AppColors.of(context).textPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        CategorySelector(
+                          selected: _selectedCategory,
+                          onChanged: (cat) =>
+                              setState(() => _selectedCategory = cat),
                         ),
                         const SizedBox(height: 24),
                         Container(

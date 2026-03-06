@@ -5,7 +5,7 @@ import '../../i18n/strings.g.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/motion_tokens.dart';
 
-class NeumorphicBottomNav extends StatelessWidget {
+class NeumorphicBottomNav extends StatefulWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
@@ -15,12 +15,56 @@ class NeumorphicBottomNav extends StatelessWidget {
     required this.onTap,
   });
 
+  @override
+  State<NeumorphicBottomNav> createState() => _NeumorphicBottomNavState();
+}
+
+class _NeumorphicBottomNavState extends State<NeumorphicBottomNav>
+    with TickerProviderStateMixin {
+  late List<AnimationController> _bounceControllers;
+  late List<Animation<double>> _bounceAnimations;
+
   static const List<IconData> _itemIcons = <IconData>[
     Icons.dashboard_rounded,
     Icons.account_balance_rounded,
     Icons.subscriptions_rounded,
     Icons.language_rounded,
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _bounceControllers = List.generate(4, (i) {
+      return AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 400),
+      );
+    });
+    _bounceAnimations = _bounceControllers.map((c) {
+      return TweenSequence<double>([
+        TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.25), weight: 30),
+        TweenSequenceItem(tween: Tween(begin: 1.25, end: 0.9), weight: 30),
+        TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.08), weight: 25),
+        TweenSequenceItem(tween: Tween(begin: 1.08, end: 1.0), weight: 15),
+      ]).animate(CurvedAnimation(parent: c, curve: Curves.easeOut));
+    }).toList();
+  }
+
+  @override
+  void didUpdateWidget(covariant NeumorphicBottomNav oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.currentIndex != widget.currentIndex) {
+      _bounceControllers[widget.currentIndex].forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final c in _bounceControllers) {
+      c.dispose();
+    }
+    super.dispose();
+  }
 
   Duration _duration(BuildContext context, Duration base) {
     final disable = MediaQuery.maybeOf(context)?.disableAnimations ?? false;
@@ -63,7 +107,7 @@ class NeumorphicBottomNav extends StatelessWidget {
                     AnimatedPositioned(
                       duration: indicatorDuration,
                       curve: MotionCurves.standard,
-                      left: segmentWidth * currentIndex + 4,
+                      left: segmentWidth * widget.currentIndex + 4,
                       top: 4,
                       width: segmentWidth - 8,
                       height: constraints.maxHeight - 8,
@@ -96,8 +140,10 @@ class NeumorphicBottomNav extends StatelessWidget {
                             icon: _itemIcons[index],
                             label: labels[index],
                             index: index,
-                            isSelected: currentIndex == index,
+                            isSelected: widget.currentIndex == index,
                             duration: itemDuration,
+                            bounceAnimation: _bounceAnimations[index],
+                            bounceController: _bounceControllers[index],
                           ),
                         );
                       }),
@@ -119,6 +165,8 @@ class NeumorphicBottomNav extends StatelessWidget {
     required int index,
     required bool isSelected,
     required Duration duration,
+    required Animation<double> bounceAnimation,
+    required AnimationController bounceController,
   }) {
     final activeColor = AppColors.of(context).primaryAccent;
     final idleColor = AppColors.of(context).textSecondary;
@@ -131,7 +179,7 @@ class NeumorphicBottomNav extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         onTap: () {
           HapticFeedback.lightImpact();
-          onTap(index);
+          widget.onTap(index);
         },
         child: Center(
           child: AnimatedSlide(
@@ -141,10 +189,14 @@ class NeumorphicBottomNav extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                AnimatedScale(
-                  duration: duration,
-                  curve: MotionCurves.standard,
-                  scale: isSelected ? 1.08 : 1.0,
+                AnimatedBuilder(
+                  animation: bounceAnimation,
+                  builder: (context, child) {
+                    return Transform.scale(
+                      scale: isSelected ? bounceAnimation.value : 1.0,
+                      child: child,
+                    );
+                  },
                   child: Icon(
                     icon,
                     size: 24,

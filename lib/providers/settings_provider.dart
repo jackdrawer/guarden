@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/settings_service.dart';
+import '../services/backup_task_runner.dart';
 import '../widgets/error_handler.dart';
 import '../errors/app_errors.dart';
 import '../i18n/strings.g.dart';
@@ -18,6 +20,14 @@ class SettingsState {
   final bool biometricConfirm;
   final AppThemeMode themeMode;
   final DateTime? lastMasterPasswordEntry;
+  // Phase 12: Locale & Currency preferences
+  final String? languageCode; // null = system locale
+  final String? defaultCurrency; // null = locale-derived
+  // Phase 13: Auto-Backup
+  final String autoBackupFrequency; // 'off', 'daily', 'weekly', 'monthly'
+  final DateTime? lastSyncTimestamp;
+  final bool backupOnlyOnWifi;
+  final bool backupOnlyWhileCharging;
 
   SettingsState({
     required this.isTravelModeActive,
@@ -31,6 +41,12 @@ class SettingsState {
     this.biometricConfirm = false,
     this.themeMode = AppThemeMode.system,
     this.lastMasterPasswordEntry,
+    this.languageCode,
+    this.defaultCurrency,
+    this.autoBackupFrequency = 'off',
+    this.lastSyncTimestamp,
+    this.backupOnlyOnWifi = true,
+    this.backupOnlyWhileCharging = false,
   });
 
   factory SettingsState.initial() => SettingsState(
@@ -52,6 +68,12 @@ class SettingsState {
     bool? biometricConfirm,
     AppThemeMode? themeMode,
     DateTime? lastMasterPasswordEntry,
+    Object? languageCode = _sentinel,
+    Object? defaultCurrency = _sentinel,
+    String? autoBackupFrequency,
+    DateTime? lastSyncTimestamp,
+    bool? backupOnlyOnWifi,
+    bool? backupOnlyWhileCharging,
   }) {
     return SettingsState(
       isTravelModeActive: isTravelModeActive ?? this.isTravelModeActive,
@@ -66,9 +88,23 @@ class SettingsState {
       themeMode: themeMode ?? this.themeMode,
       lastMasterPasswordEntry:
           lastMasterPasswordEntry ?? this.lastMasterPasswordEntry,
+      languageCode: languageCode == _sentinel
+          ? this.languageCode
+          : languageCode as String?,
+      defaultCurrency: defaultCurrency == _sentinel
+          ? this.defaultCurrency
+          : defaultCurrency as String?,
+      autoBackupFrequency: autoBackupFrequency ?? this.autoBackupFrequency,
+      lastSyncTimestamp: lastSyncTimestamp ?? this.lastSyncTimestamp,
+      backupOnlyOnWifi: backupOnlyOnWifi ?? this.backupOnlyOnWifi,
+      backupOnlyWhileCharging:
+          backupOnlyWhileCharging ?? this.backupOnlyWhileCharging,
     );
   }
 }
+
+/// Sentinel for nullable copyWith fields.
+const _sentinel = Object();
 
 class SettingsNotifier extends AsyncNotifier<SettingsState> {
   late final SettingsService _settingsService;
@@ -82,6 +118,10 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
   Future<SettingsState> _init() async {
     try {
       await _settingsService.init();
+      final lang = _settingsService.languageCode;
+      if (lang != null) {
+        LocaleSettings.setLocaleRaw(lang);
+      }
       return SettingsState(
         isTravelModeActive: _settingsService.isTravelModeActive,
         travelProtectedIds: _settingsService.travelProtectedIds,
@@ -93,10 +133,15 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
         biometricConfirm: _settingsService.biometricConfirm,
         themeMode: _settingsService.themeMode,
         lastMasterPasswordEntry: _settingsService.lastMasterPasswordEntry,
+        languageCode: _settingsService.languageCode,
+        defaultCurrency: _settingsService.defaultCurrency,
+        autoBackupFrequency: _settingsService.autoBackupFrequency,
+        lastSyncTimestamp: _settingsService.lastSyncTimestamp,
+        backupOnlyOnWifi: _settingsService.backupOnlyOnWifi,
+        backupOnlyWhileCharging: _settingsService.backupOnlyWhileCharging,
         isInitialized: true,
       );
     } catch (e, stackTrace) {
-      // Defer state update to avoid modifying provider during build phase
       WidgetsBinding.instance.addPostFrameCallback((_) {
         state = AsyncValue.error(e, stackTrace);
         ErrorHandler.handleGlobalError(
@@ -110,25 +155,29 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     }
   }
 
-  Future<void> toggleTravelMode() async {
+  Future<void> setTravelModeActive(bool value) async {
     try {
       await _settingsService.init();
       final currentValue = state.value;
       if (currentValue == null) return;
 
-      final newValue = !currentValue.isTravelModeActive;
-      await _settingsService.setTravelModeActive(newValue);
-      state = AsyncValue.data(
-        currentValue.copyWith(isTravelModeActive: newValue),
-      );
+      await _settingsService.setTravelModeActive(value);
+      state = AsyncValue.data(currentValue.copyWith(isTravelModeActive: value));
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
         DatabaseError(
-          'Failed to toggle travel mode: $e',
+          'Failed to set travel mode: $e',
           userMessage: t.settings.errors.travel_mode_failed,
         ),
       );
+    }
+  }
+
+  Future<void> toggleTravelMode() async {
+    final cur = state.value;
+    if (cur != null) {
+      await setTravelModeActive(!cur.isTravelModeActive);
     }
   }
 
@@ -163,7 +212,6 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
     return state.value?.travelProtectedIds.contains(id) ?? false;
   }
 
-  /// Generic toggle helper — DRY wrapper for all boolean settings.
   Future<void> _toggleSetting({
     required Future<void> Function(bool) setter,
     required SettingsState Function(SettingsState, bool) updater,
@@ -260,7 +308,6 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
         );
       }
     } catch (e) {
-      // Sadece arka plan logu tut, kullanıcıya göstermeye gerek yok (kritik değil)
       debugPrint('Failed to update lastMasterPasswordEntry: $e');
     }
   }
@@ -282,8 +329,109 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       );
     }
   }
+
+  Future<void> setLanguageCode(String? code) async {
+    try {
+      await _settingsService.init();
+      await _settingsService.setLanguageCode(code);
+      if (code != null) {
+        LocaleSettings.setLocaleRaw(code);
+      } else {
+        LocaleSettings.useDeviceLocale();
+      }
+      final currentValue = state.value;
+      if (currentValue != null) {
+        state = AsyncValue.data(currentValue.copyWith(languageCode: code));
+      }
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+      ErrorHandler.handleGlobalError(
+        DatabaseError(
+          'Failed to set language: $e',
+          userMessage: t.settings.errors.setting_update_failed,
+        ),
+      );
+    }
+  }
+
+  Future<void> setDefaultCurrency(String? code) async {
+    try {
+      await _settingsService.init();
+      await _settingsService.setDefaultCurrency(code);
+      final currentValue = state.value;
+      if (currentValue != null) {
+        state = AsyncValue.data(currentValue.copyWith(defaultCurrency: code));
+      }
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+      ErrorHandler.handleGlobalError(
+        DatabaseError(
+          'Failed to set default currency: $e',
+          userMessage: t.settings.errors.setting_update_failed,
+        ),
+      );
+    }
+  }
+
+  Future<void> setAutoBackupFrequency(String frequency) async {
+    await _settingsService.init();
+    await _settingsService.setAutoBackupFrequency(frequency);
+    final currentValue = state.value;
+    if (currentValue != null) {
+      state = AsyncValue.data(
+        currentValue.copyWith(autoBackupFrequency: frequency),
+      );
+      await _rescheduleBackup();
+    }
+  }
+
+  Future<void> setLastSyncTimestamp(DateTime dt) async {
+    try {
+      await _settingsService.init();
+      await _settingsService.setLastSyncTimestamp(dt);
+      final currentValue = state.value;
+      if (currentValue != null) {
+        state = AsyncValue.data(currentValue.copyWith(lastSyncTimestamp: dt));
+      }
+    } catch (e) {
+      debugPrint('Failed to set lastSyncTimestamp: $e');
+    }
+  }
+
+  Future<void> toggleBackupOnlyOnWifi(bool value) async {
+    await _settingsService.init();
+    await _settingsService.setBackupOnlyOnWifi(value);
+    final currentValue = state.value;
+    if (currentValue != null) {
+      state = AsyncValue.data(currentValue.copyWith(backupOnlyOnWifi: value));
+      await _rescheduleBackup();
+    }
+  }
+
+  Future<void> toggleBackupOnlyWhileCharging(bool value) async {
+    await _settingsService.init();
+    await _settingsService.setBackupOnlyWhileCharging(value);
+    final currentValue = state.value;
+    if (currentValue != null) {
+      state = AsyncValue.data(
+        currentValue.copyWith(backupOnlyWhileCharging: value),
+      );
+      await _rescheduleBackup();
+    }
+  }
+
+  Future<void> _rescheduleBackup() async {
+    final s = state.value;
+    if (s != null && !kIsWeb) {
+      await BackupTaskRunner.schedulePeriodicBackup(
+        s.autoBackupFrequency,
+        wifiOnly: s.backupOnlyOnWifi,
+        chargingOnly: s.backupOnlyWhileCharging,
+      );
+    }
+  }
 }
 
 final settingsProvider = AsyncNotifierProvider<SettingsNotifier, SettingsState>(
-  SettingsNotifier.new,
+  () => SettingsNotifier(),
 );

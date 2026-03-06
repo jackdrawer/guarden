@@ -1,6 +1,7 @@
 // dart:io kaldirildi
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../i18n/strings.g.dart';
 import '../errors/app_errors.dart';
 import '../services/telemetry_service.dart';
 import 'error_snackbar.dart';
@@ -130,7 +131,7 @@ class ErrorHandler {
 
     return AppError(
       exception.toString(),
-      userMessage: 'Something went wrong. Please try again.',
+      userMessage: t.settings.errors.generic,
     );
   }
 }

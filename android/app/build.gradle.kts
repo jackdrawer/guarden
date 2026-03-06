@@ -1,5 +1,6 @@
 import java.io.FileInputStream
 import java.util.Properties
+import org.gradle.api.GradleException
 
 plugins {
     id("com.android.application")
@@ -14,6 +15,21 @@ val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
+val releaseSigningKeys = listOf(
+    "keyAlias",
+    "keyPassword",
+    "storeFile",
+    "storePassword",
+)
+
+val missingReleaseSigningKeys = releaseSigningKeys.filter { key ->
+    (keystoreProperties[key] as String?)?.isBlank() != false
+}
+
+val isReleaseTaskRequested = gradle.startParameter.taskNames.any { taskName ->
+    taskName.contains("release", ignoreCase = true)
 }
 
 android {
@@ -52,7 +68,25 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            if (keystorePropertiesFile.exists() && missingReleaseSigningKeys.isEmpty()) {
+                signingConfig = signingConfigs.getByName("release")
+            } else if (isReleaseTaskRequested) {
+                val missingInputs = buildList {
+                    if (!keystorePropertiesFile.exists()) {
+                        add("android/key.properties")
+                    }
+                    addAll(missingReleaseSigningKeys)
+                }.joinToString(", ")
+                throw GradleException(
+                    "Release signing is not configured. Missing: $missingInputs. " +
+                        "Add a valid android/key.properties before running a release build."
+                )
+            }
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }

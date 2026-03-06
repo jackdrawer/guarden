@@ -9,6 +9,7 @@ import '../providers/settings_provider.dart';
 import '../services/notification_service.dart';
 import '../theme/app_colors.dart';
 import '../widgets/animated_tab_fab.dart';
+import '../widgets/lottie_animation_widget.dart';
 import '../widgets/neumorphic/neumorphic_bottom_nav.dart';
 import 'dashboard/dashboard_tab.dart';
 import 'bank_accounts/bank_accounts_tab.dart';
@@ -73,6 +74,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Icons.security_rounded,
                 size: 48,
                 color: AppColors.of(context).primaryAccent,
+              ),
+              const SizedBox(height: 8),
+              const LottieAnimationWidget(
+                animation: GuardenAnimation.shieldSecure,
+                size: 72,
+                repeat: false,
               ),
               const SizedBox(height: 16),
               ClipRRect(
@@ -287,7 +294,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  final List<Widget> _tabs = [
+  static const List<Widget> _tabs = [
     DashboardTab(),
     BankAccountsTab(),
     SubscriptionsTab(),
@@ -340,11 +347,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
             const SizedBox(width: 10),
-            Text(
-              'Guarden',
-              style: TextStyle(
-                color: AppColors.of(context).textPrimary,
-                fontWeight: FontWeight.bold,
+            Flexible(
+              child: Text(
+                t.general.app_short_name,
+                style: TextStyle(
+                  color: AppColors.of(context).textPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/crypto_service.dart';
 import '../services/secure_storage_service.dart';
+import 'package:crypto/crypto.dart';
+import 'dart:convert';
 import 'bank_account_provider.dart';
 import 'subscription_provider.dart';
 import 'web_password_provider.dart';
@@ -40,9 +42,9 @@ class _DecryptedItem {
   final String id;
   final String title;
   final String type;
-  final String plaintext;
+  final String hash;
 
-  _DecryptedItem(this.id, this.title, this.type, this.plaintext);
+  _DecryptedItem(this.id, this.title, this.type, this.hash);
 }
 
 final securityAuditProvider = FutureProvider.autoDispose<SecurityAuditReport>((
@@ -97,7 +99,10 @@ final securityAuditProvider = FutureProvider.autoDispose<SecurityAuditReport>((
         isWeak = true;
       }
 
-      final item = _DecryptedItem(id, title, type, decrypted);
+      final hashBytes = sha256.convert(utf8.encode(decrypted)).bytes;
+      final hashBase64 = base64Encode(hashBytes);
+
+      final item = _DecryptedItem(id, title, type, hashBase64);
       if (isWeak) {
         vulnerableItems.add(
           VulnerableItem(
@@ -109,7 +114,9 @@ final securityAuditProvider = FutureProvider.autoDispose<SecurityAuditReport>((
         );
       }
 
-      passwordGroups.putIfAbsent(decrypted, () => <_DecryptedItem>[]).add(item);
+      passwordGroups
+          .putIfAbsent(hashBase64, () => <_DecryptedItem>[])
+          .add(item);
     } catch (_) {
       // Ignore single item decrypt failures during audit.
     }

@@ -5,31 +5,34 @@ part 'bank_account.g.dart';
 @HiveType(typeId: 0)
 class BankAccount extends HiveObject {
   @HiveField(0)
-  String id;
+  final String id;
 
   @HiveField(1)
-  String bankName;
+  final String bankName;
 
   @HiveField(2)
-  String url; // Logo fetch için veya net bankacılığı URL'si
+  final String url; // Logo fetch için veya net bankacılığı URL'si
 
   @HiveField(3)
-  String accountName;
+  final String accountName;
 
   @HiveField(4)
-  String encryptedPassword;
+  final String encryptedPassword;
 
   @HiveField(5)
-  String encryptedNotes;
+  final String encryptedNotes;
 
   @HiveField(6)
-  int periodMonths; // Şifre rotasyon süresi: 1, 3, 6, 9, 12 vs.
+  final int periodMonths; // Şifre rotasyon süresi: 1, 3, 6, 9, 12 vs.
 
   @HiveField(7)
-  DateTime lastChangedAt; // Son değiştirilme tarihi
+  final DateTime lastChangedAt; // Son değiştirilme tarihi
 
   @HiveField(8)
-  DateTime createdAt;
+  final DateTime createdAt;
+
+  @HiveField(9)
+  final String category;
 
   BankAccount({
     required this.id,
@@ -41,5 +44,30 @@ class BankAccount extends HiveObject {
     this.periodMonths = 6,
     required this.lastChangedAt,
     required this.createdAt,
+    this.category = '',
   });
+
+  BankAccount copyWith({
+    String? bankName,
+    String? url,
+    String? accountName,
+    String? encryptedPassword,
+    String? encryptedNotes,
+    int? periodMonths,
+    DateTime? lastChangedAt,
+    String? category,
+  }) {
+    return BankAccount(
+      id: id,
+      bankName: bankName ?? this.bankName,
+      url: url ?? this.url,
+      accountName: accountName ?? this.accountName,
+      encryptedPassword: encryptedPassword ?? this.encryptedPassword,
+      encryptedNotes: encryptedNotes ?? this.encryptedNotes,
+      periodMonths: periodMonths ?? this.periodMonths,
+      lastChangedAt: lastChangedAt ?? this.lastChangedAt,
+      createdAt: createdAt,
+      category: category ?? this.category,
+    );
+  }
 }

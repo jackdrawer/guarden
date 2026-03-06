@@ -26,13 +26,15 @@ class SubscriptionAdapter extends TypeAdapter<Subscription> {
       currency: fields[6] as String,
       nextBillingDate: fields[7] as DateTime,
       createdAt: fields[8] as DateTime,
+      billingCycle: fields[9] as String,
+      category: fields[10] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, Subscription obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -50,7 +52,11 @@ class SubscriptionAdapter extends TypeAdapter<Subscription> {
       ..writeByte(7)
       ..write(obj.nextBillingDate)
       ..writeByte(8)
-      ..write(obj.createdAt);
+      ..write(obj.createdAt)
+      ..writeByte(9)
+      ..write(obj.billingCycle)
+      ..writeByte(10)
+      ..write(obj.category);
   }
 
   @override

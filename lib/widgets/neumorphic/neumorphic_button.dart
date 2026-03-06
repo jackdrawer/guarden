@@ -83,6 +83,8 @@ class _NeumorphicButtonState extends State<NeumorphicButton> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return Semantics(
       button: true,
       label: widget.semanticLabel,
@@ -106,28 +108,107 @@ class _NeumorphicButtonState extends State<NeumorphicButton> {
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
             margin: widget.margin,
-            padding: widget.padding,
             decoration: BoxDecoration(
-              color: AppColors.of(context).background,
+              color: colors.background,
               borderRadius: BorderRadius.circular(widget.borderRadius),
               boxShadow: _isPressed || widget.isFlat
                   ? null
-                  : AppColors.of(context).neumorphicShadows,
+                  : colors.neumorphicShadows,
               border: Border.all(
                 color: _isFocused || _isHovered
-                    ? AppColors.of(context).primaryAccent.withValues(alpha: 0.5)
-                    : (_isPressed
-                          ? AppColors.of(
-                              context,
-                            ).shadowDark.withValues(alpha: 0.2)
-                          : Colors.transparent),
+                    ? colors.primaryAccent.withValues(alpha: 0.5)
+                    : Colors.transparent,
                 width: 1.5,
               ),
             ),
-            child: Center(child: widget.child),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(widget.borderRadius),
+              child: Stack(
+                children: [
+                  if (_isPressed)
+                    Positioned.fill(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(
+                            widget.borderRadius,
+                          ),
+                        ),
+                        child: CustomPaint(
+                          painter: _InnerShadowPainter(
+                            shadowColor: colors.shadowDark.withValues(
+                              alpha: 0.5,
+                            ),
+                            lightShadowColor: colors.shadowLight.withValues(
+                              alpha: 0.5,
+                            ),
+                            borderRadius: widget.borderRadius,
+                          ),
+                        ),
+                      ),
+                    ),
+                  Padding(
+                    padding: widget.padding,
+                    child: Center(child: widget.child),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+class _InnerShadowPainter extends CustomPainter {
+  final Color shadowColor;
+  final Color lightShadowColor;
+  final double borderRadius;
+
+  _InnerShadowPainter({
+    required this.shadowColor,
+    required this.lightShadowColor,
+    required this.borderRadius,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final rRect = RRect.fromRectAndRadius(rect, Radius.circular(borderRadius));
+
+    // Dark Inner Shadow (Top-Left)
+    final darkPaint = Paint()
+      ..color = shadowColor
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+
+    final darkPath = Path()
+      ..fillType = PathFillType.evenOdd
+      ..addRRect(rRect)
+      ..addRect(Rect.fromLTWH(-20, -20, size.width + 40, size.height + 40));
+
+    canvas.save();
+    canvas.clipRRect(rRect);
+    canvas.translate(4, 4);
+    canvas.drawPath(darkPath, darkPaint);
+    canvas.restore();
+
+    // Light Inner Shadow (Bottom-Right)
+    final lightPaint = Paint()
+      ..color = lightShadowColor
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+
+    final lightPath = Path()
+      ..fillType = PathFillType.evenOdd
+      ..addRRect(rRect)
+      ..addRect(Rect.fromLTWH(-20, -20, size.width + 40, size.height + 40));
+
+    canvas.save();
+    canvas.clipRRect(rRect);
+    canvas.translate(-4, -4);
+    canvas.drawPath(lightPath, lightPaint);
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

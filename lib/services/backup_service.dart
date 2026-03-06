@@ -17,7 +17,12 @@ import '../utils/crypto_utils.dart';
 final backupServiceProvider = Provider<BackupService>((ref) {
   final database = ref.read(databaseProvider);
   final crypto = ref.read(cryptoProvider);
-  return BackupService(databaseService: database, cryptoService: crypto);
+  final secureStorage = ref.read(secureStorageProvider);
+  return BackupService(
+    databaseService: database,
+    cryptoService: crypto,
+    secureStorage: secureStorage,
+  );
 });
 
 class BackupException extends AppError {
@@ -84,6 +89,10 @@ class BackupMetadata {
   final DateTime createdAt;
   final int sizeInBytes;
   final String? location; // 'local', 'drive', etc.
+  final String? driveFileId; // Google Drive file ID
+  final String? driveRevisionId; // Google Drive revision ID
+  final DateTime? driveLastModified; // Last modified time from Drive
+  final DateTime? lastDownloadedFromDrive; // Last time downloaded from Drive
 
   BackupMetadata({
     required this.id,
@@ -91,6 +100,10 @@ class BackupMetadata {
     required this.createdAt,
     required this.sizeInBytes,
     this.location,
+    this.driveFileId,
+    this.driveRevisionId,
+    this.driveLastModified,
+    this.lastDownloadedFromDrive,
   });
 
   Map<String, dynamic> toJson() => {
@@ -99,6 +112,12 @@ class BackupMetadata {
     'created_at': createdAt.toUtc().toIso8601String(),
     'size_in_bytes': sizeInBytes,
     'location': location,
+    'drive_file_id': driveFileId,
+    'drive_revision_id': driveRevisionId,
+    'drive_last_modified': driveLastModified?.toUtc().toIso8601String(),
+    'last_downloaded_from_drive': lastDownloadedFromDrive
+        ?.toUtc()
+        .toIso8601String(),
   };
 
   factory BackupMetadata.fromJson(Map<String, dynamic> json) => BackupMetadata(
@@ -107,6 +126,14 @@ class BackupMetadata {
     createdAt: DateTime.parse(json['created_at'] as String).toLocal(),
     sizeInBytes: json['size_in_bytes'] as int,
     location: json['location'] as String?,
+    driveFileId: json['drive_file_id'] as String?,
+    driveRevisionId: json['drive_revision_id'] as String?,
+    driveLastModified: json['drive_last_modified'] != null
+        ? DateTime.parse(json['drive_last_modified'] as String).toLocal()
+        : null,
+    lastDownloadedFromDrive: json['last_downloaded_from_drive'] != null
+        ? DateTime.parse(json['last_downloaded_from_drive'] as String).toLocal()
+        : null,
   );
 }
 
@@ -173,6 +200,33 @@ class BackupService {
       await _secureStorage.writeValue(_backupMetadataKey, jsonEncode(jsonList));
     } catch (e) {
       debugPrint('Failed to delete backup metadata: $e');
+    }
+  }
+
+  /// Updates the lastDownloadedFromDrive timestamp for a backup
+  Future<void> updateBackupDownloadTimestamp(String id) async {
+    try {
+      final existing = await getBackupList();
+      final updatedList = existing.map((b) {
+        if (b.id == id) {
+          return BackupMetadata(
+            id: b.id,
+            name: b.name,
+            createdAt: b.createdAt,
+            sizeInBytes: b.sizeInBytes,
+            location: b.location,
+            driveFileId: b.driveFileId,
+            driveRevisionId: b.driveRevisionId,
+            driveLastModified: b.driveLastModified,
+            lastDownloadedFromDrive: DateTime.now(),
+          );
+        }
+        return b;
+      }).toList();
+      final jsonList = updatedList.map((b) => b.toJson()).toList();
+      await _secureStorage.writeValue(_backupMetadataKey, jsonEncode(jsonList));
+    } catch (e) {
+      debugPrint('Failed to update backup download timestamp: $e');
     }
   }
 

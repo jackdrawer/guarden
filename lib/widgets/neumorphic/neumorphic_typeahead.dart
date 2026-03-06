@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
+import '../../i18n/strings.g.dart';
 import '../../theme/app_colors.dart';
 import '../../constants/brand_database.dart';
 import '../../services/logo_service.dart';
@@ -169,7 +170,7 @@ class _NeumorphicTypeAheadState extends State<NeumorphicTypeAhead> {
               return Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Text(
-                  'Brand not found, you can enter it manually.',
+                  t.general.manual_entry_fallback,
                   style: TextStyle(
                     color: AppColors.of(
                       context,

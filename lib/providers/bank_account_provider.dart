@@ -12,6 +12,7 @@ class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
   late final DatabaseService _dbService = ref.read(databaseProvider);
 
   static const String _legacyTextRepairKey = 'legacy_text_repair_v1_done';
+  bool _migrationChecked = false;
 
   // Travel mode settings cached from build() to avoid watching all settings
   late bool _isTravelModeActive;
@@ -57,10 +58,13 @@ class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
   }
 
   void _repairLegacyText(List<BankAccount> items) {
+    if (_migrationChecked) return;
+
     // Check if migration already completed
     final isMigrationDone =
         _dbService.settingsBox.get(_legacyTextRepairKey) as bool?;
     if (isMigrationDone == true) {
+      _migrationChecked = true;
       return;
     }
 
@@ -73,13 +77,14 @@ class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
         continue;
       }
 
-      item.bankName = repairedName;
-      item.url = repairedUrl;
-      _dbService.bankAccountsBox.put(item.id, item);
+      final newItem = item.copyWith(bankName: repairedName, url: repairedUrl);
+
+      _dbService.bankAccountsBox.put(item.id, newItem);
     }
 
     // Mark migration as complete
     _dbService.settingsBox.put(_legacyTextRepairKey, true);
+    _migrationChecked = true;
   }
 
   void addBankAccount(BankAccount account) {

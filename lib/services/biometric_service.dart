@@ -4,6 +4,7 @@ import 'package:local_auth/error_codes.dart' as auth_error;
 import 'package:local_auth/local_auth.dart';
 
 import '../errors/app_errors.dart';
+import '../i18n/strings.g.dart';
 
 class BiometricService {
   final LocalAuthentication _auth = LocalAuthentication();
@@ -36,15 +37,12 @@ class BiometricService {
     }
   }
 
-  /// Prompts biometric authentication and returns auth result.
-  Future<bool> authenticate({
-    String reason = 'Please authenticate to access your vault',
-  }) async {
+  Future<bool> authenticate({String? reason}) async {
     if (kIsWeb) return false;
 
     try {
       return await _auth.authenticate(
-        localizedReason: reason,
+        localizedReason: reason ?? t.auth_login.biometric_tooltip,
         options: const AuthenticationOptions(
           useErrorDialogs: true,
           stickyAuth: true,

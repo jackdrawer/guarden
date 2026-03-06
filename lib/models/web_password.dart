@@ -5,28 +5,31 @@ part 'web_password.g.dart';
 @HiveType(typeId: 2)
 class WebPassword extends HiveObject {
   @HiveField(0)
-  String id;
+  final String id;
 
   @HiveField(1)
-  String title;
+  final String title;
 
   @HiveField(2)
-  String url;
+  final String url;
 
   @HiveField(3)
-  String username;
+  final String username;
 
   @HiveField(4)
-  String encryptedPassword;
+  final String encryptedPassword;
 
   @HiveField(5)
-  String encryptedNotes;
+  final String encryptedNotes;
 
   @HiveField(6)
-  DateTime createdAt;
+  final DateTime createdAt;
 
   @HiveField(7)
-  DateTime updatedAt;
+  final DateTime updatedAt;
+
+  @HiveField(8)
+  final String category;
 
   WebPassword({
     required this.id,
@@ -37,5 +40,28 @@ class WebPassword extends HiveObject {
     this.encryptedNotes = '',
     required this.createdAt,
     required this.updatedAt,
+    this.category = '',
   });
+
+  WebPassword copyWith({
+    String? title,
+    String? url,
+    String? username,
+    String? encryptedPassword,
+    String? encryptedNotes,
+    DateTime? updatedAt,
+    String? category,
+  }) {
+    return WebPassword(
+      id: id,
+      title: title ?? this.title,
+      url: url ?? this.url,
+      username: username ?? this.username,
+      encryptedPassword: encryptedPassword ?? this.encryptedPassword,
+      encryptedNotes: encryptedNotes ?? this.encryptedNotes,
+      createdAt: createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      category: category ?? this.category,
+    );
+  }
 }

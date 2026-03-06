@@ -1,122 +1,80 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Production Hardening
-current_phase: Phase 7 (Error Handling & Resilience)
-status: executing
-last_updated: "2026-03-03T23:12:00.000Z"
-last_activity: "2026-03-03 — Updated pending todos based on code analysis"
+milestone: v1.2
+milestone_name: Advanced Analytics & Experience
+current_phase: Phase 14 (Store Launch Readiness & Submission Hardening)
+status: planning
+last_updated: "2026-03-06T22:52:05.1379579+03:00"
+last_activity: "2026-03-06 - Added Phase 14 for store launch readiness and submission hardening"
 progress:
-  total_phases: 6
-  completed_phases: 5
-  total_plans: 19
-  completed_plans: 14
-  percent: 74
+  total_phases: 14
+  completed_phases: 13
+  total_plans: 27
+  completed_plans: 27
+  percent: 93
 ---
 
 # System State
-**Current Phase:** Phase 7 (Error Handling & Resilience)
-**Milestone:** v1.1 Production Hardening
-**Last updated:** 2026-03-03
+**Current Phase:** 14 - Store Launch Readiness & Submission Hardening
+**Milestone:** v1.2 Advanced Analytics & Experience
+**Last updated:** 2026-03-06
 
 ## Project Reference
 
-**Core Value:** Privacy-first offline password manager for Turkish market (bank accounts, subscriptions, web passwords) with freemium model
+**Core Value:** Privacy-first offline password manager for Turkish market (bank accounts, subscriptions, web passwords) with localized analytics and automated cloud safety.
 
-**Current Focus:** Production hardening - error handling, testing, monitoring, localization, and optimization for App Store/Play Store launch
+**Current Focus:** Planning and executing store launch blockers for Play Store and App Store submission.
 
 ## Current Position
 
-**Phase:** 7 - Error Handling & Resilience
-**Plan:** 04 (Plan 4 of 4)
-**Status:** In progress - Error Handling UI implemented via GlobalKey in Providers
-**Progress:** [██████████░░░░░░░░░░] 74%
+**Phase:** 14 - Store Launch Readiness & Submission Hardening
+**Status:** Planning - Launch blockers identified, plans not created yet.
+**Progress:** [##################--] 93%
 
-**Last activity:** 2026-03-03 — Updated progress metrics after feature scope changes
+**Last activity:** 2026-03-06 - Added Phase 14 to close store submission blockers across Android and iOS.
 
 ## Performance Metrics
 
-**v1.1 Milestone Progress:**
-- Phases complete: 5/6 (Phase 4 - Premium Paywall kaldırıldı)
-- Plans complete: 14/19 (07-01, 07-02, 07-03 tamam; 07-04 devam ediyor)
-- Requirements covered: 8/8 (100%)
-- P0 requirements: 3 (FR1, FR2, FR3)
-- P1 requirements: 2 (FR4, FR5) - FR6 kaldırıldı (Premium)
-- P2 requirements: 2 (NFR1, NFR2)
-
-**Phase 7 Metrics:**
-| Plan | Duration | Tasks | Files | Commits | Completed |
-|------|----------|-------|-------|---------|-----------|
-| 07-01 | 156s | 3 | 3 | 3 | 2026-03-03 |
-| 07-02 | 84s  | 3 | 12| 3 | 2026-03-03 |
-| 07-03 |   -  | 2 | 7 | 1 | 2026-03-03 |
-| Phase 07 P03 | 600 | 2 tasks | 7 files |
-| Phase 07 P04 | 465 | 4 tasks | 10 files |
+**Milestone Progress:**
+- Phases complete: 13/14 (93%)
+- Plans complete: 27/27 (100%)
+- Requirements covered: v1.2 complete, Phase 14 pending planning
 
 ## Accumulated Context
 
 ### Session History
-- v1.0 milestone completed (Phases 1-6: Foundation, Auth, Core UI, ~~Premium Features~~, UX/Autofill, Recovery/Backup)
-- **NOT:** Phase 4 (Premium Paywall) ve Phase 6'daki Seed Phrase Recovery kaldırıldı
-- Comprehensive code analysis revealed production readiness gaps
-- v1.1 milestone initiated: error handling, testing, monitoring, i18n, optimization, security
-- Requirements defined with 8 requirements (3 P0, 2 P1, 2 P2) - Premium requirement kaldırıldı
-- Roadmap created with 5 phases (7-11) balancing priority and logical grouping
+- v1.0 milestone completed (Phases 1-6)
+- v1.1 milestone completed (Phases 7-11)
+- v1.2 milestone completed (Phases 12-13):
+  - Visual analytics (pie charts for expenses)
+  - Full categorization across all modules
+  - Regional settings (language/currency selection)
+  - Auto-backup/restore with Google Drive background sync
 
-### Key Decisions (v1.1)
+### Key Decisions (v1.2)
 | Decision | Rationale | Date |
 |----------|-----------|------|
-| Group error handling + monitoring in Phase 7 | Both are resilience concerns, monitoring depends on proper error handling | 2026-03-03 |
-| Testing comes after error handling (Phase 8) | Tests should verify properly instrumented error states | 2026-03-03 |
-| Localization independent from testing (Phase 9) | Can proceed in parallel, no hard dependency | 2026-03-03 |
-| Optimization after testing + i18n (Phase 10) | Size optimization and memory fixes need stable test coverage and all strings extracted | 2026-03-03 |
-| Security last (Phase 11) | P2 priority, nice-to-have features | 2026-03-03 |
-| Use super parameters for error constructors | Modern Dart 2.17+ feature reduces boilerplate and improves readability | 2026-03-03 |
-| Auto-dismiss timing: 4s info, 6s errors with actions | Balances user attention with non-intrusive UX | 2026-03-03 |
-| Map common exception types to typed AppError | Automatic conversion reduces boilerplate in service/provider code | 2026-03-03 |
-| Network retry uses exponential backoff: 1s, 2s, 4s delays for 3 total attempts | Balances user experience with API rate limiting | 2026-03-03 |
-| Non-critical services (notifications, clipboard, lifecycle) log errors but don't throw | Convenience features shouldn't block core app functionality | 2026-03-03 |
-| Critical services (crypto, database, storage, biometric) throw typed errors for UI feedback | User needs clear error messages for critical operations | 2026-03-03 |
-| Use AutoDisposeAsyncNotifier for entity providers | Entity lists auto-dispose when not watched for memory efficiency | 2026-03-03 |
-| Use AsyncNotifier for singleton providers (premium, settings) | App-wide singletons persist across lifecycle | 2026-03-03 |
-| Extract AsyncValue.value with null-checks for cross-provider dependencies | Gracefully handles loading/error states during initialization | 2026-03-03 |
+| Integrated Workmanager for background tasks | Ensures reliable periodic backups even when app is closed | 2026-03-06 |
+| Google Drive AppData folder | Secure siloed storage for user backups inaccessible to other apps | 2026-03-06 |
+| 5-file retention policy | Balances safety with storage efficiency | 2026-03-06 |
+| Interactive pie charts | Provides better UX than simple lists for budget oversight | 2026-03-06 |
+| Locale-derived currencies | Automatically detects currency based on language/region while allowing override | 2026-03-06 |
+
+### Roadmap Evolution
+- Phase 14 added: Store Launch Readiness & Submission Hardening
 
 ### Known Issues
-- No active blockers
-- All v1.1 requirements mapped to phases
-- Coverage: 8/8 (100%)
+- Store launch blockers identified in release review: iOS bundle/sign-in metadata gaps, production ad IDs, release signing hygiene, and failing tests.
 
 ### TODOs
-- [x] Plan Phase 7 (Error Handling & Resilience)
-- [x] Define plans for FR1 (error handling) and FR3 (monitoring)
-- [x] Create error type system (07-01)
-- [x] Integrate error handling into services (07-02)
-- [x] Add provider error handling (07-02)
-- [x] Identify services needing error coverage (completed: 12/12 services integrated)
-- [x] Fix `flutter analyze` issues (5 info remaining, 0 errors)
-- [x] Fix `flutter test` failures (9/9 tests passing)
-- [x] Fix compile blockers in `main.dart`
-- [x] Make `ErrorHandler.handleGlobalError` binding-safe
-- [x] Fix widget test bootstrap with `TranslationProvider`
-- [x] Localizasyonları genişlet (i18n + banka logoları)
-- [x] Animasyonları genişlet (motion tokens + transitions)
-- [x] Kod kalitesi ve hata gidermeleri
-- [x] ~~Implement Seed Phrase Recovery~~ (KALDIRILDI)
-- [x] ~~Premium satın alma entegrasyonu~~ (KALDIRILDI)
-- [ ] Set up Sentry and Firebase Analytics accounts
-- [ ] Remove raw `$e` from user-visible snackbars
-- [ ] Complete FR3 telemetry wiring (Ghost Mode, event mapping)
-- [ ] Add responsive layout support
+- [x] Phase 12 Planning & Implementation
+- [x] Phase 13 Planning & Implementation
+- [x] Set up Sentry and Firebase Analytics integration
+- [x] Restore corrupted providers
+- [x] Complete telemetry wiring
+- [x] Final project sync (ROADMAP.md, STATE.md)
+- [ ] Plan Phase 14
+- [ ] Execute Phase 14 launch blockers
 
 ### Blockers
-None
-
-## Session Continuity
-
-**Next action:** Execute Plan 07-04 to integrate Sentry and Firebase Analytics with PII scrubbing.
-
-**Context for next agent:**
-- Plan 07-01, 07-02, and 07-03 complete: Robust global error handling implemented.
-- Added `scaffoldMessengerKey` in `main.dart` and intercepted provider methods globally without needing Widget contexts.
-- All 12 services and 6 providers are extremely resilient with visual indicators for faults.
-- Ready for telemetry to begin (Crashlytics, Sentry, Analytics).
+- Phase 14 planning and execution required before store submission.

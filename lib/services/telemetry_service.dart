@@ -6,16 +6,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class TelemetryService {
   final bool isDev;
+  final bool isEnabled;
 
   static final TelemetryService instance = TelemetryService._internal(
     isDev: kDebugMode,
+    isEnabled: const bool.fromEnvironment(
+      'ENABLE_TELEMETRY',
+      defaultValue: false,
+    ),
   );
 
-  TelemetryService._internal({this.isDev = kDebugMode});
+  TelemetryService._internal({
+    this.isDev = kDebugMode,
+    this.isEnabled = false,
+  });
 
   FirebaseAnalytics? _analytics;
 
   Future<void> init() async {
+    if (!isEnabled) {
+      debugPrint('Telemetry init skipped (ENABLE_TELEMETRY=false).');
+      return;
+    }
+
     // Sentry init is usually handled in main.dart via SentryFlutter.init
 
     // Firebase init
@@ -42,6 +55,10 @@ class TelemetryService {
   }
 
   Future<void> logEvent(String name, {Map<String, dynamic>? parameters}) async {
+    if (!isEnabled) {
+      return;
+    }
+
     if (isDev) {
       debugPrint('TELEMETRY EVENT: $name | $parameters');
       return;
@@ -58,6 +75,10 @@ class TelemetryService {
     dynamic exception, {
     StackTrace? stackTrace,
   }) async {
+    if (!isEnabled) {
+      return;
+    }
+
     if (isDev) {
       debugPrint('TELEMETRY ERROR: $exception');
       return;

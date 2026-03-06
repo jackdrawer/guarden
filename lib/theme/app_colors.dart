@@ -26,8 +26,30 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
   });
 
   @override
-  ThemeExtension<AppColorsExtension> copyWith() {
-    return this;
+  ThemeExtension<AppColorsExtension> copyWith({
+    Color? background,
+    Color? shadowLight,
+    Color? shadowDark,
+    Color? primaryAccent,
+    Color? textPrimary,
+    Color? textSecondary,
+    Color? error,
+    Color? success,
+    Color? surface,
+    List<BoxShadow>? neumorphicShadows,
+  }) {
+    return AppColorsExtension(
+      background: background ?? this.background,
+      shadowLight: shadowLight ?? this.shadowLight,
+      shadowDark: shadowDark ?? this.shadowDark,
+      primaryAccent: primaryAccent ?? this.primaryAccent,
+      textPrimary: textPrimary ?? this.textPrimary,
+      textSecondary: textSecondary ?? this.textSecondary,
+      error: error ?? this.error,
+      success: success ?? this.success,
+      surface: surface ?? this.surface,
+      neumorphicShadows: neumorphicShadows ?? this.neumorphicShadows,
+    );
   }
 
   @override

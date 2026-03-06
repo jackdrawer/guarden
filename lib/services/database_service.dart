@@ -23,17 +23,17 @@ class DatabaseService {
   static const String subscriptionsBoxName = 'subscriptions';
   static const String webPasswordsBoxName = 'web_passwords';
 
-  /// Hive'Ä± baÅŸlatÄ±r ve gÃ¼venli kutularÄ± (Boxes) aÃ§ar.
+  /// Hive'ı başlatır ve güvenli kutuları (Boxes) açar.
   ///
-  /// Not: Hive.initFlutter() main.dart'ta Ã§aÄŸrÄ±lÄ±r, burada tekrar Ã§aÄŸrÄ±lmaz.
+  /// Not: Hive.initFlutter() main.dart'ta çağrılır, burada tekrar çağrılmaz.
   Future<void> initDatabase() async {
     if (_isInitialized) return;
 
     try {
-      // Hive.initFlutter() main.dart'ta zaten Ã§aÄŸrÄ±ldÄ±
+      // Hive.initFlutter() main.dart'ta zaten çağrıldı
       // await Hive.initFlutter(); // KALDIRILDI - redundant
 
-      // Type Adapter kayÄ±tlarÄ± (Daha Ã¶nce kaydedilmemiÅŸse)
+      // Type Adapter kayıtları (Daha önce kaydedilmemişse)
       if (!Hive.isAdapterRegistered(0)) {
         Hive.registerAdapter(BankAccountAdapter());
       }
@@ -44,7 +44,7 @@ class DatabaseService {
         Hive.registerAdapter(WebPasswordAdapter());
       }
 
-      // 1. Storage'dan ÅŸifreleme key'ini al
+      // 1. Storage'dan şifreleme key'ini al
       String? encryptionKeyBase64 = await _secureStorage.getEncryptionKey();
 
       if (encryptionKeyBase64 == null) {
@@ -55,22 +55,23 @@ class DatabaseService {
 
       final encryptionKey = base64Decode(
         encryptionKeyBase64,
-      ); // base64Decode kullanÄ±lmalÄ±
+      ); // base64Decode kullanılmalı
 
-      // 3. AES ÅŸifreli olarak kutularÄ± aÃ§
       final cipher = HiveAesCipher(encryptionKey);
-      await Hive.openBox<BankAccount>(
-        bankAccountsBoxName,
-        encryptionCipher: cipher,
-      );
-      await Hive.openBox<Subscription>(
-        subscriptionsBoxName,
-        encryptionCipher: cipher,
-      );
-      await Hive.openBox<WebPassword>(
-        webPasswordsBoxName,
-        encryptionCipher: cipher,
-      );
+      await Future.wait([
+        Hive.openBox<BankAccount>(
+          bankAccountsBoxName,
+          encryptionCipher: cipher,
+        ),
+        Hive.openBox<Subscription>(
+          subscriptionsBoxName,
+          encryptionCipher: cipher,
+        ),
+        Hive.openBox<WebPassword>(
+          webPasswordsBoxName,
+          encryptionCipher: cipher,
+        ),
+      ]);
 
       _isInitialized = true;
     } on HiveError catch (e) {

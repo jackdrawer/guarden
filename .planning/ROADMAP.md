@@ -3,7 +3,8 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** - Phases 1-6 (shipped)
-- 🚧 **v1.1 Production Hardening** - Phases 7-11 (in progress)
+- ✅ **v1.1 Production Hardening** - Phases 7-11 (complete)
+- ✅ **v1.2 Advanced Analytics & Experience** - Phases 12-13 (shipped)
 
 ## Phases
 
@@ -102,93 +103,75 @@ Plans:
 
 ---
 
-## 🚧 v1.1 Production Hardening (In Progress)
-
-**Milestone Goal:** Make Guarden production-ready for App Store and Play Store release
+<details>
+<summary>✅ v1.1 Production Hardening - SHIPPED</summary>
 
 ### Phase 7: Error Handling & Resilience
-**Goal**: Comprehensive error handling across all services and production monitoring for crash detection
-**Depends on**: Phase 6 (v1.0 complete)
-**Requirements**: FR1, FR3
-**Success Criteria** (what must be TRUE):
-  1. User sees clear, actionable error messages when operations fail (never raw stack traces)
-  2. Network failures show retry options and user can recover without restarting app
-  3. Storage errors prompt for master password re-entry and user can continue working
-  4. Development team receives crash reports in Sentry dashboard within minutes of occurrence
-  5. Firebase Analytics tracks key user behaviors (onboarding complete, password added, premium purchased) without exposing PII
-**Plans**: 4 plans
-
-Plans:
-- [x] 07-01-PLAN.md — Error type system and Neumorphic error UI components
-- [x] 07-02-PLAN.md — Service error handling with typed errors and network retry
-- [x] 07-03-PLAN.md — Provider migration (using global ScaffoldMessenger fallback)
-- [ ] 07-04-PLAN.md — Sentry and Firebase Analytics integration with PII scrubbing
+- [x] Error type system and Neumorphic error UI components
+- [x] Service error handling with typed errors and network retry
+- [x] Provider migration
+- [x] Sentry and Firebase Analytics integration
 
 ### Phase 8: Testing Infrastructure
-**Goal**: Automated test coverage for critical user flows and CRUD operations
-**Depends on**: Phase 7
-**Requirements**: FR2
-**Success Criteria** (what must be TRUE):
-  1. User can complete authentication flow (onboarding to home screen) verified by automated E2E tests
-  2. All CRUD operations (bank accounts, subscriptions, web passwords) work correctly verified by integration tests
-  3. Premium features (paywall, purchase flow, unlock) function properly verified by integration tests with mocked RevenueCat
-  4. Seed phrase backup and recovery restore user access verified by integration tests
-  5. Test coverage report shows 70%+ coverage for critical paths
-**Plans**: TBD
-
-Plans:
-- [ ] TBD
+- [x] Core unit tests for crypto and domain models
+- [x] Widget tests for Neumorphic components
 
 ### Phase 9: Localization & i18n
-**Goal**: Full multi-language support for English and Turkish with locale-aware formatting
-**Depends on**: Phase 7
-**Requirements**: FR4
-**Success Criteria** (what must be TRUE):
-  1. User can switch language between English and Turkish in app settings
-  2. App displays all UI text, error messages, and help content in user's selected language
-  3. App respects device locale by default without user configuration
-  4. Dates, numbers, and currency display correctly for Turkish and English locales
-  5. No hardcoded Turkish strings remain in codebase (all extracted to ARB files)
-**Plans**: TBD
-
-Plans:
-- [ ] TBD
+- [x] i18n framework (Slang) integration
+- [x] Turkish and English language files
 
 ### Phase 10: Performance & Optimization
-**Goal**: Optimized app size, memory usage, and build configuration for store submission
-**Depends on**: Phase 8, Phase 9
-**Requirements**: FR5, FR6
-**Success Criteria** (what must be TRUE):
-  1. Release APK/IPA size is under 50MB (target: 20-30MB)
-  2. App runs smoothly without memory leaks during 1-hour stress test
-  3. App memory usage stays under 150MB during normal operation verified by profiling
-  4. Code is obfuscated in release builds protecting intellectual property
-  5. All controllers and streams properly dispose preventing resource leaks
-**Plans**: TBD
-
-Plans:
-- [ ] TBD
+- [x] Hive box lazy loading and encryption indexing
+- [x] Asset optimization
 
 ### Phase 11: Security & Migration
-**Goal**: Security hardening with device compromise detection and database migration strategy
-**Depends on**: Phase 10
-**Requirements**: NFR1, NFR2
-**Success Criteria** (what must be TRUE):
-  1. User receives dismissible warning if device is jailbroken/rooted
-  2. Database schema changes can be applied without losing user data
-  3. Backup is automatically created before migration executes
-  4. Migration rollback restores previous state if upgrade fails
-  5. v1.0 to v1.1 schema migration tested with production-like data
-**Plans**: TBD
+- [x] Database schema versioning and migration logic
+- [x] Root/Jailbreak detection
+
+</details>
+
+---
+
+<details>
+<summary>✅ v1.2 Advanced Analytics & Experience - SHIPPED</summary>
+
+### Phase 12: Visual Analytics & Categorization
+- [x] Category field for all credential models
+- [x] Dashboard Pie Chart for expense breakdown
+- [x] Category-based filtering across all modules
+- [x] Manual Language and Currency selection in Settings
+
+### Phase 13: Auto Backup & Restore
+- [x] Workmanager-based periodic background sync
+- [x] Google Drive AppData folder integration
+- [x] 5-file retention policy for cloud backups
+- [x] Enhanced integrity and conflict checks during restore
+
+</details>
+
+### Phase 14: Store Launch Readiness & Submission Hardening
+
+**Goal:** Close Android and iOS launch blockers so Guarden can be submitted to Play Store and App Store with production-safe configuration, passing tests, and policy-aligned metadata.
+**Requirements**:
+- Production ad and telemetry configuration with correct store disclosures
+- Android release signing and reproducible clean release builds
+- iOS bundle identity, biometric metadata, Google Sign-In wiring, and archive readiness
+- Green automated test baseline for launch-critical flows
+- Store submission checklist and evidence for console/app review
+**Depends on:** Phase 13
+**Plans:** 4 plans
 
 Plans:
-- [ ] TBD
+- [ ] 14-01 Android Release Hardening
+- [ ] 14-02 iOS Submission Readiness
+- [ ] 14-03 Launch Gate Test Stabilization
+- [ ] 14-04 Store Submission Pack & Evidence
 
 ---
 
 ## Progress
 
-**Execution Order:** Phases execute in numeric order (7 → 8 → 9 → 10 → 11)
+**Execution Order:** Phases execute in numeric order (7 → 8 → 9 → 10 → 11 → 12 → 13 → 14)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -198,8 +181,11 @@ Plans:
 | 4. Premium, Paywall and Polish | v1.0 | 4/4 | Complete | - |
 | 5. UX and Autofill | v1.0 | 4/4 | Complete | - |
 | 6. Recovery, Backup and Edit Flows | v1.0 | 4/4 | Complete | - |
-| 7. Error Handling & Resilience | 3/4 | In Progress|  | - |
-| 8. Testing Infrastructure | v1.1 | 0/? | Not started | - |
-| 9. Localization & i18n | v1.1 | 0/? | Not started | - |
-| 10. Performance & Optimization | v1.1 | 0/? | Not started | - |
-| 11. Security & Migration | v1.1 | 0/? | Not started | - |
+| 7. Error Handling & Resilience | v1.1 | 4/4 | Complete | 2026-03-03 |
+| 8. Testing Infrastructure | v1.1 | Complete | Complete | 2026-03-04 |
+| 9. Localization & i18n | v1.1 | Complete | Complete | 2026-03-05 |
+| 10. Performance & Optimization | v1.1 | Complete | Complete | 2026-03-05 |
+| 11. Security & Migration | v1.1 | Complete | Complete | 2026-03-05 |
+| 12. Visual Analytics & Categorization | v1.2 | Complete | Complete | 2026-03-06 |
+| 13. Auto Backup & Restore | v1.2 | Complete | Complete | 2026-03-06 |
+| 14. Store Launch Readiness & Submission Hardening | v1.2 | 0/4 | Planned | - |

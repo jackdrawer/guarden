@@ -37,15 +37,21 @@ class GoRouterRefreshStream extends ChangeNotifier {
     _lockSubscription = ref.listen(isLockedProvider, (previous, next) {
       notifyListeners();
     });
+    // Listen to splash completion
+    _splashSubscription = ref.listen(splashCompleterProvider, (previous, next) {
+      notifyListeners();
+    });
   }
 
   late final ProviderSubscription<AuthState?> _authSubscription;
   late final ProviderSubscription<bool> _lockSubscription;
+  late final ProviderSubscription<bool> _splashSubscription;
 
   @override
   void dispose() {
     _authSubscription.close();
     _lockSubscription.close();
+    _splashSubscription.close();
     super.dispose();
   }
 }

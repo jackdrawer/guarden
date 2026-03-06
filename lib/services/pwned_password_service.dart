@@ -7,7 +7,11 @@ import '../errors/app_errors.dart';
 import '../i18n/strings.g.dart';
 
 final pwnedPasswordProvider = Provider<PwnedPasswordService>((ref) {
-  return PwnedPasswordService();
+  final service = PwnedPasswordService();
+  ref.onDispose(() {
+    service.dispose();
+  });
+  return service;
 });
 
 class PwnedResult {
@@ -109,5 +113,9 @@ class PwnedPasswordService {
     if (typesCount < 2) return true;
 
     return false;
+  }
+
+  void dispose() {
+    _httpClient.close();
   }
 }

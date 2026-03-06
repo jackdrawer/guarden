@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth_provider.dart';
 import '../theme/app_colors.dart';
 import '../widgets/neumorphic/neumorphic_container.dart';
+import '../widgets/lottie_animation_widget.dart';
+import '../i18n/strings.g.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -28,7 +30,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       curve: Curves.easeOutBack,
     );
 
-    // Paralel Ã§alÄ±ÅŸtÄ±r: animasyon + minimum gÃ¶sterim sÃ¼resi
+    // Paralel çalıştır: animasyon + minimum gösterim süresi
     Future.wait([
       _controller.forward(),
       Future.delayed(const Duration(milliseconds: 800)), // minimum 800ms
@@ -72,13 +74,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Guarden',
+                          t.general.app_name,
+                          textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 32,
+                            fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: AppColors.of(context).textPrimary,
-                            letterSpacing: 2,
                           ),
+                        ),
+                        const SizedBox(height: 12),
+                        const LottieAnimationWidget(
+                          animation: GuardenAnimation.lockUnlock,
+                          size: 48,
+                          repeat: false,
                         ),
                       ],
                     ),

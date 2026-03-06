@@ -8,6 +8,7 @@ import '../../widgets/neumorphic/neumorphic_container.dart';
 import '../../widgets/neumorphic/neumorphic_button.dart';
 import '../../providers/security_audit_provider.dart';
 import '../../i18n/strings.g.dart';
+import '../../widgets/password_generator_dialog.dart';
 
 class SecurityAuditScreen extends ConsumerStatefulWidget {
   const SecurityAuditScreen({super.key});
@@ -153,7 +154,7 @@ class _SecurityAuditScreenState extends ConsumerState<SecurityAuditScreen> {
                   child: NeumorphicButton(
                     onPressed: () {
                       HapticFeedback.lightImpact();
-                      // Call global generator
+                      showPasswordGenerator(context);
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -184,7 +185,8 @@ class _SecurityAuditScreenState extends ConsumerState<SecurityAuditScreen> {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
+        error: (e, st) =>
+            Center(child: Text(t.settings.error_with_message(message: '$e'))),
       ),
     );
   }

@@ -13,6 +13,7 @@ class SubscriptionNotifier
   late final DatabaseService _dbService = ref.read(databaseProvider);
 
   static const String _legacyTextRepairKey = 'subscription_text_repair_v1_done';
+  bool _migrationChecked = false;
 
   // Travel mode settings cached from build() to avoid watching all settings
   late bool _isTravelModeActive;
@@ -58,10 +59,13 @@ class SubscriptionNotifier
   }
 
   void _repairLegacyText(List<Subscription> items) {
+    if (_migrationChecked) return;
+
     // Check if migration already completed
     final isMigrationDone =
         _dbService.settingsBox.get(_legacyTextRepairKey) as bool?;
     if (isMigrationDone == true) {
+      _migrationChecked = true;
       return;
     }
 
@@ -74,13 +78,16 @@ class SubscriptionNotifier
         continue;
       }
 
-      item.serviceName = repairedName;
-      item.url = repairedUrl;
-      _dbService.subscriptionsBox.put(item.id, item);
+      final newItem = item.copyWith(
+        serviceName: repairedName,
+        url: repairedUrl,
+      );
+      _dbService.subscriptionsBox.put(item.id, newItem);
     }
 
     // Mark migration as complete
     _dbService.settingsBox.put(_legacyTextRepairKey, true);
+    _migrationChecked = true;
   }
 
   void addSubscription(Subscription item) {

@@ -15,6 +15,7 @@ import '../../widgets/neumorphic/neumorphic_button.dart';
 import '../../widgets/neumorphic/neumorphic_input.dart';
 import '../../widgets/neumorphic/neumorphic_typeahead.dart';
 import '../../widgets/password_generator_dialog.dart';
+import '../../widgets/category/category_widgets.dart';
 
 class BankAccountFormScreen extends ConsumerStatefulWidget {
   final String? accountId;
@@ -38,6 +39,7 @@ class _BankAccountFormScreenState extends ConsumerState<BankAccountFormScreen> {
   bool _travelProtected = false;
   String _selectedLogoUrl = '';
   bool _isLoadingExisting = false;
+  String? _selectedCategory;
 
   bool get _isEditMode => widget.accountId != null;
 
@@ -84,6 +86,7 @@ class _BankAccountFormScreenState extends ConsumerState<BankAccountFormScreen> {
     _accountNameController.text = account.accountName;
     _selectedLogoUrl = account.url;
     _selectedPeriod = account.periodMonths;
+    _selectedCategory = account.category;
     final settings = ref.read(settingsProvider).valueOrNull;
     _travelProtected =
         settings?.travelProtectedIds.contains(account.id) ?? false;
@@ -160,6 +163,7 @@ class _BankAccountFormScreenState extends ConsumerState<BankAccountFormScreen> {
         periodMonths: _selectedPeriod,
         lastChangedAt: DateTime.now(),
         createdAt: existing?.createdAt ?? DateTime.now(),
+        category: _selectedCategory ?? '',
       );
 
       if (_isEditMode) {
@@ -336,6 +340,21 @@ class _BankAccountFormScreenState extends ConsumerState<BankAccountFormScreen> {
                           controller: _notesController,
                           hintText: t.bank_form.notes_hint,
                           maxLines: 3,
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          t.general.category,
+                          style: TextStyle(
+                            color: AppColors.of(context).textPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        CategorySelector(
+                          selected: _selectedCategory,
+                          onChanged: (category) {
+                            setState(() => _selectedCategory = category);
+                          },
                         ),
                         const SizedBox(height: 24),
                         Container(

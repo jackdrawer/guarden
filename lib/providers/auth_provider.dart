@@ -16,11 +16,15 @@ enum AuthState { initial, firstTime, unauthenticated, authenticated }
 class AuthNotifier extends AsyncNotifier<AuthState> {
   late SecureStorageService _secureStorage;
   late DatabaseService _databaseService;
+  late CryptoService _cryptoService;
+
+  int _failedLoginAttempts = 0;
 
   @override
   Future<AuthState> build() async {
     _secureStorage = ref.read(secureStorageProvider);
     _databaseService = ref.read(databaseProvider);
+    _cryptoService = ref.read(cryptoProvider);
     return await _checkInitialState();
   }
 
@@ -64,7 +68,23 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   Future<bool> login(String masterPassword) async {
     try {
       final isValid = await verifyMasterPassword(masterPassword);
-      if (!isValid) return false;
+      if (!isValid) {
+        _failedLoginAttempts++;
+        int delaySeconds = 0;
+        if (_failedLoginAttempts >= 5) {
+          delaySeconds = 30;
+        } else if (_failedLoginAttempts >= 3) {
+          delaySeconds = 4;
+        } else if (_failedLoginAttempts >= 2) {
+          delaySeconds = 2;
+        } else {
+          delaySeconds = 1;
+        }
+        await Future.delayed(Duration(seconds: delaySeconds));
+        return false;
+      }
+
+      _failedLoginAttempts = 0;
 
       await _databaseService.initDatabase();
 
@@ -83,13 +103,11 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   }
 
   Future<bool> verifyMasterPassword(String masterPassword) async {
-    final crypto = CryptoService();
-
     try {
       final salt = await _secureStorage.getSalt();
       if (salt == null) return false;
 
-      final derivedKey = await crypto.deriveKey(masterPassword, salt);
+      final derivedKey = await _cryptoService.deriveKey(masterPassword, salt);
       final derivedBytes = await derivedKey.extractBytes();
       final derivedBase64 = base64Encode(derivedBytes);
 
@@ -147,11 +165,10 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   }
 
   Future<void> _persistMasterPasswordVerifier(String masterPassword) async {
-    final crypto = CryptoService();
     final salt = generateSecureSalt();
     await _secureStorage.saveSalt(salt);
 
-    final derivedKey = await crypto.deriveKey(masterPassword, salt);
+    final derivedKey = await _cryptoService.deriveKey(masterPassword, salt);
     final keyBytes = await derivedKey.extractBytes();
     final verifier = base64Encode(keyBytes);
 

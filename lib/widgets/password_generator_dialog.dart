@@ -69,28 +69,43 @@ class _PasswordGeneratorDialogState
   }
 
   Color _getStrengthColor() {
-    int strength = 0;
-    if (_length >= 12) strength++;
-    if (_length >= 16) strength++;
-    if (_useUppercase) strength++;
-    if (_useNumbers) strength++;
-    if (_useSymbols) strength++;
+    int charsetSize = 0;
+    if (_useLowercase) charsetSize += 26;
+    if (_useUppercase) charsetSize += 26;
+    if (_useNumbers) charsetSize += 10;
+    if (_useSymbols) charsetSize += 32;
 
-    if (strength <= 2) return AppColors.of(context).error;
-    if (strength <= 4) return Colors.amber;
-    return Colors.green;
+    if (charsetSize == 0) charsetSize = 26;
+
+    final entropy = _length * (log(charsetSize) / ln2);
+
+    if (entropy < 28) return AppColors.of(context).error;
+    if (entropy < 36) return Colors.orange;
+    if (entropy < 60) return Colors.amber;
+    if (entropy < 128) return Colors.green;
+    return Colors.blue;
   }
 
   String _getStrengthText() {
-    int strength = 0;
-    if (_length >= 12) strength++;
-    if (_length >= 16) strength++;
-    if (_useUppercase) strength++;
-    if (_useNumbers) strength++;
-    if (_useSymbols) strength++;
+    int charsetSize = 0;
+    if (_useLowercase) charsetSize += 26;
+    if (_useUppercase) charsetSize += 26;
+    if (_useNumbers) charsetSize += 10;
+    if (_useSymbols) charsetSize += 32;
 
-    if (strength <= 2) return t.password_generator.weak;
-    if (strength <= 4) return t.password_generator.strong;
+    if (charsetSize == 0) charsetSize = 26;
+
+    final entropy = _length * (log(charsetSize) / ln2);
+
+    if (entropy < 28) {
+      return t.password_generator.weak;
+    }
+    if (entropy < 36) {
+      return t.password_generator.medium;
+    }
+    if (entropy < 60) {
+      return t.password_generator.strong;
+    }
     return t.password_generator.excellent;
   }
 

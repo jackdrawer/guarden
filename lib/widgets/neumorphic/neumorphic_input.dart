@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../theme/app_colors.dart';
 
 class NeumorphicInput extends StatefulWidget {
@@ -11,6 +12,7 @@ class NeumorphicInput extends StatefulWidget {
   final int maxLines;
   final FocusNode? focusNode;
   final FormFieldValidator<String>? validator;
+  final List<TextInputFormatter>? inputFormatters;
 
   const NeumorphicInput({
     super.key,
@@ -23,6 +25,7 @@ class NeumorphicInput extends StatefulWidget {
     this.maxLines = 1,
     this.focusNode,
     this.validator,
+    this.inputFormatters,
   });
 
   @override
@@ -116,6 +119,7 @@ class _NeumorphicInputState extends State<NeumorphicInput> {
               keyboardType: widget.keyboardType,
               maxLines: widget.maxLines,
               validator: widget.validator,
+              inputFormatters: widget.inputFormatters,
               style: TextStyle(color: AppColors.of(context).textPrimary),
               decoration: InputDecoration(
                 hintText: widget.hintText,

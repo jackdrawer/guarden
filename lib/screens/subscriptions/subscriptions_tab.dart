@@ -10,22 +10,49 @@ import '../../providers/subscription_provider.dart';
 import '../../services/logo_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/animated_empty_state.dart';
+import '../../widgets/category/category_widgets.dart';
 import '../../widgets/neumorphic/neumorphic_container.dart';
+import '../../utils/currency_utils.dart';
 
-class SubscriptionsTab extends ConsumerWidget {
+class SubscriptionsTab extends ConsumerStatefulWidget {
   const SubscriptionsTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SubscriptionsTab> createState() => _SubscriptionsTabState();
+}
+
+class _SubscriptionsTabState extends ConsumerState<SubscriptionsTab> {
+  String? _selectedCategory;
+
+  @override
+  Widget build(BuildContext context) {
     final subscriptions = ref.watch(subscriptionProvider).valueOrNull ?? [];
     final logoService = ref.watch(logoServiceProvider);
-    final displayCurrency = subscriptions.isNotEmpty
-        ? subscriptions.first.currency
-        : 'TRY';
+    final displayCurrency = CurrencyUtils.getDefaultCurrency();
 
-    double totalMonthlyCost = 0.0;
+    // Filter by selected category
+    final filtered = _selectedCategory == null || _selectedCategory!.isEmpty
+        ? subscriptions
+        : subscriptions.where((s) => s.category == _selectedCategory).toList();
+
+    final Map<String, double> breakdown = {};
     for (var sub in subscriptions) {
-      totalMonthlyCost += sub.monthlyCost;
+      final monthlyCost = sub.billingCycle == 'yearly'
+          ? sub.monthlyCost / 12
+          : sub.monthlyCost;
+      breakdown[sub.currency] = (breakdown[sub.currency] ?? 0.0) + monthlyCost;
+    }
+
+    final hasMultipleCurrencies = breakdown.length > 1;
+    String breakdownString = '';
+    if (hasMultipleCurrencies) {
+      breakdownString = breakdown.entries
+          .map((e) => CurrencyUtils.formatAmount(e.value, e.key))
+          .join(' + ');
+    } else {
+      final key = breakdown.keys.firstOrNull ?? displayCurrency;
+      final val = breakdown.values.firstOrNull ?? 0.0;
+      breakdownString = CurrencyUtils.formatAmount(val, key);
     }
 
     return Padding(
@@ -41,6 +68,11 @@ class SubscriptionsTab extends ConsumerWidget {
               color: AppColors.of(context).textPrimary,
             ),
           ),
+          const SizedBox(height: 12),
+          CategoryFilterChips(
+            selected: _selectedCategory,
+            onChanged: (cat) => setState(() => _selectedCategory = cat),
+          ),
           const SizedBox(height: 16),
           NeumorphicContainer(
             padding: const EdgeInsets.all(20),
@@ -51,16 +83,31 @@ class SubscriptionsTab extends ConsumerWidget {
                   t.subscriptions.monthly_total,
                   style: TextStyle(
                     fontSize: 16,
-                    color: AppColors.of(context).textSecondary,
+                    color: hasMultipleCurrencies
+                        ? Colors.orange
+                        : AppColors.of(context).textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                Text(
-                  '$displayCurrency ${totalMonthlyCost.toStringAsFixed(2)}',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.of(context).primaryAccent,
+                if (hasMultipleCurrencies)
+                  const Icon(
+                    Icons.account_balance_wallet_outlined,
+                    size: 16,
+                    color: Colors.orange,
+                  ),
+                Expanded(
+                  child: Text(
+                    breakdownString,
+                    textAlign: TextAlign.end,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                    style: TextStyle(
+                      fontSize: hasMultipleCurrencies ? 16 : 20,
+                      fontWeight: FontWeight.bold,
+                      color: hasMultipleCurrencies
+                          ? Colors.orange
+                          : AppColors.of(context).primaryAccent,
+                    ),
                   ),
                 ),
               ],
@@ -68,7 +115,7 @@ class SubscriptionsTab extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: subscriptions.isEmpty
+            child: filtered.isEmpty
                 ? AnimatedEmptyState(
                     icon: Icons.subscriptions_outlined,
                     title: t.subscriptions.empty.title,
@@ -76,9 +123,9 @@ class SubscriptionsTab extends ConsumerWidget {
                   )
                 : AnimationLimiter(
                     child: ListView.builder(
-                      itemCount: subscriptions.length,
+                      itemCount: filtered.length,
                       itemBuilder: (context, index) {
-                        final sub = subscriptions[index];
+                        final sub = filtered[index];
                         return AnimationConfiguration.staggeredList(
                           position: index,
                           duration: const Duration(milliseconds: 375),
@@ -160,7 +207,7 @@ class SubscriptionsTab extends ConsumerWidget {
                                                 ),
                                                 const SizedBox(height: 4),
                                                 Text(
-                                                  '${sub.currency} ${sub.monthlyCost.toStringAsFixed(2)} ${t.subscriptions.per_month}',
+                                                  '${CurrencyUtils.formatAmount(sub.monthlyCost, sub.currency)} ${sub.billingCycle == 'yearly' ? t.subscription_form.yearly : t.subscriptions.per_month}',
                                                   style: TextStyle(
                                                     fontSize: 14,
                                                     color: AppColors.of(

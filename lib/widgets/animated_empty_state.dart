@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
+import 'lottie_animation_widget.dart';
 
 class AnimatedEmptyState extends StatefulWidget {
   final IconData icon;
@@ -54,6 +55,10 @@ class _AnimatedEmptyStateState extends State<AnimatedEmptyState>
         children: [
           AnimatedBuilder(
             animation: _controller,
+            child: const LottieAnimationWidget(
+              animation: GuardenAnimation.emptyStateVault,
+              size: 140,
+            ),
             builder: (context, child) {
               return Transform.scale(
                 scale: _scaleAnimation.value,
@@ -76,11 +81,7 @@ class _AnimatedEmptyStateState extends State<AnimatedEmptyState>
                         ),
                       ],
                     ),
-                    child: Icon(
-                      widget.icon,
-                      size: 64,
-                      color: AppColors.of(context).primaryAccent,
-                    ),
+                    child: child,
                   ),
                 ),
               );
