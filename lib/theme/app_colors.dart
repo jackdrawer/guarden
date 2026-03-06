@@ -8,6 +8,7 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
   final Color textPrimary;
   final Color textSecondary;
   final Color error;
+  final Color success;
   final Color surface;
   final List<BoxShadow> neumorphicShadows;
 
@@ -19,6 +20,7 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
     required this.textPrimary,
     required this.textSecondary,
     required this.error,
+    required this.success,
     required this.surface,
     required this.neumorphicShadows,
   });
@@ -44,6 +46,7 @@ class AppColorsExtension extends ThemeExtension<AppColorsExtension> {
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
       textSecondary: Color.lerp(textSecondary, other.textSecondary, t)!,
       error: Color.lerp(error, other.error, t)!,
+      success: Color.lerp(success, other.success, t)!,
       surface: Color.lerp(surface, other.surface, t)!,
       neumorphicShadows: t < 0.5 ? neumorphicShadows : other.neumorphicShadows,
     );
@@ -65,6 +68,7 @@ class AppColors {
     textPrimary: const Color(0xFF4A5568),
     textSecondary: const Color(0xFF718096),
     error: const Color(0xFFE53E3E),
+    success: const Color(0xFF48BB78),
     surface: const Color(0xFFF7FAFC),
     neumorphicShadows: [
       const BoxShadow(
@@ -90,6 +94,7 @@ class AppColors {
     textPrimary: const Color(0xFFE2E8F0),
     textSecondary: const Color(0xFF94A3B8),
     error: const Color(0xFFF87171),
+    success: const Color(0xFF68D391),
     surface: const Color(0xFF23232A),
     neumorphicShadows: [
       const BoxShadow(

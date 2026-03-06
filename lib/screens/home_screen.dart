@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../i18n/strings.g.dart';
+import '../providers/auth_provider.dart';
 import '../providers/bank_account_provider.dart';
 import '../providers/web_password_provider.dart';
 import '../providers/settings_provider.dart';
@@ -84,7 +85,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               const SizedBox(height: 24),
               Text(
-                t.settings.labels.security_reminder ?? 'Security Reminder',
+                t.settings.reminders.master_password_title,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -94,7 +95,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Uzun zamandır sadece Biyometrik ile giriş yapıyorsunuz. Master şifreniz güvenlik için şarttır, onu hatırlıyor musunuz?\n\nUnutmayın: Güvenliğiniz için Master Şifrenizi sadece fiziksel bir kağıda yazıp, güvenli bir yerde saklayın.',
+                t.settings.reminders.master_password_desc,
                 style: TextStyle(
                   fontSize: 14,
                   height: 1.5,
@@ -116,7 +117,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       ),
                       child: Text(
-                        'Daha Sonra',
+                        t.settings.reminders.remind_later,
                         style: TextStyle(
                           color: AppColors.of(context).textSecondary,
                           fontWeight: FontWeight.bold,
@@ -140,7 +141,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text('Doğrula'),
+                      child: Text(t.settings.reminders.test_it),
                     ),
                   ),
                 ],
@@ -166,7 +167,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             return AlertDialog(
               backgroundColor: AppColors.of(context).background,
               title: Text(
-                'Master Şifrenizi Girin',
+                t.settings.reminders.enter_master_password,
                 style: TextStyle(color: AppColors.of(context).textPrimary),
               ),
               content: Column(
@@ -187,7 +188,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     obscureText: obscure,
                     style: TextStyle(color: AppColors.of(context).textPrimary),
                     decoration: InputDecoration(
-                      hintText: 'Master Şifre',
+                      hintText: t.settings.reminders.master_password_hint,
                       hintStyle: TextStyle(
                         color: AppColors.of(
                           context,
@@ -222,7 +223,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 TextButton(
                   onPressed: () => Navigator.pop(ctx, false),
                   child: Text(
-                    'İptal',
+                    t.general.cancel,
                     style: TextStyle(
                       color: AppColors.of(context).textSecondary,
                     ),
@@ -237,9 +238,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     if (isCorrect) {
                       if (ctx.mounted) Navigator.pop(ctx, true);
                     } else {
-                      setState(
-                        () => error = 'Yanlış şifre. Lütfen tekrar deneyin.',
-                      );
+                      setState(() => error = t.settings.alerts.wrong_password);
                       controller.clear();
                     }
                   },
@@ -247,7 +246,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     backgroundColor: AppColors.of(context).primaryAccent,
                     foregroundColor: Colors.white,
                   ),
-                  child: const Text('Doğrula'),
+                  child: Text(t.settings.reminders.test_it),
                 ),
               ],
             );
@@ -263,7 +262,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Harika! Şifrenizi hatırlıyorsunuz.'),
+            content: Text(t.settings.alerts.correct_password),
             backgroundColor: AppColors.of(context).success,
             behavior: SnackBarBehavior.floating,
           ),

@@ -1,0 +1,10 @@
+Analyzing guarden...                                            
+
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\security\compromised_accounts_screen.dart:57:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\security_audit_screen.dart:79:42 - deprecated_member_use
+   info - 'Share' is deprecated and shouldn't be used. Use SharePlus instead - lib\screens\settings\settings_screen.dart:228:28 - deprecated_member_use
+   info - 'shareXFiles' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead - lib\screens\settings\settings_screen.dart:228:34 - deprecated_member_use
+   info - Parameter 'message' could be a super parameter - lib\services\backup_service.dart:24:3 - use_super_parameters
+   info - 'copyWith' is deprecated and shouldn't be used. Assign values directly to the instance - lib\services\monitoring_service.dart:74:27 - deprecated_member_use
+   info - 'copyWith' is deprecated and shouldn't be used. Assign values directly to the instance - lib\services\monitoring_service.dart:87:27 - deprecated_member_use
+

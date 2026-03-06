@@ -1,5 +1,7 @@
 {
   "general": {
+    "app_name": "Guarden - Premium Gizlilik",
+    "app_short_name": "Guarden",
     "save": "Kaydet",
     "edit": "Düzenle",
     "delete": "Sil",
@@ -33,7 +35,17 @@
     "username_email": "Kullanıcı Adı / E-posta",
     "login_url": "Giriş URL",
     "password_decrypt_failed": "Şifre çözümlenemedi.",
-    "record_to_edit_not_found": "Düzenlenecek kayıt bulunamadı."
+    "record_to_edit_not_found": "Düzenlenecek kayıt bulunamadı.",
+    "category": "Kategori",
+    "manual_entry_fallback": "Eşleşme bulunamadı, manuel olarak girebilirsiniz.",
+    "categories": {
+      "all": "Tümü",
+      "work": "İş",
+      "personal": "Kişisel",
+      "finance": "Finans",
+      "social": "Sosyal",
+      "entertainment": "Eğlence"
+    }
   },
   "home": {
     "add_bank": "Banka Ekle",
@@ -49,10 +61,13 @@
   },
   "dashboard": {
     "title": "Hoş Geldiniz",
-    "subtitle": "Güvenli kasanız",
+    "subtitle": "Güvenden başka bedeli olmayan premium gizlilik",
     "command_center": "Kumanda Merkezi",
     "total_budget": "Aylık Toplam Gider",
     "monthly_cost": "Aylık Maliyet",
+    "show_chart": "Analitiği Göster",
+    "hide_chart": "Analitiği Gizle",
+    "expense_breakdown": "Harcama Dağılımı",
     "alert_title": "Güvenlik Uyarısı",
     "alerts": {
       "expired_banks": "Süresi dolan $count hesap parolanız var!"
@@ -71,6 +86,9 @@
     "master_password_wrong": "Master şifre hatalı.",
     "panic_mode_title": "Panik Modu",
     "panic_mode_confirm_message": "⚠️ KRİTİK UYARI: Bu işlem tüm kasa verilerini (banka hesapları, abonelikler ve web şifreleri dahil) kalıcı olarak silecek. Bu işlem geri alınamaz. Devam etmek istediğinize emin misiniz?",
+    "panic_mode_confirm_prompt": "Onaylamak için \"$keyword\" yazın:",
+    "panic_mode_confirm_hint": "$keyword",
+    "panic_mode_confirm_keyword": "SİL",
     "delete_keys": "Tüm Verileri Sil",
     "backup_ready": "Yedek hazır",
     "backup_text_copied": "Yedek metni kopyalandı.",
@@ -95,7 +113,10 @@
       "security_privacy": "Güvenlik ve Gizlilik",
       "drive_backup": "Google Drive Yedekleme",
       "manual_import_export": "Cihaza Yedekle",
-      "notifications": "Bildirimler"
+      "notifications": "Bildirimler",
+      "regional_settings": "Bölgesel Ayarlar",
+      "auto_backup": "Otomatik Yedekleme",
+      "help_about": "Yardım ve Hakkında"
     },
     "labels": {
       "autofill": "Otomatik Doldurma",
@@ -116,7 +137,39 @@
       "enable_notifications": "Bildirimleri aç",
       "bank_password_rotation": "Banka şifre rotasyonu",
       "subscription_renewal": "Abonelik yenileme",
-      "security_alerts": "Güvenlik uyarıları"
+      "security_alerts": "Güvenlik uyarıları",
+      "security_reminder": "Güvenlik Hatırlatması",
+      "language": "Dil",
+      "default_currency": "Varsayılan Para Birimi",
+      "system_default": "Sistem Varsayılanı",
+      "automatic": "Otomatik",
+      "auto_backup_frequency": "Otomatik Yedekleme Sıklığı",
+      "last_sync": "Son başarılı eşitleme",
+      "sync_now": "Şimdi Eşitle",
+      "wifi_only": "Sadece Wi-Fi",
+      "charging_only": "Sadece şarjda",
+      "never": "Hiçbir zaman",
+      "daily": "Günlük",
+      "weekly": "Haftalık",
+      "monthly": "Aylık",
+      "usage_guide": "Kullanım",
+      "usage_guide_subtitle": "Kasa, yedekleme ve kurtarma akışlarını öğrenin",
+      "privacy_overview": "Gizlilik",
+      "privacy_overview_subtitle": "Verilerinizin, yedeklerinizin ve telemetrinin nasıl işlendiği",
+      "about_guarden": "Hakkında",
+      "about_guarden_subtitle": "Ürün amacı, offline-first yapı ve kurtarma prensipleri",
+      "app_version": "Uygulama Sürümü",
+      "app_version_subtitle": "Bu cihazdaki kurulu sürüm bilgisi",
+      "open_source_licenses": "Açık Kaynak Lisansları",
+      "open_source_licenses_subtitle": "Üçüncü parti paket lisanslarını görüntüleyin",
+      "privacy_policy": "Gizlilik Politikası",
+      "privacy_policy_subtitle": "Veri işleme ve gizlilik ilkelerimiz",
+      "terms_of_service": "Kullanım Şartları",
+      "terms_of_service_subtitle": "Uygulama kullanım koşulları",
+      "cookie_policy": "Çerez Politikası",
+      "cookie_policy_subtitle": "Çerez ve benzeri teknolojilerin kullanımı",
+      "open_full_version": "Tam Versiyonu Aç",
+      "full_version_url": "https://jackdrawer.github.io/guarden/"
     },
     "tooltips": {
       "autofill": "Diğer uygulamalarda şifrelerinizi otomatik doldurmayı etkinleştirir",
@@ -130,11 +183,52 @@
       "panic_mode": "Acil durumlarda tüm kasa verilerini (şifreler ve hesaplar dahil) kalıcı olarak siler",
       "theme": "Uygulamanın görünüm temasını seçin"
     },
+    "backup_history_title": "Yedekleme Geçmişi",
+    "no_backups_yet": "Henüz yedekleme yapılmamış.",
+    "clear_all": "Tümünü Temizle",
+    "downloaded": "İndirildi",
+    "download_from_drive": "Drive'dan İndir",
+    "backup_history_saved_count": "$count yedekleme kaydedilmiş",
+    "backup_history_tooltip": "Önceki yedeklemeleri görüntüle ve yönet",
+    "backup_location_drive": "Google Drive",
+    "backup_location_local": "Cihaz",
+    "version_unknown": "Sürüm bilgisi alınamadı",
+    "version_format": "v$version ($build)",
+    "licenses_page_title": "Açık Kaynak Lisansları",
     "theme": {
       "title": "Tema",
       "light": "Aydınlık",
       "dark": "Karanlık",
       "system": "Sistem"
+    },
+    "info": {
+      "usage": {
+        "title": "Guarden Nasıl Kullanılır",
+        "intro_title": "Günlük kullanım",
+        "intro_body": "Kasayı master şifreniz veya biyometri ile açın, ardından ana sekmelerden banka hesaplarını, abonelikleri ve web şifrelerini yönetin.",
+        "backup_title": "Yedekleme",
+        "backup_body": "Cihaza veya Google Drive'a şifreli yedek oluşturabilirsiniz. Yedekler şifreli kalır ve geri yükleme için yine master şifrenizi ister.",
+        "recovery_title": "Kurtarma ve sıfırlama",
+        "recovery_body": "Master şifrenizi unutursanız mevcut kasa açılamaz. Panik sıfırlama yerel kasayı temizler ve yeniden başlamanızı sağlar. Eski şifreli yedekler, yalnızca daha sonra aynı master şifreyi hatırlarsanız tekrar kullanılabilir."
+      },
+      "privacy": {
+        "title": "Gizlilik ve Güvenlik",
+        "storage_title": "Veriler nerede tutulur",
+        "storage_body": "Kasa kayıtları cihazınızda yerel olarak saklanır. Guarden, paylaşımlı bir bulut kasa yerine offline-first bir model üzerine kuruludur.",
+        "encryption_title": "Şifreleme modeli",
+        "encryption_body": "Master şifreniz geri çözülebilir biçimde saklanmaz. Kasa ve şifreli yedekler için gerekli şifreleme materyali bu şifreden türetilir.",
+        "telemetry_title": "Telemetri ve bulut kullanımı",
+        "telemetry_body": "İsteğe bağlı analitik ve çökme raporları sınırlı operasyonel veri toplayabilir. Google Drive yedekleme ise yalnızca siz kendi hesabınızla açıkça etkinleştirirseniz kullanılır."
+      },
+      "about": {
+        "title": "Guarden Hakkında",
+        "mission_title": "Guarden nedir",
+        "mission_body": "Guarden; yerel sahiplik, şifreli depolama ve pratik kurtarma sınırlarına odaklanan güvenli bir şifre kasasıdır.",
+        "offline_title": "Offline-first yaklaşım",
+        "offline_body": "Temel veriler cihazda kalır ve sürekli bir backend bağımlılığı olmadan kullanılabilir. Bulut yedekleme ana kaynak değil, isteğe bağlı ek katmandır.",
+        "recovery_title": "Kurtarma felsefesi",
+        "recovery_body": "Ürün bilinçli olarak katıdır: doğru master şifre olmadan ne mevcut kasa ne de şifreli yedekler çözülebilir."
+      }
     },
     "errors": {
       "travel_mode_failed": "Seyahat modu güncellenemedi.",
@@ -152,31 +246,56 @@
       "pwned_check_failed": "Şifre güvenliği kontrol edilemedi. İnterneti kontrol edin.",
       "generic": "Bir hata oluştu. Lütfen tekrar deneyin."
     },
+    "alerts": {
+      "backup_success": "Veriler başarıyla yedeklendi.",
+      "export_success": "Veriler başarıyla dışa aktarıldı/kopyalandı.",
+      "restore_success": "Veriler başarıyla geri yüklendi.",
+      "panic_mode_warning": "Bu işlem geri alınamaz! Veritabanı derhal imha edilecek.",
+      "panic_mode_act": "Panik modunu etkinleştirmek için basılı tut",
+      "import_warning": "Dışarıdan veri aktarmak mevcut verilerin üzerine yazabilir. Emin misiniz?",
+      "auth_required_backup": "Yedeklemek için kimliğinizi doğrulayın",
+      "auth_required_export": "Dışa aktarmak için kimliğini doğrula",
+      "drive_backup_success": "Yedek başarıyla Google Drive'a yüklendi.",
+      "drive_restore_success": "Yedek başarıyla Google Drive'dan geri yüklendi.",
+      "wrong_password": "Yanlış şifre. Lütfen tekrar deneyin.",
+      "correct_password": "Harika! Şifrenizi hatırlıyorsunuz."
+    },
+    "reminders": {
+      "master_password_title": "Güvenlik Hatırlatması",
+      "master_password_desc": "Uzun zamandır sadece Biyometrik ile giriş yapıyorsunuz. Master şifreniz güvenlik için şarttır, onu hatırlıyor musunuz?\n\nUnutmayın: Güvenliğiniz için Master Şifrenizi sadece fiziksel bir kağıda yazıp, güvenli bir yerde saklayın.",
+      "test_it": "Doğrula",
+      "remind_later": "Daha Sonra",
+      "enter_master_password": "Master Şifrenizi Girin",
+      "master_password_hint": "Master Şifre"
+    },
     "web_not_supported": "Web tarayıcıda desteklenmiyor."
   },
   "auth_login": {
     "biometric_unavailable": "Biyometrik doğrulama kullanılamıyor.",
     "biometric_failed": "Biyometrik doğrulama başarısız oldu.",
     "wrong_master_password": "Master şifre hatalı.",
-    "subtitle": "Kasanızı açmak için master şifrenizi girin.",
+    "subtitle": "Premium gizliliğinize erişmek için master şifrenizi girin.",
     "unlock_button": "Kilidi Aç",
     "use_biometrics": "Biyometri Kullan",
     "forgot_master_password": "Master şifremi unuttum",
-    "forgot_dialog_body": "Master şifrenizi unuttuysanız, kasanıza erişmenin tek yolu tüm verileri cihazdan silmek ve bir yedekle (varsa) geri yüklemektir. Gizliliğiniz gereği şifreniz hiçbir yerde saklanmaz.",
+    "forgot_dialog_body": "Master şifreniz olmadan mevcut kasa açılamaz ve şifreli yedekler çözülemez. Gizliliğiniz gereği şifreniz hiçbir yerde saklanmaz. İsterseniz bu cihazdaki kasa verilerini silip yeniden başlayabilirsiniz. Cihazı sıfırladıktan sonra master şifrenizi hatırlarsanız, eski şifreli yedeklerinizi yeniden geri yükleyebilirsiniz.",
     "reset_device_panic": "Cihazı Sıfırla (Panik)",
+    "reset_device_confirm_title": "Son Onay",
+    "reset_device_confirm_body": "Bu işlem cihazdaki tüm kasa verilerini kalıcı olarak silecektir. İşlem geri alınamaz. Cihazı sıfırlamak istediğinize emin misiniz?",
+    "reset_device_confirm_action": "Evet, cihazı sıfırla",
     "master_password_tooltip": "Kasanızı açmak için kullandığınız ana şifre",
     "biometric_tooltip": "Parmak izi veya yüz tanıma ile hızlı giriş"
   },
   "welcome": {
     "title": "Guarden'a Hoş Geldiniz",
-    "subtitle": "Banka hesaplarınız, dijital abonelikleriniz ve tüm şifreleriniz artık güvende. Şimdi kişisel offline kasanızı oluşturalım.",
+    "subtitle": "Guarden: Güvenden başka bedeli olmayan premium gizlilik. Save paper, save password, save time, save privacy. Şimdi kişisel offline kasanızı oluşturalım.",
     "get_started": "Başlayalım"
   },
   "onboarding_setup": {
     "password_too_short": "Şifre en az 8 karakter olmalı.",
     "passwords_do_not_match": "Şifreler eşleşmiyor.",
-    "title": "Guarden Kurulumu",
-    "subtitle": "Tüm kimlik bilgilerinizi korumak için bir Master Şifre belirleyin.",
+    "title": "Güvenli Gelecek: Guarden",
+    "subtitle": "Premium gizliliğinizi başlatmak ve tüm dijital varlıklarınızı doğadan ilham alan bir güvenlikle korumak için Master Şifre belirleyin.",
     "confirm_password_hint": "Şifreyi Onayla",
     "create_vault": "Kasayı Oluştur"
   },
@@ -210,9 +329,13 @@
     "title_edit": "Aboneliği Düzenle",
     "service_name_label": "Servis / Yayıncı (Netflix, Spotify vb.)",
     "service_name_hint": "ör. Netflix",
-    "monthly_cost_label": "Aylık Tutar (TRY)",
+    "monthly_cost_label": "Aylık Tutar",
+    "currency_label": "P. Birimi",
     "monthly_cost_hint": "ör. 149.99",
     "next_billing_date": "Sonraki Fatura Tarihi",
+    "billing_cycle_label": "Ödeme Döngüsü",
+    "monthly": "Aylık",
+    "yearly": "Yıllık",
     "email_hint": "Hesap e-posta adresiniz"
   },
   "subscription_detail": {
@@ -239,6 +362,7 @@
   "password_generator": {
     "title": "Şifre Üretici",
     "weak": "Zayıf",
+    "medium": "Orta",
     "strong": "Güçlü",
     "excellent": "Mükemmel",
     "refresh": "Yenile",

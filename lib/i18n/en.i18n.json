@@ -1,5 +1,7 @@
 {
   "general": {
+    "app_name": "Guarden - Premium Privacy",
+    "app_short_name": "Guarden",
     "save": "Save",
     "edit": "Edit",
     "delete": "Delete",
@@ -33,7 +35,17 @@
     "username_email": "Username / Email",
     "login_url": "Login URL",
     "password_decrypt_failed": "Password could not be decrypted.",
-    "record_to_edit_not_found": "Record to edit was not found."
+    "record_to_edit_not_found": "Record to edit was not found.",
+    "category": "Category",
+    "manual_entry_fallback": "No match found, you can enter it manually.",
+    "categories": {
+      "all": "All",
+      "work": "Work",
+      "personal": "Personal",
+      "finance": "Finance",
+      "social": "Social",
+      "entertainment": "Entertainment"
+    }
   },
   "home": {
     "add_bank": "Add Bank",
@@ -49,10 +61,13 @@
   },
   "dashboard": {
     "title": "Welcome",
-    "subtitle": "Your safe vault",
+    "subtitle": "Premium privacy that costs nothing but trust",
     "command_center": "Control Center",
     "total_budget": "Total Budget",
     "monthly_cost": "Monthly Cost",
+    "show_chart": "Show Analytics",
+    "hide_chart": "Hide Analytics",
+    "expense_breakdown": "Expense Breakdown",
     "alert_title": "Security Alert",
     "alerts": {
       "expired_banks": "You have $count expired bank passwords!"
@@ -71,6 +86,9 @@
     "master_password_wrong": "Master password is incorrect.",
     "panic_mode_title": "Panic Mode",
     "panic_mode_confirm_message": "⚠️ CRITICAL WARNING: This will permanently delete ALL vault data including bank accounts, subscriptions, and web passwords. This action cannot be undone. Are you sure you want to continue?",
+    "panic_mode_confirm_prompt": "Type \"$keyword\" to confirm:",
+    "panic_mode_confirm_hint": "$keyword",
+    "panic_mode_confirm_keyword": "DELETE",
     "delete_keys": "Delete All Data",
     "backup_ready": "Backup ready",
     "backup_text_copied": "Backup text copied.",
@@ -95,7 +113,10 @@
       "security_privacy": "Security and Privacy",
       "drive_backup": "Google Drive Backup",
       "manual_import_export": "Device Backup",
-      "notifications": "Notifications"
+      "notifications": "Notifications",
+      "regional_settings": "Regional Settings",
+      "auto_backup": "Auto-Backup",
+      "help_about": "Help and About"
     },
     "labels": {
       "autofill": "Autofill",
@@ -116,7 +137,39 @@
       "enable_notifications": "Enable notifications",
       "bank_password_rotation": "Bank password rotation",
       "subscription_renewal": "Subscription renewal",
-      "security_alerts": "Security alerts"
+      "security_alerts": "Security alerts",
+      "security_reminder": "Security Reminder",
+      "language": "Language",
+      "default_currency": "Default Currency",
+      "system_default": "System Default",
+      "automatic": "Automatic",
+      "auto_backup_frequency": "Auto-Backup Frequency",
+      "last_sync": "Last successful sync",
+      "sync_now": "Sync Now",
+      "wifi_only": "Only on Wi-Fi",
+      "charging_only": "Only while charging",
+      "never": "Never",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "usage_guide": "How to Use",
+      "usage_guide_subtitle": "Learn the core vault, backup, and recovery flows",
+      "privacy_overview": "Privacy",
+      "privacy_overview_subtitle": "How your data, backups, and telemetry are handled",
+      "about_guarden": "About Guarden",
+      "about_guarden_subtitle": "Product purpose, offline-first model, and recovery principles",
+      "app_version": "App Version",
+      "app_version_subtitle": "Installed version on this device",
+      "open_source_licenses": "Open Source Licenses",
+      "open_source_licenses_subtitle": "View third-party package licenses",
+      "privacy_policy": "Privacy Policy",
+      "privacy_policy_subtitle": "Our data processing and privacy principles",
+      "terms_of_service": "Terms of Service",
+      "terms_of_service_subtitle": "Application usage terms and conditions",
+      "cookie_policy": "Cookie Policy",
+      "cookie_policy_subtitle": "Use of cookies and similar technologies",
+      "open_full_version": "Open Full Version",
+      "full_version_url": "https://jackdrawer.github.io/guarden/"
     },
     "tooltips": {
       "autofill": "Enables automatic password filling in other apps",
@@ -130,11 +183,52 @@
       "panic_mode": "Permanently deletes all vault data including passwords and accounts in emergency situations",
       "theme": "Choose the app appearance theme"
     },
+    "backup_history_title": "Backup History",
+    "no_backups_yet": "No backups yet.",
+    "clear_all": "Clear All",
+    "downloaded": "Downloaded",
+    "download_from_drive": "Download from Drive",
+    "backup_history_saved_count": "$count backups saved",
+    "backup_history_tooltip": "View and manage previous backups",
+    "backup_location_drive": "Google Drive",
+    "backup_location_local": "Local",
+    "version_unknown": "Version info unavailable",
+    "version_format": "v$version ($build)",
+    "licenses_page_title": "Open Source Licenses",
     "theme": {
       "title": "Theme",
       "light": "Light",
       "dark": "Dark",
       "system": "System"
+    },
+    "info": {
+      "usage": {
+        "title": "How to Use Guarden",
+        "intro_title": "Daily use",
+        "intro_body": "Unlock the vault with your master password or biometrics, then manage bank accounts, subscriptions, and web passwords from the main tabs.",
+        "backup_title": "Backups",
+        "backup_body": "Create encrypted backups to your device or Google Drive. Backups stay encrypted and still require your master password to restore.",
+        "recovery_title": "Recovery and reset",
+        "recovery_body": "If you forget your master password, the existing vault cannot be opened. Panic reset clears the local vault so you can start over. Old encrypted backups become usable again only if you later remember the same master password."
+      },
+      "privacy": {
+        "title": "Privacy and Security",
+        "storage_title": "Where data lives",
+        "storage_body": "Vault records are stored locally on your device. Guarden is designed around an offline-first model rather than a shared cloud vault.",
+        "encryption_title": "Encryption model",
+        "encryption_body": "Your master password is not stored in recoverable form. It is used to derive encryption material for the vault and for encrypted backups.",
+        "telemetry_title": "Telemetry and cloud use",
+        "telemetry_body": "Optional analytics and crash reporting may collect limited operational data. Google Drive backup is only used when you explicitly enable it with your own account."
+      },
+      "about": {
+        "title": "About Guarden",
+        "mission_title": "What Guarden is",
+        "mission_body": "Guarden is a secure password vault focused on local ownership, encrypted storage, and practical recovery boundaries.",
+        "offline_title": "Offline-first approach",
+        "offline_body": "Core data stays on the device and remains usable without a permanent backend dependency. Cloud backup is an optional layer, not the primary source of truth.",
+        "recovery_title": "Recovery philosophy",
+        "recovery_body": "The product is intentionally strict: without the correct master password, neither the current vault nor encrypted backups can be decrypted."
+      }
     },
     "errors": {
       "travel_mode_failed": "Could not update travel mode.",
@@ -152,31 +246,56 @@
       "pwned_check_failed": "Could not check password security. Check your internet.",
       "generic": "Something went wrong. Please try again."
     },
+    "alerts": {
+      "backup_success": "Data backed up successfully.",
+      "export_success": "Data exported/copied successfully.",
+      "restore_success": "Data restored successfully.",
+      "panic_mode_warning": "This action cannot be undone! The database will be destroyed immediately.",
+      "panic_mode_act": "Hold to activate panic mode",
+      "import_warning": "Importing external data may overwrite existing data. Are you sure?",
+      "auth_required_backup": "Authenticate to backup",
+      "auth_required_export": "Authenticate to export",
+      "drive_backup_success": "Backup successfully uploaded to Google Drive.",
+      "drive_restore_success": "Backup successfully restored from Google Drive.",
+      "wrong_password": "Wrong password. Please try again.",
+      "correct_password": "Great! You remember your password."
+    },
+    "reminders": {
+      "master_password_title": "Security Reminder",
+      "master_password_desc": "You have been using only Biometrics to log in for a long time. Your Master Password is required for security, do you remember it?\n\nRemember: For your security, write your Master Password only on a physical piece of paper and keep it in a safe place.",
+      "test_it": "Verify",
+      "remind_later": "Remind Later",
+      "enter_master_password": "Enter Master Password",
+      "master_password_hint": "Master Password"
+    },
     "web_not_supported": "Not supported in web browser."
   },
   "auth_login": {
     "biometric_unavailable": "Biometric authentication is not available.",
     "biometric_failed": "Biometric authentication failed.",
     "wrong_master_password": "Wrong master password.",
-    "subtitle": "Enter your master password to unlock your vault.",
+    "subtitle": "Enter your master password to access your premium privacy.",
     "unlock_button": "Unlock",
     "use_biometrics": "Use Biometrics",
     "forgot_master_password": "I forgot my master password",
-    "forgot_dialog_body": "If you forgot your master password, the only way to access your vault is to delete all data from the device and restore from a backup (if available). For your privacy, your password is not stored anywhere.",
+    "forgot_dialog_body": "Without your master password, the current vault cannot be unlocked and encrypted backups cannot be decrypted. For your privacy, your password is not stored anywhere. If you want, you can erase the vault data on this device and start over. If you remember your master password after resetting the device, you can restore your old encrypted backups again.",
     "reset_device_panic": "Reset Device (Panic)",
+    "reset_device_confirm_title": "Final Confirmation",
+    "reset_device_confirm_body": "This will permanently delete all vault data on this device. This action cannot be undone. Are you sure you want to reset the device?",
+    "reset_device_confirm_action": "Yes, reset device",
     "master_password_tooltip": "The main password you use to unlock your vault",
     "biometric_tooltip": "Quick login with fingerprint or face recognition"
   },
   "welcome": {
     "title": "Welcome to Guarden",
-    "subtitle": "Your bank accounts, digital subscriptions, and all passwords are now secure. Let us create your personal offline vault.",
+    "subtitle": "Guarden: Premium privacy that costs nothing but trust. Save paper, save password, save time, save privacy. Let us create your personal offline vault.",
     "get_started": "Get Started"
   },
   "onboarding_setup": {
     "password_too_short": "Password must be at least 8 characters.",
     "passwords_do_not_match": "Passwords do not match.",
-    "title": "Guarden Setup",
-    "subtitle": "Set a Master Password to protect all your credentials.",
+    "title": "Secure Future: Guarden",
+    "subtitle": "Set a Master Password to initialize your premium privacy and protect all digital assets with nature-inspired security.",
     "confirm_password_hint": "Confirm Password",
     "create_vault": "Create Vault"
   },
@@ -210,9 +329,13 @@
     "title_edit": "Edit Subscription",
     "service_name_label": "Service / Publisher (Netflix, Spotify etc.)",
     "service_name_hint": "e.g. Netflix",
-    "monthly_cost_label": "Monthly Cost (TRY)",
+    "monthly_cost_label": "Monthly Cost",
+    "currency_label": "Currency",
     "monthly_cost_hint": "e.g. 149.99",
     "next_billing_date": "Next Billing Date",
+    "billing_cycle_label": "Billing Cycle",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
     "email_hint": "Your account email address"
   },
   "subscription_detail": {
@@ -239,6 +362,7 @@
   "password_generator": {
     "title": "Password Generator",
     "weak": "Weak",
+    "medium": "Medium",
     "strong": "Strong",
     "excellent": "Excellent",
     "refresh": "Refresh",

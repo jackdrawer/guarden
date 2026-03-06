@@ -76,7 +76,7 @@ class _SecurityAuditScreenState extends ConsumerState<SecurityAuditScreen> {
                             strokeWidth: 12,
                             backgroundColor: AppColors.of(
                               context,
-                            ).shadowDark.withOpacity(0.2),
+                            ).shadowDark.withValues(alpha: 0.2),
                             color: _getScoreColor(context, report.score),
                             strokeCap: StrokeCap.round,
                           ),

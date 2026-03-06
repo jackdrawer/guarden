@@ -21,9 +21,8 @@ final backupServiceProvider = Provider<BackupService>((ref) {
 });
 
 class BackupException extends AppError {
-  BackupException(String message, {String? userMessage})
+  BackupException(super.message, {String? userMessage})
     : super(
-        message,
         userMessage: userMessage ?? t.settings.errors.backup_read_failed,
         canRetry: false,
       );

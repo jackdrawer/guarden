@@ -54,7 +54,7 @@ class CompromisedAccountsScreen extends ConsumerWidget {
                   Icon(
                     Icons.check_circle_outline,
                     size: 64,
-                    color: Colors.green.withOpacity(0.5),
+                    color: Colors.green.withValues(alpha: 0.5),
                   ),
                   const SizedBox(height: 16),
                   Text(
