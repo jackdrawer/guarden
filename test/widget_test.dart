@@ -17,5 +17,7 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 300));
     expect(find.byType(GuardenApp), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
   });
 }

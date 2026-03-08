@@ -7,6 +7,7 @@ import '../services/text_sanitizer.dart';
 import '../widgets/error_handler.dart';
 import '../i18n/strings.g.dart';
 import 'settings_provider.dart';
+import 'activity_provider.dart';
 
 class SubscriptionNotifier
     extends AutoDisposeAsyncNotifier<List<Subscription>> {
@@ -94,6 +95,15 @@ class SubscriptionNotifier
     try {
       _dbService.subscriptionsBox.put(item.id, item);
       state = AsyncValue.data(_getItems());
+      ref
+          .read(activityProvider.notifier)
+          .recordActivity(
+            title: item.serviceName,
+            subtitle: t.dashboard.activities.added_subscription,
+            type: 'subscription',
+            action: 'added',
+            itemId: item.id,
+          );
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
@@ -109,6 +119,15 @@ class SubscriptionNotifier
     try {
       _dbService.subscriptionsBox.put(item.id, item);
       state = AsyncValue.data(_getItems());
+      ref
+          .read(activityProvider.notifier)
+          .recordActivity(
+            title: item.serviceName,
+            subtitle: t.dashboard.activities.updated_subscription,
+            type: 'subscription',
+            action: 'updated',
+            itemId: item.id,
+          );
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
@@ -120,15 +139,46 @@ class SubscriptionNotifier
     }
   }
 
-  void deleteSubscription(String id) {
+  Subscription? deleteSubscription(String id) {
     try {
+      final item = _dbService.subscriptionsBox.get(id);
+      if (item == null) {
+        return null;
+      }
+      final title = item.serviceName;
       _dbService.subscriptionsBox.delete(id);
       state = AsyncValue.data(_getItems());
+      ref
+          .read(activityProvider.notifier)
+          .recordActivity(
+            title: title,
+            subtitle: t.dashboard.activities.deleted_subscription,
+            type: 'subscription',
+            action: 'deleted',
+            itemId: id,
+          );
+      return item;
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to delete subscription: $e',
+          userMessage: t.settings.errors.setting_update_failed,
+        ),
+      );
+      return null;
+    }
+  }
+
+  void restoreSubscription(Subscription item) {
+    try {
+      _dbService.subscriptionsBox.put(item.id, item);
+      state = AsyncValue.data(_getItems());
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+      ErrorHandler.handleGlobalError(
+        DatabaseError(
+          'Failed to restore subscription: $e',
           userMessage: t.settings.errors.setting_update_failed,
         ),
       );

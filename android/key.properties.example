@@ -1,4 +1,7 @@
-storeFile=C:/path/to/release-key.jks
-storePassword=change-me
-keyAlias=release
-keyPassword=change-me
+# Copy this file to key.properties and replace the placeholder values.
+# Do not commit the real key.properties file.
+
+storeFile=release-keystore.jks
+storePassword=CHANGE_ME_STORE_PASSWORD
+keyAlias=guarden-release
+keyPassword=CHANGE_ME_KEY_PASSWORD

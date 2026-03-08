@@ -7,6 +7,7 @@ import '../../i18n/strings.g.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/web_password_provider.dart';
+import '../../providers/activity_provider.dart';
 import '../../services/clipboard_service.dart';
 import '../../services/crypto_service.dart';
 import '../../services/logo_service.dart';
@@ -28,109 +29,29 @@ class WebPasswordDetailScreen extends ConsumerStatefulWidget {
 
 class _WebPasswordDetailScreenState
     extends ConsumerState<WebPasswordDetailScreen> {
+  static const _hiddenPassword = '********';
+  static const _hiddenNotes = '••••••••';
+
   bool _isPasswordRevealed = false;
-  String _decryptedPassword = '********';
-  String _decryptedNotes = '';
+  String _decryptedPassword = _hiddenPassword;
+  String _decryptedNotes = _hiddenNotes;
   bool _isNotesRevealed = false;
-
-  Future<bool> _authenticate() async {
-    final settings = ref.read(settingsProvider).valueOrNull;
-    final isConfirmEnabled = settings?.biometricConfirm ?? false;
-
-    if (!isConfirmEnabled) return true;
-
-    final canUse = await ref.read(authProvider.notifier).canUseBiometrics();
-    if (canUse) {
-      final unlocked = await ref.read(authProvider.notifier).biometricUnlock();
-      if (unlocked) return true;
-    }
-
-    // SECURITY FIX: Fallback to master password if biometrics failed or not available
-    return await _requestMasterPassword();
-  }
-
-  Future<bool> _requestMasterPassword() async {
-    final controller = TextEditingController();
-    try {
-      var obscure = true;
-      final password = await showDialog<String>(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) {
-          return StatefulBuilder(
-            builder: (context, setState) {
-              return AlertDialog(
-                backgroundColor: AppColors.of(ctx).surface,
-                title: Text(
-                  t.general.authentication,
-                  style: TextStyle(color: AppColors.of(ctx).textPrimary),
-                ),
-                content: TextField(
-                  controller: controller,
-                  autofocus: false,
-                  obscureText: obscure,
-                  style: TextStyle(color: AppColors.of(ctx).textPrimary),
-                  decoration: InputDecoration(
-                    labelText: t.general.master_password_hint,
-                    labelStyle: TextStyle(
-                      color: AppColors.of(ctx).textSecondary,
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        obscure ? Icons.visibility : Icons.visibility_off,
-                        color: AppColors.of(ctx).primaryAccent,
-                      ),
-                      onPressed: () => setState(() => obscure = !obscure),
-                    ),
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: Text(t.general.cancel),
-                  ),
-                  FilledButton(
-                    onPressed: () => Navigator.of(context).pop(controller.text),
-                    child: Text(t.general.confirm),
-                  ),
-                ],
-              );
-            },
-          );
-        },
-      );
-
-      if (password == null || password.isEmpty) return false;
-
-      final isValid = await ref
-          .read(authProvider.notifier)
-          .verifyMasterPassword(password);
-
-      if (!isValid && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(t.auth_login.wrong_master_password)),
-        );
-      }
-
-      return isValid;
-    } finally {
-      // Small delay to ensure dialog animation completes before disposing controller
-      Future.delayed(const Duration(milliseconds: 200), () {
-        controller.dispose();
-      });
-    }
-  }
 
   Future<void> _revealPassword(String encryptedPassword) async {
     if (_isPasswordRevealed) {
       setState(() {
         _isPasswordRevealed = false;
-        _decryptedPassword = '********';
+        _decryptedPassword = _hiddenPassword;
       });
       return;
     }
 
-    final authPassed = await _authenticate();
+    final authPassed = await ref
+        .read(authProvider.notifier)
+        .authenticateForSensitiveAction(
+          context,
+          wrongPasswordMessage: t.auth_login.wrong_master_password,
+        );
     if (!authPassed) return;
 
     try {
@@ -152,7 +73,7 @@ class _WebPasswordDetailScreenState
           if (mounted && _isPasswordRevealed) {
             setState(() {
               _isPasswordRevealed = false;
-              _decryptedPassword = '********';
+              _decryptedPassword = _hiddenPassword;
             });
           }
         });
@@ -166,8 +87,21 @@ class _WebPasswordDetailScreenState
     }
   }
 
-  Future<void> _revealNotes(String encryptedNotes) async {
-    if (_isNotesRevealed || encryptedNotes.isEmpty) return;
+  Future<void> _toggleNotes(String encryptedNotes) async {
+    if (encryptedNotes.isEmpty) return;
+
+    if (_isNotesRevealed) {
+      _hideNotes();
+      return;
+    }
+
+    final authPassed = await ref
+        .read(authProvider.notifier)
+        .authenticateForSensitiveAction(
+          context,
+          wrongPasswordMessage: t.auth_login.wrong_master_password,
+        );
+    if (!authPassed) return;
 
     try {
       final secureStorage = ref.read(secureStorageProvider);
@@ -183,19 +117,60 @@ class _WebPasswordDetailScreenState
           _decryptedNotes = decrypted;
           _isNotesRevealed = true;
         });
+
+        Future.delayed(const Duration(seconds: 15), () {
+          if (mounted && _isNotesRevealed) {
+            _hideNotes();
+          }
+        });
       }
     } catch (_) {
       debugPrint('Failed to load notes');
     }
   }
 
-  Future<void> _copyToClipboard(String label, String value) async {
-    if (value == '********') return;
+  void _hideNotes() {
+    setState(() {
+      _decryptedNotes = _hiddenNotes;
+      _isNotesRevealed = false;
+    });
+  }
 
-    final authPassed = await _authenticate();
+  Future<void> _copyToClipboard(
+    String label,
+    String value, {
+    String? activitySubtitle,
+  }) async {
+    if (value == _hiddenPassword || value == _hiddenNotes || value.isEmpty) {
+      return;
+    }
+
+    final authPassed = await ref
+        .read(authProvider.notifier)
+        .authenticateForSensitiveAction(
+          context,
+          wrongPasswordMessage: t.auth_login.wrong_master_password,
+        );
     if (!authPassed) return;
 
-    ref.read(clipboardServiceProvider).copy(value);
+    await ref.read(clipboardServiceProvider).copy(value);
+
+    // Record activity
+    final items = ref.read(webPasswordProvider).valueOrNull ?? [];
+    final matches = items.where((b) => b.id == widget.webPasswordId);
+    final item = matches.isNotEmpty ? matches.first : null;
+
+    if (item != null && activitySubtitle != null) {
+      ref
+          .read(activityProvider.notifier)
+          .recordActivity(
+            title: item.title,
+            subtitle: activitySubtitle,
+            type: 'web_password',
+            action: 'copied',
+            itemId: item.id,
+          );
+    }
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -213,60 +188,68 @@ class _WebPasswordDetailScreenState
     bool isSensitive = false,
     VoidCallback? onReveal,
     bool isRevealed = true,
+    String? activitySubtitle,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0),
-      child: NeumorphicContainer(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.of(
-                        context,
-                      ).textSecondary.withValues(alpha: 0.8),
+      padding: const EdgeInsets.all(0), // Wrapped by other paddings usually
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 16.0),
+        child: NeumorphicContainer(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.of(
+                          context,
+                        ).textSecondary.withValues(alpha: 0.8),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: isSensitive
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                      color: AppColors.of(context).textPrimary,
+                    const SizedBox(height: 4),
+                    Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: isSensitive
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: AppColors.of(context).textPrimary,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            if (isSensitive)
-              IconButton(
-                tooltip: isRevealed
-                    ? t.general.hide_password
-                    : t.general.show_password,
-                icon: Icon(
-                  isRevealed ? Icons.visibility_off : Icons.visibility,
-                  color: AppColors.of(context).textSecondary,
+                  ],
                 ),
-                onPressed: onReveal,
               ),
-            IconButton(
-              tooltip: t.general.copy,
-              icon: Icon(
-                Icons.copy,
-                color: AppColors.of(context).primaryAccent,
+              if (isSensitive)
+                IconButton(
+                  tooltip: isRevealed
+                      ? t.general.hide_password
+                      : t.general.show_password,
+                  icon: Icon(
+                    isRevealed ? Icons.visibility_off : Icons.visibility,
+                    color: AppColors.of(context).textSecondary,
+                  ),
+                  onPressed: onReveal,
+                ),
+              IconButton(
+                tooltip: t.general.copy,
+                icon: Icon(
+                  Icons.copy,
+                  color: AppColors.of(context).primaryAccent,
+                ),
+                onPressed: () => _copyToClipboard(
+                  label,
+                  value,
+                  activitySubtitle: activitySubtitle,
+                ),
               ),
-              onPressed: () => _copyToClipboard(label, value),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -292,10 +275,6 @@ class _WebPasswordDetailScreenState
     }
 
     final item = items[itemIndex];
-
-    if (item.encryptedNotes.isNotEmpty && !_isNotesRevealed) {
-      _revealNotes(item.encryptedNotes);
-    }
 
     return Scaffold(
       backgroundColor: AppColors.of(context).background,
@@ -340,16 +319,28 @@ class _WebPasswordDetailScreenState
             ),
             const SizedBox(height: 32),
             _buildInfoCard(t.general.login_url, item.url),
-            _buildInfoCard(t.general.username_email, item.username),
+            _buildInfoCard(
+              t.general.username_email,
+              item.username,
+              activitySubtitle: t.dashboard.activities.copied_username,
+            ),
             _buildInfoCard(
               t.general.password,
               _decryptedPassword,
               isSensitive: true,
               isRevealed: _isPasswordRevealed,
               onReveal: () => _revealPassword(item.encryptedPassword),
+              activitySubtitle: t.dashboard.activities.copied_password,
             ),
             if (item.encryptedNotes.isNotEmpty)
-              _buildInfoCard(t.general.notes, _decryptedNotes),
+              _buildInfoCard(
+                t.general.notes,
+                _decryptedNotes,
+                isSensitive: true,
+                isRevealed: _isNotesRevealed,
+                onReveal: () => _toggleNotes(item.encryptedNotes),
+                activitySubtitle: t.dashboard.activities.notes_copied,
+              ),
             const SizedBox(height: 24),
             NeumorphicContainer(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),

@@ -6,6 +6,7 @@ import '../../i18n/strings.g.dart';
 import '../../providers/settings_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/subscription_provider.dart';
+import '../../providers/activity_provider.dart';
 import '../../services/clipboard_service.dart';
 import '../../services/crypto_service.dart';
 import '../../services/logo_service.dart';
@@ -28,107 +29,26 @@ class SubscriptionDetailScreen extends ConsumerStatefulWidget {
 
 class _SubscriptionDetailScreenState
     extends ConsumerState<SubscriptionDetailScreen> {
+  static const _hiddenPassword = '********';
+
   bool _isPasswordRevealed = false;
-  String _decryptedPassword = '********';
-
-  Future<bool> _requestMasterPassword() async {
-    final controller = TextEditingController();
-    try {
-      var obscure = true;
-      final password = await showDialog<String>(
-        context: context,
-        barrierDismissible: false,
-        builder: (ctx) {
-          return StatefulBuilder(
-            builder: (context, setState) {
-              return AlertDialog(
-                backgroundColor: AppColors.of(ctx).surface,
-                title: Text(
-                  t.general.authentication,
-                  style: TextStyle(color: AppColors.of(ctx).textPrimary),
-                ),
-                content: TextField(
-                  controller: controller,
-                  autofocus: false,
-                  obscureText: obscure,
-                  style: TextStyle(color: AppColors.of(ctx).textPrimary),
-                  decoration: InputDecoration(
-                    labelText: t.general.master_password_hint,
-                    labelStyle: TextStyle(
-                      color: AppColors.of(ctx).textSecondary,
-                    ),
-                    suffixIcon: IconButton(
-                      onPressed: () => setState(() => obscure = !obscure),
-                      icon: Icon(
-                        obscure ? Icons.visibility : Icons.visibility_off,
-                        color: AppColors.of(ctx).textSecondary,
-                      ),
-                    ),
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: Text(
-                      t.general.cancel,
-                      style: TextStyle(color: AppColors.of(ctx).textSecondary),
-                    ),
-                  ),
-                  FilledButton(
-                    onPressed: () => Navigator.of(ctx).pop(controller.text),
-                    child: Text(t.general.confirm),
-                  ),
-                ],
-              );
-            },
-          );
-        },
-      );
-
-      if (password == null || password.isEmpty) return false;
-      final isValid = await ref
-          .read(authProvider.notifier)
-          .verifyMasterPassword(password);
-      if (!isValid && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(t.settings.master_password_wrong)),
-        );
-      }
-      return isValid;
-    } finally {
-      // Small delay to ensure dialog animation completes before disposing controller
-      Future.delayed(const Duration(milliseconds: 200), () {
-        controller.dispose();
-      });
-    }
-  }
-
-  Future<bool> _authenticate() async {
-    final settings = ref.read(settingsProvider).valueOrNull;
-    final isConfirmEnabled = settings?.biometricConfirm ?? false;
-
-    if (!isConfirmEnabled) return true;
-
-    final canUse = await ref.read(authProvider.notifier).canUseBiometrics();
-    if (canUse) {
-      final unlocked = await ref.read(authProvider.notifier).biometricUnlock();
-      if (unlocked) return true;
-    }
-
-    // Fallback: request master password if biometrics failed or not available
-    return await _requestMasterPassword();
-  }
+  String _decryptedPassword = _hiddenPassword;
 
   Future<void> _revealPassword(String encryptedPassword) async {
     if (_isPasswordRevealed) {
       setState(() {
         _isPasswordRevealed = false;
-        _decryptedPassword = '********';
+        _decryptedPassword = _hiddenPassword;
       });
       return;
     }
 
-    final authPassed = await _authenticate();
+    final authPassed = await ref
+        .read(authProvider.notifier)
+        .authenticateForSensitiveAction(
+          context,
+          wrongPasswordMessage: t.settings.master_password_wrong,
+        );
     if (!authPassed) return;
 
     try {
@@ -150,7 +70,7 @@ class _SubscriptionDetailScreenState
           if (mounted && _isPasswordRevealed) {
             setState(() {
               _isPasswordRevealed = false;
-              _decryptedPassword = '********';
+              _decryptedPassword = _hiddenPassword;
             });
           }
         });
@@ -164,9 +84,41 @@ class _SubscriptionDetailScreenState
     }
   }
 
-  void _copyToClipboard(String label, String value) {
-    if (value == '********') return;
-    ref.read(clipboardServiceProvider).copy(value);
+  Future<void> _copyToClipboard(
+    String label,
+    String value, {
+    String? activitySubtitle,
+  }) async {
+    if (value.isEmpty || value == _hiddenPassword) return;
+
+    final authPassed = await ref
+        .read(authProvider.notifier)
+        .authenticateForSensitiveAction(
+          context,
+          wrongPasswordMessage: t.settings.master_password_wrong,
+        );
+    if (!authPassed) return;
+
+    await ref.read(clipboardServiceProvider).copy(value);
+
+    if (!mounted) return;
+
+    // Record activity
+    final items = ref.read(subscriptionProvider).valueOrNull ?? [];
+    final matches = items.where((s) => s.id == widget.subscriptionId);
+    final item = matches.isNotEmpty ? matches.first : null;
+
+    if (item != null && activitySubtitle != null) {
+      ref
+          .read(activityProvider.notifier)
+          .recordActivity(
+            title: item.serviceName,
+            subtitle: activitySubtitle,
+            type: 'subscription',
+            action: 'copied',
+            itemId: item.id,
+          );
+    }
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -182,6 +134,7 @@ class _SubscriptionDetailScreenState
     bool isSensitive = false,
     VoidCallback? onReveal,
     bool isRevealed = true,
+    String? activitySubtitle,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16.0),
@@ -229,7 +182,11 @@ class _SubscriptionDetailScreenState
                 Icons.copy,
                 color: AppColors.of(context).primaryAccent,
               ),
-              onPressed: () => _copyToClipboard(label, value),
+              onPressed: () => _copyToClipboard(
+                label,
+                value,
+                activitySubtitle: activitySubtitle,
+              ),
             ),
           ],
         ),
@@ -257,6 +214,8 @@ class _SubscriptionDetailScreenState
     }
 
     final sub = subs[subIndex];
+    final costText =
+        '${CurrencyUtils.formatAmount(sub.monthlyCost, sub.currency)} ${sub.billingCycle == 'yearly' ? t.subscription_form.yearly : t.subscriptions.per_month}';
 
     return Scaffold(
       backgroundColor: AppColors.of(context).background,
@@ -297,7 +256,7 @@ class _SubscriptionDetailScreenState
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '${CurrencyUtils.formatAmount(sub.monthlyCost, sub.currency)} ${sub.billingCycle == 'yearly' ? t.subscription_form.yearly : t.subscriptions.per_month}',
+                    costText,
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w600,
@@ -308,7 +267,11 @@ class _SubscriptionDetailScreenState
               ),
             ),
             const SizedBox(height: 32),
-            _buildInfoCard(t.general.username_email, sub.emailOrUsername),
+            _buildInfoCard(
+              t.general.username_email,
+              sub.emailOrUsername,
+              activitySubtitle: t.dashboard.activities.copied_username,
+            ),
             if (sub.encryptedPassword.isNotEmpty)
               _buildInfoCard(
                 t.general.password,
@@ -316,6 +279,7 @@ class _SubscriptionDetailScreenState
                 isSensitive: true,
                 isRevealed: _isPasswordRevealed,
                 onReveal: () => _revealPassword(sub.encryptedPassword),
+                activitySubtitle: t.dashboard.activities.copied_password,
               ),
             _buildInfoCard(
               t.subscription_detail.next_billing_date_label,

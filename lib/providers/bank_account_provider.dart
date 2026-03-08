@@ -7,6 +7,7 @@ import '../services/text_sanitizer.dart';
 import '../widgets/error_handler.dart';
 import '../i18n/strings.g.dart';
 import 'settings_provider.dart';
+import 'activity_provider.dart';
 
 class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
   late final DatabaseService _dbService = ref.read(databaseProvider);
@@ -91,6 +92,15 @@ class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
     try {
       _dbService.bankAccountsBox.put(account.id, account);
       state = AsyncValue.data(_getItems());
+      ref
+          .read(activityProvider.notifier)
+          .recordActivity(
+            title: account.bankName,
+            subtitle: t.dashboard.activities.added_bank_account,
+            type: 'bank_account',
+            action: 'added',
+            itemId: account.id,
+          );
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
@@ -106,6 +116,15 @@ class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
     try {
       _dbService.bankAccountsBox.put(account.id, account);
       state = AsyncValue.data(_getItems());
+      ref
+          .read(activityProvider.notifier)
+          .recordActivity(
+            title: account.bankName,
+            subtitle: t.dashboard.activities.updated_bank_account,
+            type: 'bank_account',
+            action: 'updated',
+            itemId: account.id,
+          );
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
@@ -117,15 +136,46 @@ class BankAccountNotifier extends AutoDisposeAsyncNotifier<List<BankAccount>> {
     }
   }
 
-  void deleteBankAccount(String id) {
+  BankAccount? deleteBankAccount(String id) {
     try {
+      final item = _dbService.bankAccountsBox.get(id);
+      if (item == null) {
+        return null;
+      }
+      final title = item.bankName;
       _dbService.bankAccountsBox.delete(id);
       state = AsyncValue.data(_getItems());
+      ref
+          .read(activityProvider.notifier)
+          .recordActivity(
+            title: title,
+            subtitle: t.dashboard.activities.deleted_bank_account,
+            type: 'bank_account',
+            action: 'deleted',
+            itemId: id,
+          );
+      return item;
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to delete account: $e',
+          userMessage: t.settings.errors.setting_update_failed,
+        ),
+      );
+      return null;
+    }
+  }
+
+  void restoreBankAccount(BankAccount account) {
+    try {
+      _dbService.bankAccountsBox.put(account.id, account);
+      state = AsyncValue.data(_getItems());
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+      ErrorHandler.handleGlobalError(
+        DatabaseError(
+          'Failed to restore account: $e',
           userMessage: t.settings.errors.setting_update_failed,
         ),
       );

@@ -11,6 +11,7 @@
     "loading": "Yükleniyor...",
     "confirm": "Onayla",
     "copy": "Kopyala",
+    "undo": "Geri Al",
     "close": "Kapat",
     "continue": "Devam",
     "apply": "Uygula",
@@ -27,6 +28,7 @@
     "hide_in_travel_mode": "Seyahat Modunda Gizle",
     "record_not_found": "Kayıt bulunamadı",
     "copied_label": "$label kopyalandı",
+    "deleted_label": "$label silindi",
     "delete_record": "Kaydı Sil",
     "confirm_delete_title": "Silmek istediğinize emin misiniz?",
     "confirm_delete_message": "Bu işlem geri alınamaz.",
@@ -75,6 +77,36 @@
     "security_audit": {
       "title": "Güvenlik Taraması",
       "subtitle": "Web şifrelerinizin veri sızıntılarında ifşa olup olmadığını kontrol edin."
+    },
+    "activities": {
+      "title": "Son Aktiviteler",
+      "added_web_password": "Şifre eklendi",
+      "updated_web_password": "Şifre güncellendi",
+      "deleted_web_password": "Şifre silindi",
+      "copied_password": "Şifre kopyalandı",
+      "copied_username": "Kullanıcı adı kopyalandı",
+      "added_bank_account": "Banka hesabı eklendi",
+      "updated_bank_account": "Banka hesabı güncellendi",
+      "deleted_bank_account": "Banka hesabı silindi",
+      "copied_iban": "IBAN kopyalandı",
+      "added_subscription": "Abonelik eklendi",
+      "updated_subscription": "Abonelik güncellendi",
+      "deleted_subscription": "Abonelik silindi",
+      "notes_copied": "Notlar kopyalandı",
+      "time_just_now": "az önce",
+      "time_minute": "dk",
+      "time_hour": "sa",
+      "time_day": "gn"
+    },
+    "backup_status": {
+      "title": "Yedekleme Durumu",
+      "sync_now": "Şimdi Senkronize Et",
+      "last_sync": "Son senkronizasyon: $time",
+      "items_secured": "$count öğe bulutla koruma altında",
+      "never": "Hiç yedeklenmedi",
+      "status_ok": "Senkronize Edildi",
+      "status_pending": "Beklemede",
+      "status_error": "Hata Oluştu"
     }
   },
   "settings": {
@@ -125,7 +157,7 @@
       "biometric_unlock": "Biyometrik Kilit Açma",
       "sensitive_action_confirmation": "Hassas İşlem Onayı",
       "backup_to_drive": "Drive'a Yedekle",
-      "backup_to_drive_subtitle": "Şifreli yedeği kişisel Drive alanınıza aktarır",
+      "backup_to_drive_subtitle": "Şifreli kasa yedeğini kendi Google Drive alanınıza yükler",
       "restore_from_drive": "Drive'dan Getir",
       "restore_from_drive_subtitle": "Kendi Google hesabınızdan yedeği çeker",
       "copy_to_clipboard": "Dosyaya Aktar",
@@ -153,11 +185,11 @@
       "weekly": "Haftalık",
       "monthly": "Aylık",
       "usage_guide": "Kullanım",
-      "usage_guide_subtitle": "Kasa, yedekleme ve kurtarma akışlarını öğrenin",
+      "usage_guide_subtitle": "Kasayı açma, kayıt ekleme, yedekleme ve kurtarma akışlarını güvenle öğrenin",
       "privacy_overview": "Gizlilik",
-      "privacy_overview_subtitle": "Verilerinizin, yedeklerinizin ve telemetrinin nasıl işlendiği",
+      "privacy_overview_subtitle": "Offline-first depolama, yedekleme, biyometri ve telemetri özetini görün",
       "about_guarden": "Hakkında",
-      "about_guarden_subtitle": "Ürün amacı, offline-first yapı ve kurtarma prensipleri",
+      "about_guarden_subtitle": "Guarden'in kasanızı neden yerelde, şifreli ve sizin kontrolünüzde tuttuğunu görün",
       "app_version": "Uygulama Sürümü",
       "app_version_subtitle": "Bu cihazdaki kurulu sürüm bilgisi",
       "open_source_licenses": "Açık Kaynak Lisansları",
@@ -235,6 +267,7 @@
       "setting_update_failed": "Ayar kaydedilemedi.",
       "load_failed": "Veriler yüklenemedi.",
       "storage_access_failed": "Güvenli depolamaya erişilemedi.",
+      "encryption_key_missing": "Şifreleme anahtarı bulunamadı.",
       "db_open_failed": "Veritabanı açılamadı. İzinleri kontrol edin.",
       "db_not_ready": "Veritabanı henüz hazır değil.",
       "encryption_failed": "Veri şifrelenemedi.",
@@ -244,6 +277,8 @@
       "gdrive_auth_failed": "Google hesabına bağlanırken bir hata oluştu.",
       "gdrive_permission_denied": "Google Drive izni reddedildi.",
       "pwned_check_failed": "Şifre güvenliği kontrol edilemedi. İnterneti kontrol edin.",
+      "invalid_input": "Geçersiz giriş algılandı. Lütfen bilgileri kontrol edin.",
+      "network_failed": "Bağlantı kurulamadı. İnternetinizi kontrol edip tekrar deneyin.",
       "generic": "Bir hata oluştu. Lütfen tekrar deneyin."
     },
     "alerts": {
@@ -273,8 +308,9 @@
   "auth_login": {
     "biometric_unavailable": "Biyometrik doğrulama kullanılamıyor.",
     "biometric_failed": "Biyometrik doğrulama başarısız oldu.",
+    "biometric_try_master_password": "Biyometrik doğrulama başarısız oldu. Tekrar deneyin veya master şifrenizi kullanın.",
     "wrong_master_password": "Master şifre hatalı.",
-    "subtitle": "Premium gizliliğinize erişmek için master şifrenizi girin.",
+    "subtitle": "Bu cihazda saklanan şifreli kasanızı açmak için master şifrenizi girin.",
     "unlock_button": "Kilidi Aç",
     "use_biometrics": "Biyometri Kullan",
     "forgot_master_password": "Master şifremi unuttum",
@@ -288,14 +324,14 @@
   },
   "welcome": {
     "title": "Guarden'a Hoş Geldiniz",
-    "subtitle": "Guarden: Güvenden başka bedeli olmayan premium gizlilik. Save paper, save password, save time, save privacy. Şimdi kişisel offline kasanızı oluşturalım.",
+    "subtitle": "Güvenden başka bedeli olmayan premium gizlilik",
     "get_started": "Başlayalım"
   },
   "onboarding_setup": {
     "password_too_short": "Şifre en az 8 karakter olmalı.",
     "passwords_do_not_match": "Şifreler eşleşmiyor.",
-    "title": "Güvenli Gelecek: Guarden",
-    "subtitle": "Premium gizliliğinizi başlatmak ve tüm dijital varlıklarınızı doğadan ilham alan bir güvenlikle korumak için Master Şifre belirleyin.",
+    "title": "Şifreli Kasanızı Oluşturun",
+    "subtitle": "Yerel kasanızı korumak, yedeklerinizi güvenceye almak ve offline-first kullanıma başlamak için bir master şifre belirleyin.",
     "confirm_password_hint": "Şifreyi Onayla",
     "create_vault": "Kasayı Oluştur"
   },
@@ -303,7 +339,7 @@
     "enabled_message": "Biyometrik giriş etkinleştirildi.",
     "failed_message": "Biyometrik doğrulama iptal edildi veya başarısız oldu.",
     "title": "Biyometrik Giriş",
-    "subtitle": "Her seferinde master şifre girmek yerine kasanızı Face ID veya parmak iziyle hızlı açabilirsiniz."
+    "subtitle": "Daha hızlı giriş için Face ID veya parmak izi kullanın. Kasanız yine cihaz güvenliği ve master şifrenizle korunur."
   },
   "bank_form": {
     "required_fields": "Banka adı ve şifre zorunludur.",
@@ -380,11 +416,20 @@
     "scan_failed": "Tarama başarısız oldu.",
     "great": "Harika!",
     "safe_message": "Şifreleriniz güvenli görünüyor.",
+    "safe_badge": "Güvenli",
     "weak_or_risky_passwords": "Zayıf veya riskli şifreler",
     "security_score": "Güvenlik skoru",
     "scanned": "Taranan",
     "weak": "Zayıf",
-    "reused": "Tekrar Eden"
+    "reused": "Tekrar Eden",
+    "reason_weak_password": "Zayıf şifre",
+    "reason_reused_password": "Tekrar kullanılan şifre",
+    "reason_weak_and_reused": "Zayıf ve tekrar kullanılan şifre",
+    "types": {
+      "bank": "Banka",
+      "subscription": "Abonelik",
+      "web": "Web"
+    }
   },
   "compromised_accounts": {
     "title": "İfşa Olmuş Hesaplar",
@@ -397,19 +442,28 @@
     "count_limit": "$current/$max Şifre",
     "empty": {
       "title": "Henüz Web Şifresi Yok",
-      "subtitle": "İnternet sitelerindeki ve uygulamalardaki şifrelerinizi askeri seviyede güvenlik ile burada saklayın."
+      "subtitle": "İlk web veya uygulama girişinizi ekleyin; şifrelerinizi şifreli, düzenli ve otomatik doldurmaya hazır tutun."
     },
     "copy_success": "Şifre kopyalandı!",
     "copy_error": "Kopyalama hatası: $error",
     "tooltip_copy": "Şifreyi Kopyala",
     "no_key_error": "Şifreleme anahtarı bulunamadı."
   },
+  "autofill": {
+    "title": "Hesap Seç",
+    "matching_accounts": "Eşleşen hesaplar",
+    "all_accounts": "Tüm hesaplar",
+    "show_all_accounts": "Tümünü göster",
+    "matching_accounts_hint": "Bu uygulama veya site için en olası eşleşmeler önce gösterilir.",
+    "no_saved_password_found": "Kayıtlı şifre bulunamadı.",
+    "no_matching_accounts": "Doğrudan bir eşleşme bulunamadı. Yine de tüm kasadan seçim yapabilirsiniz."
+  },
   "bank_accounts": {
     "title": "Banka & Finans",
     "count_limit": "$current/$max Kasa",
     "empty": {
       "title": "Henüz Banka Hesabı Yok",
-      "subtitle": "Burada finansal kurumlarınızı ve IBAN bilgilerinizi yüksek güvenlikle saklayabilirsiniz."
+      "subtitle": "İlk banka kaydınızı ekleyin; erişim bilgilerini, notları ve kurtarma ayrıntılarını tek bir şifreli kasada tutun."
     }
   },
   "subscriptions": {
@@ -419,7 +473,7 @@
     "per_month": "/ay",
     "empty": {
       "title": "Henüz Abonelik Yok",
-      "subtitle": "Aylık ödemelerinizi ve dijital platform üyeliklerinizi buradan takip edebilirsiniz."
+      "subtitle": "İlk aboneliğinizi ekleyin; yinelenen ödemeleri, yenileme tarihlerini ve erişim ayrıntılarını tek yerde yönetin."
     }
   },
   "notifications": {

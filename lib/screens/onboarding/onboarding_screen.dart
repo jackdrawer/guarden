@@ -61,6 +61,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: Image.asset(
+                        'assets/images/app_icon.png',
+                        width: 76,
+                        height: 76,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   Text(
                     t.onboarding_setup.title,
                     style: TextStyle(
@@ -79,7 +91,32 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: AppColors.of(
+                        context,
+                      ).primaryAccent.withValues(alpha: 0.08),
+                    ),
+                    child: Column(
+                      children: [
+                        _OnboardingHintRow(
+                          icon: Icons.lock_outline_rounded,
+                          label: t.settings.info.privacy.encryption_title,
+                          body: t.settings.info.privacy.encryption_body,
+                        ),
+                        const SizedBox(height: 10),
+                        _OnboardingHintRow(
+                          icon: Icons.phone_android_rounded,
+                          label: t.settings.info.privacy.storage_title,
+                          body: t.settings.info.privacy.storage_body,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 28),
                   NeumorphicTextField(
                     controller: _passwordController,
                     hintText: t.general.master_password_hint,
@@ -111,6 +148,53 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _OnboardingHintRow extends StatelessWidget {
+  const _OnboardingHintRow({
+    required this.icon,
+    required this.label,
+    required this.body,
+  });
+
+  final IconData icon;
+  final String label;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 18, color: AppColors.of(context).primaryAccent),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: AppColors.of(context).textPrimary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                body,
+                style: TextStyle(
+                  color: AppColors.of(context).textSecondary,
+                  fontSize: 12,
+                  height: 1.35,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

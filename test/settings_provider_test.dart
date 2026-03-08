@@ -83,6 +83,8 @@ class _FakeSettingsService extends SettingsService {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   SettingsState readSettingsState(ProviderContainer container) {
     return container.read(settingsProvider).valueOrNull ??
         SettingsState.initial();
@@ -98,8 +100,8 @@ void main() {
       final sub = container.listen(settingsProvider, (_, __) {});
       addTearDown(sub.close);
 
-      await Future<void>.delayed(const Duration(milliseconds: 10));
-      expect(readSettingsState(container).isInitialized, isTrue);
+      final initializedState = await container.read(settingsProvider.future);
+      expect(initializedState.isInitialized, isTrue);
 
       final notifier = container.read(settingsProvider.notifier);
       await notifier.toggleTravelMode();
@@ -130,7 +132,7 @@ void main() {
       final sub = container.listen(settingsProvider, (_, __) {});
       addTearDown(sub.close);
 
-      await Future<void>.delayed(const Duration(milliseconds: 10));
+      await container.read(settingsProvider.future);
       final notifier = container.read(settingsProvider.notifier);
       await notifier.resetSettings();
 

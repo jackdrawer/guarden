@@ -1,0 +1,105 @@
+[
+    {
+        "eventType": "VIEW_CLICKED",
+        "elementDescriptors": [
+            {
+                "contentDescription": "Başlayalım"
+            },
+            {
+                "text": "Başlayalım"
+            }
+        ]
+    },
+    {
+        "eventType": "VIEW_TEXT_CHANGED",
+        "replacementText": "master1234",
+        "elementDescriptors": [
+            {
+                "resourceId": "master_password_field"
+            },
+            {
+                "hintText": "Master Şifre"
+            }
+        ]
+    },
+    {
+        "eventType": "VIEW_TEXT_CHANGED",
+        "replacementText": "master1234",
+        "elementDescriptors": [
+            {
+                "resourceId": "confirm_password_field"
+            },
+            {
+                "hintText": "Şifreyi Onayla"
+            }
+        ]
+    },
+    {
+        "eventType": "VIEW_CLICKED",
+        "elementDescriptors": [
+            {
+                "text": "Kasayı Oluştur"
+            }
+        ]
+    },
+    {
+        "eventType": "VIEW_CLICKED",
+        "elementDescriptors": [
+            {
+                "text": "Daha Sonra"
+            }
+        ]
+    },
+    {
+        "eventType": "VIEW_CLICKED",
+        "elementDescriptors": [
+            {
+                "text": "Web Sifresi Ekle"
+            }
+        ]
+    },
+    {
+        "eventType": "VIEW_TEXT_CHANGED",
+        "replacementText": "Test Sitesi",
+        "elementDescriptors": [
+            {
+                "hintText": "ör. Amazon, GitHub"
+            }
+        ]
+    },
+    {
+        "eventType": "VIEW_TEXT_CHANGED",
+        "replacementText": "test.com",
+        "elementDescriptors": [
+            {
+                "hintText": "ör. amazon.com"
+            }
+        ]
+    },
+    {
+        "eventType": "VIEW_TEXT_CHANGED",
+        "replacementText": "test@user.com",
+        "elementDescriptors": [
+            {
+                "hintText": "isim@alanadi.com"
+            }
+        ]
+    },
+    {
+        "eventType": "VIEW_TEXT_CHANGED",
+        "replacementText": "pass123",
+        "elementDescriptors": [
+            {
+                "hintText": "Şifre"
+            }
+        ]
+    },
+    {
+        "eventType": "VIEW_CLICKED",
+        "elementDescriptors": [
+            {
+                "text": "Kaydet"
+            }
+        ]
+    }
+]

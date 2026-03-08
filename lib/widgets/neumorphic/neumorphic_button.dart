@@ -1,10 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../theme/app_colors.dart';
 
 class NeumorphicButton extends StatefulWidget {
   final Widget child;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final double borderRadius;
   final EdgeInsets padding;
   final EdgeInsets margin;
@@ -29,10 +31,14 @@ class NeumorphicButton extends StatefulWidget {
 }
 
 class _NeumorphicButtonState extends State<NeumorphicButton> {
+  static const _activationDebounce = Duration(milliseconds: 300);
+
   bool _isPressed = false;
   bool _isHovered = false;
   bool _isFocused = false;
+  bool _isActivationLocked = false;
   late FocusNode _focusNode;
+  Timer? _activationLockTimer;
 
   @override
   void initState() {
@@ -49,10 +55,14 @@ class _NeumorphicButtonState extends State<NeumorphicButton> {
       _focusNode = widget.focusNode ?? FocusNode();
       _focusNode.addListener(_onFocusChange);
     }
+    if (widget.onPressed == null) {
+      _unlockActivation();
+    }
   }
 
   @override
   void dispose() {
+    _activationLockTimer?.cancel();
     if (widget.focusNode == null) {
       _focusNode.dispose();
     } else {
@@ -68,17 +78,38 @@ class _NeumorphicButtonState extends State<NeumorphicButton> {
   }
 
   void _handleTapDown() {
+    if (widget.onPressed == null) {
+      return;
+    }
     HapticFeedback.lightImpact();
     setState(() => _isPressed = true);
   }
 
   void _handleTapUp() {
     setState(() => _isPressed = false);
-    widget.onPressed();
+    _invokePressed();
   }
 
   void _handleTapCancel() {
     setState(() => _isPressed = false);
+  }
+
+  void _invokePressed() {
+    if (widget.onPressed == null || _isActivationLocked) {
+      return;
+    }
+
+    _isActivationLocked = true;
+    widget.onPressed?.call();
+
+    _activationLockTimer?.cancel();
+    _activationLockTimer = Timer(_activationDebounce, _unlockActivation);
+  }
+
+  void _unlockActivation() {
+    _activationLockTimer?.cancel();
+    _activationLockTimer = null;
+    _isActivationLocked = false;
   }
 
   @override
@@ -88,7 +119,7 @@ class _NeumorphicButtonState extends State<NeumorphicButton> {
     return Semantics(
       button: true,
       label: widget.semanticLabel,
-      enabled: true,
+      enabled: widget.onPressed != null,
       child: FocusableActionDetector(
         focusNode: _focusNode,
         onShowHoverHighlight: (v) => setState(() => _isHovered = v),
@@ -96,26 +127,28 @@ class _NeumorphicButtonState extends State<NeumorphicButton> {
         actions: {
           ActivateIntent: CallbackAction<Intent>(
             onInvoke: (_) {
-              widget.onPressed();
+              _invokePressed();
               return null;
             },
           ),
         },
         child: GestureDetector(
-          onTapDown: (_) => _handleTapDown(),
-          onTapUp: (_) => _handleTapUp(),
-          onTapCancel: _handleTapCancel,
+          onTapDown: widget.onPressed == null ? null : (_) => _handleTapDown(),
+          onTapUp: widget.onPressed == null ? null : (_) => _handleTapUp(),
+          onTapCancel: widget.onPressed == null ? null : _handleTapCancel,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
             margin: widget.margin,
             decoration: BoxDecoration(
-              color: colors.background,
+              color: widget.onPressed == null
+                  ? colors.background.withValues(alpha: 0.85)
+                  : colors.background,
               borderRadius: BorderRadius.circular(widget.borderRadius),
-              boxShadow: _isPressed || widget.isFlat
+              boxShadow: _isPressed || widget.isFlat || widget.onPressed == null
                   ? null
                   : colors.neumorphicShadows,
               border: Border.all(
-                color: _isFocused || _isHovered
+                color: widget.onPressed != null && (_isFocused || _isHovered)
                     ? colors.primaryAccent.withValues(alpha: 0.5)
                     : Colors.transparent,
                 width: 1.5,
@@ -148,7 +181,10 @@ class _NeumorphicButtonState extends State<NeumorphicButton> {
                     ),
                   Padding(
                     padding: widget.padding,
-                    child: Center(child: widget.child),
+                    child: Opacity(
+                      opacity: widget.onPressed == null ? 0.65 : 1,
+                      child: Center(child: widget.child),
+                    ),
                   ),
                 ],
               ),

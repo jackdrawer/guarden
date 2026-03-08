@@ -3,7 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final appLifecycleProvider = Provider<AppLifecycleService>((ref) {
-  return AppLifecycleService(ref);
+  final service = AppLifecycleService(ref);
+  ref.onDispose(service.dispose);
+  return service;
 });
 
 final isLockedProvider = StateProvider<bool>((ref) => false);
@@ -15,9 +17,11 @@ class AppLifecycleService extends WidgetsBindingObserver {
   final Ref _ref;
   Timer? _lockTimer;
   Timer? _idleTimer;
+  Timer? _lockGraceTimer;
   DateTime? _lastInteraction;
   static const int lockTimeoutSeconds = 60;
   static const int idleCheckIntervalMs = 1000; // Check every second
+  static const int _lockGraceSeconds = 10; // Grace period before locking
 
   AppLifecycleService(this._ref) {
     WidgetsBinding.instance.addObserver(this);
@@ -28,6 +32,7 @@ class AppLifecycleService extends WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _lockTimer?.cancel();
     _idleTimer?.cancel();
+    _lockGraceTimer?.cancel();
   }
 
   @override
@@ -36,26 +41,28 @@ class AppLifecycleService extends WidgetsBindingObserver {
 
     switch (state) {
       case AppLifecycleState.inactive:
-        // Phone screen locked or app going to background - lock immediately
-        _lockImmediately();
+        // Transient state: triggered by dialogs, account pickers,
+        // biometric prompts, etc. Do NOT lock here.
         break;
       case AppLifecycleState.paused:
-        // App in background - start timer for safety
-        _startLockTimer();
+        // App truly went to background - start grace period then lock
+        _startGracefulLock();
         break;
       case AppLifecycleState.resumed:
-        // App back in foreground - cancel all lock timers
+        // App back in foreground - cancel all lock/grace timers
         _cancelLockTimer();
+        _cancelGraceTimer();
         _resetIdleTimer();
         break;
       case AppLifecycleState.hidden:
-        // App hidden (e.g., app switcher) - lock immediately
-        _lockImmediately();
+        // App switcher or picture-in-picture - start grace period
+        _startGracefulLock();
         break;
       case AppLifecycleState.detached:
         // App detached - clean up
         _lockTimer?.cancel();
         _idleTimer?.cancel();
+        _lockGraceTimer?.cancel();
         break;
     }
   }
@@ -101,13 +108,28 @@ class AppLifecycleService extends WidgetsBindingObserver {
     _lastInteraction = DateTime.now();
   }
 
-  /// Locks the app immediately
-  void _lockImmediately() {
+  /// Starts a graceful lock with a grace period.
+  /// If the user returns within [_lockGraceSeconds], the lock is cancelled.
+  void _startGracefulLock() {
     // Only lock if user is authenticated
     final isAuthenticated = _ref.read(isUserAuthenticatedProvider);
     if (!isAuthenticated) return;
 
-    _lockApp();
+    // Don't start if already locked
+    if (_ref.read(isLockedProvider)) return;
+
+    // Don't start duplicate grace timers
+    if (_lockGraceTimer?.isActive == true) return;
+
+    _lockGraceTimer = Timer(const Duration(seconds: _lockGraceSeconds), () {
+      _lockApp();
+    });
+  }
+
+  /// Cancels the grace period timer
+  void _cancelGraceTimer() {
+    _lockGraceTimer?.cancel();
+    _lockGraceTimer = null;
   }
 
   /// Locks the app
@@ -115,6 +137,7 @@ class AppLifecycleService extends WidgetsBindingObserver {
     try {
       _ref.read(isLockedProvider.notifier).state = true;
       _cancelLockTimer();
+      _cancelGraceTimer();
     } catch (e) {
       debugPrint('Error locking app: $e');
     }
@@ -124,24 +147,6 @@ class AppLifecycleService extends WidgetsBindingObserver {
   void unlockApp() {
     _ref.read(isLockedProvider.notifier).state = false;
     _resetIdleTimer();
-  }
-
-  void _startLockTimer() {
-    try {
-      // Only start timer if user is authenticated
-      final isAuthenticated = _ref.read(isUserAuthenticatedProvider);
-      if (!isAuthenticated) return;
-
-      // Don't start if already locked
-      if (_ref.read(isLockedProvider)) return;
-
-      _lockTimer?.cancel();
-      _lockTimer = Timer(const Duration(seconds: lockTimeoutSeconds), () {
-        _lockApp();
-      });
-    } catch (e) {
-      debugPrint('Lifecycle lock timer error: $e');
-    }
   }
 
   void _cancelLockTimer() {

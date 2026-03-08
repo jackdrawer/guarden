@@ -6,12 +6,14 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../i18n/strings.g.dart';
+import '../../models/subscription.dart';
 import '../../providers/subscription_provider.dart';
 import '../../services/logo_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/animated_empty_state.dart';
 import '../../widgets/category/category_widgets.dart';
 import '../../widgets/neumorphic/neumorphic_container.dart';
+import '../../widgets/ads/native_ad_widget.dart';
 import '../../utils/currency_utils.dart';
 
 class SubscriptionsTab extends ConsumerStatefulWidget {
@@ -23,6 +25,33 @@ class SubscriptionsTab extends ConsumerStatefulWidget {
 
 class _SubscriptionsTabState extends ConsumerState<SubscriptionsTab> {
   String? _selectedCategory;
+
+  void _handleDelete(BuildContext context, Subscription sub) {
+    HapticFeedback.mediumImpact();
+    final deleted = ref
+        .read(subscriptionProvider.notifier)
+        .deleteSubscription(sub.id);
+    if (deleted == null) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(t.general.deleted_label(label: sub.serviceName)),
+          duration: const Duration(seconds: 6),
+          action: SnackBarAction(
+            label: t.general.undo,
+            onPressed: () {
+              ref
+                  .read(subscriptionProvider.notifier)
+                  .restoreSubscription(deleted);
+            },
+          ),
+        ),
+      );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -120,12 +149,29 @@ class _SubscriptionsTabState extends ConsumerState<SubscriptionsTab> {
                     icon: Icons.subscriptions_outlined,
                     title: t.subscriptions.empty.title,
                     subtitle: t.subscriptions.empty.subtitle,
+                    actionLabel: t.home.add_subscription,
+                    onAction: () => context.push('/add-subscription'),
                   )
                 : AnimationLimiter(
                     child: ListView.builder(
-                      itemCount: filtered.length,
+                      itemCount:
+                          filtered.length + (filtered.isNotEmpty ? 1 : 0),
                       itemBuilder: (context, index) {
-                        final sub = filtered[index];
+                        if (index == 1 && filtered.isNotEmpty) {
+                          return AnimationConfiguration.staggeredList(
+                            position: index,
+                            duration: const Duration(milliseconds: 375),
+                            child: const SlideAnimation(
+                              verticalOffset: 50.0,
+                              child: FadeInAnimation(child: NativeAdWidget()),
+                            ),
+                          );
+                        }
+
+                        final adjustedIndex = (filtered.isNotEmpty && index > 1)
+                            ? index - 1
+                            : index;
+                        final sub = filtered[adjustedIndex];
                         return AnimationConfiguration.staggeredList(
                           position: index,
                           duration: const Duration(milliseconds: 375),
@@ -154,14 +200,8 @@ class _SubscriptionsTabState extends ConsumerState<SubscriptionsTab> {
                                         label: t.general.edit,
                                       ),
                                       SlidableAction(
-                                        onPressed: (context) {
-                                          HapticFeedback.mediumImpact();
-                                          ref
-                                              .read(
-                                                subscriptionProvider.notifier,
-                                              )
-                                              .deleteSubscription(sub.id);
-                                        },
+                                        onPressed: (context) =>
+                                            _handleDelete(context, sub),
                                         backgroundColor: Colors.transparent,
                                         foregroundColor: AppColors.of(
                                           context,

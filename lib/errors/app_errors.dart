@@ -1,3 +1,5 @@
+import '../i18n/strings.g.dart';
+
 class AppError implements Exception {
   final String message;
   final String userMessage;
@@ -18,51 +20,49 @@ class AppError implements Exception {
 class StorageError extends AppError {
   StorageError(
     super.message, {
-    super.userMessage =
-        'Couldn\'t access secure storage. Please re-enter your master password.',
+    String? userMessage,
     super.canRetry = true,
     super.action = 're-enter password',
-  });
+  }) : super(userMessage: userMessage ?? t.settings.errors.storage_access_failed);
 }
 
 class CryptoError extends AppError {
   CryptoError(
     super.message, {
-    super.userMessage =
-        'Couldn\'t encrypt data. Your information is safe but wasn\'t saved.',
+    String? userMessage,
     super.canRetry = false,
     super.action,
-  });
+  }) : super(userMessage: userMessage ?? t.settings.errors.encryption_failed);
 }
 
 class NetworkError extends AppError {
   NetworkError(
     super.message, {
-    super.userMessage =
-        'Couldn\'t connect to server. Check your internet and try again.',
+    String? userMessage,
     super.canRetry = true,
     super.action = 'retry',
-  });
+  }) : super(userMessage: userMessage ?? t.settings.errors.network_failed);
 }
 
 class DatabaseError extends AppError {
   DatabaseError(
     super.message, {
-    super.userMessage =
-        'Couldn\'t save your data. Please check available storage.',
+    String? userMessage,
     super.canRetry = true,
     super.action = 'retry',
-  });
+  }) : super(userMessage: userMessage ?? t.settings.errors.setting_update_failed);
 }
 
 class BiometricError extends AppError {
   BiometricError(
     super.message, {
-    super.userMessage =
-        'Biometric authentication failed. Try again or use master password.',
+    String? userMessage,
     super.canRetry = true,
     super.action = 'retry',
-  });
+  }) : super(
+         userMessage:
+             userMessage ?? t.auth_login.biometric_try_master_password,
+       );
 }
 
 class ValidationError extends AppError {
@@ -74,6 +74,6 @@ class ValidationError extends AppError {
   }) : super(
          userMessage:
              userMessage ??
-             'Invalid input provided. Please check your details.',
+             t.settings.errors.invalid_input,
        );
 }

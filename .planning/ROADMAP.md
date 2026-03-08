@@ -162,16 +162,49 @@ Plans:
 **Plans:** 4 plans
 
 Plans:
-- [ ] 14-01 Android Release Hardening
+- [x] 14-01 Android Release Hardening
 - [ ] 14-02 iOS Submission Readiness
-- [ ] 14-03 Launch Gate Test Stabilization
-- [ ] 14-04 Store Submission Pack & Evidence
+- [x] 14-03 Launch Gate Test Stabilization
+- [x] 14-04 Store Submission Pack & Evidence
+
+### Phase 15: Store Launch Growth Polish
+
+**Goal:** Polish first-run UX, trust messaging, and screenshot-ready Android surfaces so Guarden's launch experience matches its Play Store positioning.
+**Requirements**:
+- Store-aligned onboarding, login, and first-run messaging
+- Screenshot-ready Android surfaces with stronger empty-state and CTA hierarchy
+- More visible privacy, backup, autofill, and offline-first trust cues
+- Final Android screenshot/listing QA pack tied to actual launch surfaces
+**Depends on:** Phase 14
+**Plans:** 4 plans
+
+Plans:
+- [x] 15-01 First-Run Messaging & Onboarding Alignment
+- [x] 15-02 Core Surface Polish & Empty-State CTA Clarity
+- [x] 15-03 Trust, Privacy & Backup Visibility Polish
+- [x] 15-04 Screenshot Readiness & Launch QA
+
+### Phase 16: Security UX Hardening & Safe Interaction Standards
+
+**Goal:** Eliminate sensitive-action security inconsistencies, prevent accidental data loss, and harden autofill and audit flows before the next feature expansion.
+**Requirements**:
+- Sensitive notes stay hidden by default and only decrypt after explicit user reveal
+- Copy, reveal, export, and delete flows follow one consistent authentication and recovery policy across modules
+- Autofill prioritizes domain/package matches, and destructive list actions support undo or confirmation
+- Duplicate security-audit surfaces, hardcoded security strings, and audit performance hotspots are cleaned up in this hardening pass
+**Depends on:** Phase 15
+**Plans:** 3 plans
+
+Plans:
+- [x] 16-01 Sensitive Action Standard, Explicit Reveal, and Export Auth Alignment
+- [x] 16-02 Safe Delete Recovery and Save Submission Guards
+- [x] 16-03 Autofill Match-First, Audit Consolidation, and Security i18n Cleanup
 
 ---
 
 ## Progress
 
-**Execution Order:** Phases execute in numeric order (7 → 8 → 9 → 10 → 11 → 12 → 13 → 14)
+**Execution Order:** Phases execute in numeric order (7 → 8 → 9 → 10 → 11 → 12 → 13 → 14 → 15 → 16)
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -188,4 +221,6 @@ Plans:
 | 11. Security & Migration | v1.1 | Complete | Complete | 2026-03-05 |
 | 12. Visual Analytics & Categorization | v1.2 | Complete | Complete | 2026-03-06 |
 | 13. Auto Backup & Restore | v1.2 | Complete | Complete | 2026-03-06 |
-| 14. Store Launch Readiness & Submission Hardening | v1.2 | 0/4 | Planned | - |
+| 14. Store Launch Readiness & Submission Hardening | v1.2 | 3/4 | In Progress | - |
+| 15. Store Launch Growth Polish | v1.2 | 4/4 | Complete | 2026-03-07 |
+| 16. Security UX Hardening & Safe Interaction Standards | v1.2 | 3/3 | Complete | 2026-03-08 |

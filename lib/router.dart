@@ -14,7 +14,7 @@ import 'screens/subscriptions/subscription_form_screen.dart';
 import 'screens/subscriptions/subscription_detail_screen.dart';
 import 'screens/web_passwords/web_password_form_screen.dart';
 import 'screens/web_passwords/web_password_detail_screen.dart';
-import 'screens/security_audit_screen.dart';
+import 'screens/security/security_audit_screen.dart';
 import 'screens/security/compromised_accounts_screen.dart';
 import 'screens/settings/settings_screen.dart';
 import 'screens/splash_screen.dart';

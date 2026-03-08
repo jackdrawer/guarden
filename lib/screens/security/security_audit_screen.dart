@@ -122,7 +122,7 @@ class SecurityAuditScreen extends ConsumerWidget {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      item.reason,
+                                      '${_typeLabel(item.type)} • ${item.reason}',
                                       style: const TextStyle(
                                         color: Colors.orangeAccent,
                                         fontSize: 12,
@@ -184,6 +184,17 @@ class SecurityAuditScreen extends ConsumerWidget {
       ),
       child: Icon(icon, color: colors.primaryAccent),
     );
+  }
+
+  String _typeLabel(String type) {
+    switch (type) {
+      case 'bank':
+        return t.security_audit.types.bank;
+      case 'subscription':
+        return t.security_audit.types.subscription;
+      default:
+        return t.security_audit.types.web;
+    }
   }
 
   Widget _buildScoreWheel(BuildContext context, int score) {

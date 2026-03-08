@@ -11,6 +11,7 @@
     "loading": "Loading...",
     "confirm": "Confirm",
     "copy": "Copy",
+    "undo": "Undo",
     "close": "Close",
     "continue": "Continue",
     "apply": "Apply",
@@ -27,6 +28,7 @@
     "hide_in_travel_mode": "Hide in Travel Mode",
     "record_not_found": "Record not found",
     "copied_label": "$label copied",
+    "deleted_label": "$label deleted",
     "delete_record": "Delete Record",
     "confirm_delete_title": "Are you sure you want to delete?",
     "confirm_delete_message": "This action cannot be undone.",
@@ -75,6 +77,36 @@
     "security_audit": {
       "title": "Security Check",
       "subtitle": "Check if your passwords are leaked in data breaches."
+    },
+    "activities": {
+      "title": "Recent Activities",
+      "added_web_password": "Password added",
+      "updated_web_password": "Password updated",
+      "deleted_web_password": "Password deleted",
+      "copied_password": "Password copied",
+      "copied_username": "Username copied",
+      "added_bank_account": "Bank account added",
+      "updated_bank_account": "Bank account updated",
+      "deleted_bank_account": "Bank account deleted",
+      "copied_iban": "IBAN copied",
+      "added_subscription": "Subscription added",
+      "updated_subscription": "Subscription updated",
+      "deleted_subscription": "Subscription deleted",
+      "notes_copied": "Notes copied",
+      "time_just_now": "just now",
+      "time_minute": "m",
+      "time_hour": "h",
+      "time_day": "d"
+    },
+    "backup_status": {
+      "title": "Backup Status",
+      "sync_now": "Sync Now",
+      "last_sync": "Last sync: $time",
+      "items_secured": "$count items secured in cloud",
+      "never": "Never backed up",
+      "status_ok": "Synchronized",
+      "status_pending": "Pending",
+      "status_error": "Sync Error"
     }
   },
   "settings": {
@@ -125,7 +157,7 @@
       "biometric_unlock": "Biometric unlock",
       "sensitive_action_confirmation": "Sensitive action confirmation",
       "backup_to_drive": "Backup to Drive",
-      "backup_to_drive_subtitle": "Uploads encrypted backup to your personal Drive space",
+      "backup_to_drive_subtitle": "Upload an encrypted vault backup to your own Google Drive space",
       "restore_from_drive": "Restore from Drive",
       "restore_from_drive_subtitle": "Downloads backup from your own Google account",
       "copy_to_clipboard": "Export to File",
@@ -153,11 +185,11 @@
       "weekly": "Weekly",
       "monthly": "Monthly",
       "usage_guide": "How to Use",
-      "usage_guide_subtitle": "Learn the core vault, backup, and recovery flows",
+      "usage_guide_subtitle": "Unlock, save, back up, and recover with confidence",
       "privacy_overview": "Privacy",
-      "privacy_overview_subtitle": "How your data, backups, and telemetry are handled",
+      "privacy_overview_subtitle": "Offline-first storage, backups, biometrics, and telemetry at a glance",
       "about_guarden": "About Guarden",
-      "about_guarden_subtitle": "Product purpose, offline-first model, and recovery principles",
+      "about_guarden_subtitle": "Why Guarden keeps your vault local, encrypted, and under your control",
       "app_version": "App Version",
       "app_version_subtitle": "Installed version on this device",
       "open_source_licenses": "Open Source Licenses",
@@ -235,6 +267,7 @@
       "setting_update_failed": "Could not save setting.",
       "load_failed": "Could not load data.",
       "storage_access_failed": "Could not access secure storage.",
+      "encryption_key_missing": "Encryption key not found.",
       "db_open_failed": "Could not open database. Check permissions.",
       "db_not_ready": "Database is not ready yet.",
       "encryption_failed": "Could not encrypt data.",
@@ -244,6 +277,8 @@
       "gdrive_auth_failed": "An error occurred while connecting to Google account.",
       "gdrive_permission_denied": "Google Drive permission was denied.",
       "pwned_check_failed": "Could not check password security. Check your internet.",
+      "invalid_input": "Invalid input provided. Please check your details.",
+      "network_failed": "Could not connect. Check your internet and try again.",
       "generic": "Something went wrong. Please try again."
     },
     "alerts": {
@@ -273,8 +308,9 @@
   "auth_login": {
     "biometric_unavailable": "Biometric authentication is not available.",
     "biometric_failed": "Biometric authentication failed.",
+    "biometric_try_master_password": "Biometric authentication failed. Try again or use your master password.",
     "wrong_master_password": "Wrong master password.",
-    "subtitle": "Enter your master password to access your premium privacy.",
+    "subtitle": "Unlock your encrypted vault stored on this device.",
     "unlock_button": "Unlock",
     "use_biometrics": "Use Biometrics",
     "forgot_master_password": "I forgot my master password",
@@ -288,14 +324,14 @@
   },
   "welcome": {
     "title": "Welcome to Guarden",
-    "subtitle": "Guarden: Premium privacy that costs nothing but trust. Save paper, save password, save time, save privacy. Let us create your personal offline vault.",
+    "subtitle": "Premium privacy that costs nothing but trust",
     "get_started": "Get Started"
   },
   "onboarding_setup": {
     "password_too_short": "Password must be at least 8 characters.",
     "passwords_do_not_match": "Passwords do not match.",
-    "title": "Secure Future: Guarden",
-    "subtitle": "Set a Master Password to initialize your premium privacy and protect all digital assets with nature-inspired security.",
+    "title": "Create Your Encrypted Vault",
+    "subtitle": "Set a master password to protect your local vault, secure your backups, and start with an offline-first setup.",
     "confirm_password_hint": "Confirm Password",
     "create_vault": "Create Vault"
   },
@@ -303,7 +339,7 @@
     "enabled_message": "Biometric login enabled.",
     "failed_message": "Biometric authentication was canceled or failed.",
     "title": "Biometric Login",
-    "subtitle": "Instead of entering your master password every time, you can quickly unlock your vault using Face ID or fingerprint."
+    "subtitle": "Use Face ID or fingerprint for faster unlocks. Your vault still stays protected by your device security and master password."
   },
   "bank_form": {
     "required_fields": "Bank name and password are required.",
@@ -380,11 +416,20 @@
     "scan_failed": "Scan failed.",
     "great": "Great!",
     "safe_message": "Your passwords look safe.",
+    "safe_badge": "Safe",
     "weak_or_risky_passwords": "Weak or risky passwords",
     "security_score": "Security score",
     "scanned": "Scanned",
     "weak": "Weak",
-    "reused": "Reused"
+    "reused": "Reused",
+    "reason_weak_password": "Weak password",
+    "reason_reused_password": "Reused password",
+    "reason_weak_and_reused": "Weak and reused password",
+    "types": {
+      "bank": "Bank",
+      "subscription": "Subscription",
+      "web": "Web"
+    }
   },
   "compromised_accounts": {
     "title": "Compromised Accounts",
@@ -397,19 +442,28 @@
     "count_limit": "$current/$max Passwords",
     "empty": {
       "title": "No Web Passwords Yet",
-      "subtitle": "Store your passwords for websites and apps here with military-grade security."
+      "subtitle": "Add your first website or app login to keep it encrypted, organized, and ready for autofill."
     },
     "copy_success": "Password copied!",
     "copy_error": "Copy error: $error",
     "tooltip_copy": "Copy Password",
     "no_key_error": "Encryption key not found."
   },
+  "autofill": {
+    "title": "Select Account",
+    "matching_accounts": "Matching accounts",
+    "all_accounts": "All accounts",
+    "show_all_accounts": "Show all",
+    "matching_accounts_hint": "Likely matches are shown first for this app or site.",
+    "no_saved_password_found": "No saved password found.",
+    "no_matching_accounts": "No direct match found. You can still choose from the full vault list."
+  },
   "bank_accounts": {
     "title": "Banking & Finance",
     "count_limit": "$current/$max Vaults",
     "empty": {
       "title": "No Bank Accounts Yet",
-      "subtitle": "Store your financial institutions and IBAN information securely here."
+      "subtitle": "Add your first bank record to keep account access, notes, and recovery details in one encrypted vault."
     }
   },
   "subscriptions": {
@@ -419,7 +473,7 @@
     "per_month": "/month",
     "empty": {
       "title": "No Subscriptions Yet",
-      "subtitle": "Track your monthly payments and digital platform memberships here."
+      "subtitle": "Add your first subscription to track recurring services, billing dates, and access details in one place."
     }
   },
   "notifications": {

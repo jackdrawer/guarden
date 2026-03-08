@@ -1,0 +1,42 @@
+{
+  "app_name": "Guarden",
+  "brand_icon": "assets/images/app_icon.png",
+  "screenshots": [
+    {
+      "input": "docs/release/raw-playstore/dashboard.jpg",
+      "output": "docs/release/generated-playstore/tr-01-dashboard.png",
+      "eyebrow": "GUVENLI KASA",
+      "headline": "Kumanda merkeziniz hep elinizin altinda",
+      "subheadline": "Toplam gorunum, guvenlik taramasi ve kasa yonetimi tek ekranda.",
+      "crop_top": 96,
+      "crop_bottom": 42
+    },
+    {
+      "input": "docs/release/raw-playstore/subscriptions.jpg",
+      "output": "docs/release/generated-playstore/tr-02-subscriptions.png",
+      "eyebrow": "ABONELIKLER",
+      "headline": "Abonelikleri tek yerde duzenli tutun",
+      "subheadline": "Aylik maliyetleri ve kayitlari Guarden icinde net sekilde yonetin.",
+      "crop_top": 96,
+      "crop_bottom": 42
+    },
+    {
+      "input": "docs/release/raw-playstore/settings.jpg",
+      "output": "docs/release/generated-playstore/tr-03-settings.png",
+      "eyebrow": "GIZLILIK",
+      "headline": "Yedekleme ve gizlilik kontrolunuzde",
+      "subheadline": "Biyometri, otomatik doldurma ve guvenlik ayarlarini tek alandan yonetin.",
+      "crop_top": 96,
+      "crop_bottom": 42
+    },
+    {
+      "input": "docs/release/raw-playstore/login.jpg",
+      "output": "docs/release/generated-playstore/tr-04-login.png",
+      "eyebrow": "HIZLI GIRIS",
+      "headline": "Biyometri ile hizli ve net giris",
+      "subheadline": "Kasayi acmak icin guvenli biyometrik akisi veya master sifreyi kullanin.",
+      "crop_top": 96,
+      "crop_bottom": 42
+    }
+  ]
+}

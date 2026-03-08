@@ -129,7 +129,7 @@ class CompromisedAccountsScreen extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  item.type.toUpperCase(),
+                  _typeLabel(item.type),
                   style: TextStyle(
                     fontSize: 12,
                     color: AppColors.of(context).textSecondary,
@@ -182,5 +182,16 @@ class CompromisedAccountsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _typeLabel(String type) {
+    switch (type) {
+      case 'bank':
+        return t.security_audit.types.bank;
+      case 'subscription':
+        return t.security_audit.types.subscription;
+      default:
+        return t.security_audit.types.web;
+    }
   }
 }

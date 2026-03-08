@@ -22,12 +22,37 @@ class WelcomeScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.shield_moon,
-                    size: 80,
-                    color: AppColors.of(context).primaryAccent,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: Image.asset(
+                      'assets/images/app_icon.png',
+                      width: 92,
+                      height: 92,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   const SizedBox(height: 24),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      color: AppColors.of(
+                        context,
+                      ).primaryAccent.withValues(alpha: 0.10),
+                    ),
+                    child: Text(
+                      t.settings.info.about.offline_title,
+                      style: TextStyle(
+                        color: AppColors.of(context).primaryAccent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 18),
                   Text(
                     t.welcome.title,
                     style: TextStyle(
@@ -47,7 +72,27 @@ class WelcomeScreen extends StatelessWidget {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 24),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: [
+                      _FeaturePill(
+                        icon: Icons.shield_outlined,
+                        label: t.settings.info.privacy.encryption_title,
+                      ),
+                      _FeaturePill(
+                        icon: Icons.cloud_upload_outlined,
+                        label: t.settings.info.usage.backup_title,
+                      ),
+                      _FeaturePill(
+                        icon: Icons.fingerprint,
+                        label: t.onboarding_biometric.title,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 36),
                   NeumorphicButton(
                     onPressed: () => context.go('/onboarding'),
                     child: Text(
@@ -64,6 +109,39 @@ class WelcomeScreen extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _FeaturePill extends StatelessWidget {
+  const _FeaturePill({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        color: AppColors.of(context).surface,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: AppColors.of(context).primaryAccent),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColors.of(context).textSecondary,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

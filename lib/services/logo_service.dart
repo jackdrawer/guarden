@@ -6,6 +6,7 @@ import '../theme/app_colors.dart';
 
 class LogoService {
   static const Map<String, String> _domainAliases = {
+    'akbank': 'akbank.com',
     'is bankasi': 'isbank.com.tr',
     'isbank': 'isbank.com.tr',
     'garanti': 'garantibbva.com.tr',
@@ -23,6 +24,8 @@ class LogoService {
     'claude pro': 'anthropic.com',
     'github copilot': 'github.com',
   };
+  final Set<String> _failedLogoUrls = <String>{};
+  final Set<String> _failedDomains = <String>{};
 
   /// Resolves raw values (domain/url/brand name) to canonical domain.
   String resolveDomain(String rawUrlOrDomain) {
@@ -59,9 +62,8 @@ class LogoService {
 
   /// Returns default logo URL (primary provider) for a resolved domain.
   String getLogoUrl(String domain) {
-    final cleanDomain = _sanitizeDomain(domain);
-    if (cleanDomain.isEmpty) return '';
-    return 'https://icon.horse/icon/$cleanDomain';
+    final candidates = resolveLogoUrls(domain);
+    return candidates.isEmpty ? '' : candidates.first;
   }
 
   /// Backward compatible entrypoint for codepaths expecting single URL.
@@ -73,23 +75,26 @@ class LogoService {
   /// Ordered fallback chain for local + global brands.
   List<String> resolveLogoUrls(String rawUrlOrDomain) {
     final domain = resolveDomain(rawUrlOrDomain);
-    if (domain.isEmpty) {
+    if (domain.isEmpty || _failedDomains.contains(domain)) {
       return const [];
     }
 
-    final candidates = <String>[
-      'https://icon.horse/icon/$domain',
-      'https://logo.clearbit.com/$domain',
-      'https://www.google.com/s2/favicons?sz=128&domain=$domain',
-      'https://icons.duckduckgo.com/ip3/$domain.ico',
-      'https://api.faviconkit.com/$domain/128',
-      'https://$domain/favicon.ico',
-      'https://www.$domain/favicon.ico',
-    ];
+    final candidates = kIsWeb
+        ? <String>[
+            'https://www.google.com/s2/favicons?sz=128&domain_url=https://$domain',
+          ]
+        : <String>[
+            'https://www.google.com/s2/favicons?sz=128&domain_url=https://$domain',
+            'https://$domain/favicon.ico',
+            'https://www.$domain/favicon.ico',
+          ];
 
     final seen = <String>{};
     final unique = <String>[];
     for (final url in candidates) {
+      if (_failedLogoUrls.contains(url)) {
+        continue;
+      }
       if (seen.add(url)) {
         unique.add(url);
       }
@@ -174,6 +179,20 @@ class LogoService {
     final fallbackLetter = resolvedDomain.isNotEmpty
         ? resolvedDomain[0].toUpperCase()
         : '?';
+
+    // Web engines either require cross-origin image decoding support or
+    // platform-view backed HTML images. Prefer a deterministic local avatar.
+    if (kIsWeb) {
+      return SizedBox(
+        width: size,
+        height: size,
+        child: Builder(
+          builder: (context) =>
+              _buildFallbackAvatar(context, fallbackLetter, size),
+        ),
+      );
+    }
+
     final logoCandidates = resolveLogoUrls(rawUrlOrDomain);
 
     return SizedBox(
@@ -185,20 +204,11 @@ class LogoService {
             return _buildFallbackAvatar(context, fallbackLetter, size);
           }
 
-          if (kIsWeb) {
-            return _buildWebLogoWithFallback(
-              context,
-              logoCandidates,
-              0,
-              fallbackLetter,
-              size,
-            );
-          }
-
           return _buildCachedLogoWithFallback(
             context,
             logoCandidates,
             0,
+            resolvedDomain,
             fallbackLetter,
             size,
           );
@@ -211,10 +221,12 @@ class LogoService {
     BuildContext context,
     List<String> logoCandidates,
     int index,
+    String domain,
     String fallbackLetter,
     double size,
   ) {
     if (index >= logoCandidates.length) {
+      _markDomainFailed(domain);
       return _buildFallbackAvatar(context, fallbackLetter, size);
     }
 
@@ -232,47 +244,37 @@ class LogoService {
       ),
       placeholder: (context, url) =>
           _buildFallbackAvatar(context, fallbackLetter, size),
-      errorWidget: (context, url, error) => _buildCachedLogoWithFallback(
-        context,
-        logoCandidates,
-        index + 1,
-        fallbackLetter,
-        size,
-      ),
+      errorWidget: (context, url, error) {
+        _markLogoUrlFailed(url);
+        return _buildCachedLogoWithFallback(
+          context,
+          logoCandidates,
+          index + 1,
+          domain,
+          fallbackLetter,
+          size,
+        );
+      },
     );
   }
 
-  Widget _buildWebLogoWithFallback(
-    BuildContext context,
-    List<String> logoCandidates,
-    int index,
-    String fallbackLetter,
-    double size,
-  ) {
-    if (index >= logoCandidates.length) {
-      return _buildFallbackAvatar(context, fallbackLetter, size);
-    }
+  @visibleForTesting
+  void markDomainAsFailed(String domain) {
+    _markDomainFailed(_sanitizeDomain(domain));
+  }
 
-    return Image.network(
-      logoCandidates[index],
-      width: size,
-      height: size,
-      fit: BoxFit.cover,
-      webHtmlElementStrategy: WebHtmlElementStrategy.prefer,
-      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-        if (wasSynchronouslyLoaded || frame != null) {
-          return _buildImageAvatar(context, child, size);
-        }
-        return _buildFallbackAvatar(context, fallbackLetter, size);
-      },
-      errorBuilder: (context, error, stackTrace) => _buildWebLogoWithFallback(
-        context,
-        logoCandidates,
-        index + 1,
-        fallbackLetter,
-        size,
-      ),
-    );
+  void _markLogoUrlFailed(String url) {
+    if (url.isEmpty) {
+      return;
+    }
+    _failedLogoUrls.add(url);
+  }
+
+  void _markDomainFailed(String domain) {
+    if (domain.isEmpty) {
+      return;
+    }
+    _failedDomains.add(domain);
   }
 
   Widget _buildImageAvatar(BuildContext context, Widget child, double size) {

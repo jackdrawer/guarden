@@ -5,6 +5,7 @@ import 'secure_storage_service.dart';
 import '../models/bank_account.dart';
 import '../models/subscription.dart';
 import '../models/web_password.dart';
+import '../models/activity.dart';
 import '../errors/app_errors.dart';
 import '../i18n/strings.g.dart';
 
@@ -22,6 +23,7 @@ class DatabaseService {
   static const String bankAccountsBoxName = 'bank_accounts';
   static const String subscriptionsBoxName = 'subscriptions';
   static const String webPasswordsBoxName = 'web_passwords';
+  static const String activitiesBoxName = 'activities';
 
   /// Hive'ı başlatır ve güvenli kutuları (Boxes) açar.
   ///
@@ -30,8 +32,10 @@ class DatabaseService {
     if (_isInitialized) return;
 
     try {
-      // Hive.initFlutter() main.dart'ta zaten çağrıldı
-      // await Hive.initFlutter(); // KALDIRILDI - redundant
+      if (_areVaultBoxesOpen()) {
+        _isInitialized = true;
+        return;
+      }
 
       // Type Adapter kayıtları (Daha önce kaydedilmemişse)
       if (!Hive.isAdapterRegistered(0)) {
@@ -43,6 +47,9 @@ class DatabaseService {
       if (!Hive.isAdapterRegistered(2)) {
         Hive.registerAdapter(WebPasswordAdapter());
       }
+      if (!Hive.isAdapterRegistered(4)) {
+        Hive.registerAdapter(ActivityAdapter());
+      }
 
       // 1. Storage'dan şifreleme key'ini al
       String? encryptionKeyBase64 = await _secureStorage.getEncryptionKey();
@@ -53,9 +60,7 @@ class DatabaseService {
         );
       }
 
-      final encryptionKey = base64Decode(
-        encryptionKeyBase64,
-      ); // base64Decode kullanılmalı
+      final encryptionKey = base64Decode(encryptionKeyBase64);
 
       final cipher = HiveAesCipher(encryptionKey);
       await Future.wait([
@@ -71,6 +76,7 @@ class DatabaseService {
           webPasswordsBoxName,
           encryptionCipher: cipher,
         ),
+        Hive.openBox<Activity>(activitiesBoxName, encryptionCipher: cipher),
       ]);
 
       _isInitialized = true;
@@ -92,6 +98,7 @@ class DatabaseService {
   }
 
   Box<BankAccount> get bankAccountsBox {
+    _restoreInitializationFromOpenBoxes();
     if (!_isInitialized) {
       throw DatabaseError(
         'Database not initialized',
@@ -102,6 +109,7 @@ class DatabaseService {
   }
 
   Box<Subscription> get subscriptionsBox {
+    _restoreInitializationFromOpenBoxes();
     if (!_isInitialized) {
       throw DatabaseError(
         'Database not initialized',
@@ -112,6 +120,7 @@ class DatabaseService {
   }
 
   Box<WebPassword> get webPasswordsBox {
+    _restoreInitializationFromOpenBoxes();
     if (!_isInitialized) {
       throw DatabaseError(
         'Database not initialized',
@@ -121,8 +130,18 @@ class DatabaseService {
     return Hive.box<WebPassword>(webPasswordsBoxName);
   }
 
+  Box<Activity> get activitiesBox {
+    _restoreInitializationFromOpenBoxes();
+    if (!_isInitialized) {
+      throw DatabaseError(
+        'Database not initialized',
+        userMessage: t.settings.errors.db_not_ready,
+      );
+    }
+    return Hive.box<Activity>(activitiesBoxName);
+  }
+
   /// Settings box for migration flags and general settings
-  /// Note: This box is opened by SettingsService, we just provide access to it
   Box get settingsBox {
     if (!Hive.isBoxOpen('settings_box')) {
       throw DatabaseError(
@@ -136,7 +155,7 @@ class DatabaseService {
   /// Tüm kutuları kapatır (Lock Vault)
   Future<void> closeDatabase() async {
     try {
-      await Hive.close(); // Kapatılan tüm kutuları kapatır
+      await Hive.close();
       _isInitialized = false;
     } catch (e) {
       throw DatabaseError(
@@ -149,10 +168,11 @@ class DatabaseService {
   /// Bütün verileri siler (Panic Mode / Reset)
   Future<void> deleteDatabase() async {
     try {
-      await Hive.close(); // Boxes must be closed before deletion
+      await Hive.close();
       await Hive.deleteBoxFromDisk(bankAccountsBoxName);
       await Hive.deleteBoxFromDisk(subscriptionsBoxName);
       await Hive.deleteBoxFromDisk(webPasswordsBoxName);
+      await Hive.deleteBoxFromDisk(activitiesBoxName);
       await Hive.deleteBoxFromDisk('settings_box');
       _isInitialized = false;
     } catch (e) {
@@ -161,5 +181,22 @@ class DatabaseService {
         userMessage: t.settings.errors.generic,
       );
     }
+  }
+
+  void _restoreInitializationFromOpenBoxes() {
+    if (_isInitialized) {
+      return;
+    }
+
+    if (_areVaultBoxesOpen()) {
+      _isInitialized = true;
+    }
+  }
+
+  bool _areVaultBoxesOpen() {
+    return Hive.isBoxOpen(bankAccountsBoxName) &&
+        Hive.isBoxOpen(subscriptionsBoxName) &&
+        Hive.isBoxOpen(webPasswordsBoxName) &&
+        Hive.isBoxOpen(activitiesBoxName);
   }
 }

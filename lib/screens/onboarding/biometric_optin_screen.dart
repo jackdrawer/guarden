@@ -8,6 +8,7 @@ import '../../providers/settings_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/neumorphic/neumorphic_button.dart';
 import '../../widgets/neumorphic/neumorphic_container.dart';
+import '../../widgets/lottie_animation_widget.dart';
 
 class BiometricOptInScreen extends ConsumerStatefulWidget {
   const BiometricOptInScreen({super.key});
@@ -88,10 +89,28 @@ class _BiometricOptInScreenState extends ConsumerState<BiometricOptInScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    Icons.fingerprint,
-                    size: 80,
-                    color: AppColors.of(context).primaryAccent,
+                  Container(
+                    width: 110,
+                    height: 110,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          AppColors.of(
+                            context,
+                          ).primaryAccent.withValues(alpha: 0.22),
+                          AppColors.of(
+                            context,
+                          ).primaryAccent.withValues(alpha: 0.05),
+                        ],
+                      ),
+                    ),
+                    child: const Center(
+                      child: LottieAnimationWidget(
+                        animation: GuardenAnimation.fingerprintScan,
+                        size: 70,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 24),
                   Text(
@@ -113,7 +132,27 @@ class _BiometricOptInScreenState extends ConsumerState<BiometricOptInScreen> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 20),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(999),
+                      color: AppColors.of(context).surface,
+                    ),
+                    child: Text(
+                      t.auth_login.biometric_tooltip,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: AppColors.of(context).textSecondary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
                   NeumorphicButton(
                     onPressed: _enableBiometrics,
                     child: Text(

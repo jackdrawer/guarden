@@ -10,10 +10,38 @@ import '../../services/logo_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/animated_empty_state.dart';
 import '../../widgets/neumorphic/neumorphic_container.dart';
+import '../../widgets/ads/native_ad_widget.dart';
 import '../../i18n/strings.g.dart';
 
 class BankAccountsTab extends ConsumerWidget {
   const BankAccountsTab({super.key});
+
+  void _handleDelete(BuildContext context, WidgetRef ref, bank) {
+    HapticFeedback.mediumImpact();
+    final deleted = ref.read(bankAccountProvider.notifier).deleteBankAccount(
+      bank.id,
+    );
+    if (deleted == null) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(t.general.deleted_label(label: bank.bankName)),
+          duration: const Duration(seconds: 6),
+          action: SnackBarAction(
+            label: t.general.undo,
+            onPressed: () {
+              ref
+                  .read(bankAccountProvider.notifier)
+                  .restoreBankAccount(deleted);
+            },
+          ),
+        ),
+      );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,12 +68,34 @@ class BankAccountsTab extends ConsumerWidget {
                     icon: Icons.account_balance_wallet_outlined,
                     title: t.bank_accounts.empty.title,
                     subtitle: t.bank_accounts.empty.subtitle,
+                    actionLabel: t.home.add_bank,
+                    onAction: () => context.push('/add-bank'),
                   )
                 : AnimationLimiter(
                     child: ListView.builder(
-                      itemCount: bankAccounts.length,
+                      itemCount:
+                          bankAccounts.length +
+                          (bankAccounts.isNotEmpty ? 1 : 0),
                       itemBuilder: (context, index) {
-                        final bank = bankAccounts[index];
+                        // Show native ad at index 1 (second item) if list is not empty
+                        if (index == 1 && bankAccounts.isNotEmpty) {
+                          return AnimationConfiguration.staggeredList(
+                            position: index,
+                            duration: const Duration(milliseconds: 375),
+                            child: const SlideAnimation(
+                              verticalOffset: 50.0,
+                              child: FadeInAnimation(child: NativeAdWidget()),
+                            ),
+                          );
+                        }
+
+                        // Calculate correct data index based on ad position
+                        final adjustedIndex =
+                            (bankAccounts.isNotEmpty && index > 1)
+                            ? index - 1
+                            : index;
+                        final bank = bankAccounts[adjustedIndex];
+
                         return AnimationConfiguration.staggeredList(
                           position: index,
                           duration: const Duration(milliseconds: 375),
@@ -72,14 +122,8 @@ class BankAccountsTab extends ConsumerWidget {
                                         label: t.general.edit,
                                       ),
                                       SlidableAction(
-                                        onPressed: (context) {
-                                          HapticFeedback.mediumImpact();
-                                          ref
-                                              .read(
-                                                bankAccountProvider.notifier,
-                                              )
-                                              .deleteBankAccount(bank.id);
-                                        },
+                                        onPressed: (context) =>
+                                            _handleDelete(context, ref, bank),
                                         backgroundColor: Colors.transparent,
                                         foregroundColor: AppColors.of(
                                           context,

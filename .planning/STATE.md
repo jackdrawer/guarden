@@ -3,42 +3,42 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Advanced Analytics & Experience
 current_phase: Phase 14 (Store Launch Readiness & Submission Hardening)
-status: planning
-last_updated: "2026-03-06T22:52:05.1379579+03:00"
-last_activity: "2026-03-06 - Added Phase 14 for store launch readiness and submission hardening"
+status: execution
+last_updated: "2026-03-08T04:48:44+03:00"
+last_activity: "2026-03-08 - Phase 16 executed out of order; sensitive-action policy, undo safety, autofill ranking, and security-audit consolidation are complete while Phase 14 remains blocked by macOS or store tasks"
 progress:
-  total_phases: 14
-  completed_phases: 13
-  total_plans: 27
-  completed_plans: 27
-  percent: 93
+  total_phases: 16
+  completed_phases: 15
+  total_plans: 36
+  completed_plans: 35
+  percent: 97
 ---
 
 # System State
 **Current Phase:** 14 - Store Launch Readiness & Submission Hardening
 **Milestone:** v1.2 Advanced Analytics & Experience
-**Last updated:** 2026-03-06
+**Last updated:** 2026-03-08
 
 ## Project Reference
 
 **Core Value:** Privacy-first offline password manager for Turkish market (bank accounts, subscriptions, web passwords) with localized analytics and automated cloud safety.
 
-**Current Focus:** Planning and executing store launch blockers for Play Store and App Store submission.
+**Current Focus:** External Phase 14 iOS/archive tasks remain blocked, while Phase 16 hardening work is now complete and ready for verification or release follow-through.
 
 ## Current Position
 
 **Phase:** 14 - Store Launch Readiness & Submission Hardening
-**Status:** Planning - Launch blockers identified, plans not created yet.
-**Progress:** [##################--] 93%
+**Status:** Execution in progress - Phase 16 completed out of order for internal security UX hardening, while Phase 14 remains open because iOS archive work is deferred pending macOS/Xcode access.
+**Progress:** [###################-] 97%
 
-**Last activity:** 2026-03-06 - Added Phase 14 to close store submission blockers across Android and iOS.
+**Last activity:** 2026-03-08 - Phase 16 executed with shared sensitive-action auth, undoable deletes, save guards, autofill match-first ranking, and security-audit cleanup; Phase 14 remains blocked on external platform work.
 
 ## Performance Metrics
 
 **Milestone Progress:**
-- Phases complete: 13/14 (93%)
-- Plans complete: 27/27 (100%)
-- Requirements covered: v1.2 complete, Phase 14 pending planning
+- Phases complete: 15/16 with only Phase 14 still open due external iOS or store blockers
+- Plans complete: 35/36
+- Requirements covered: v1.2 complete, Phase 15 Android launch polish complete, Phase 16 security UX hardening complete, Phase 14 iOS/store tasks still open
 
 ## Accumulated Context
 
@@ -62,9 +62,15 @@ progress:
 
 ### Roadmap Evolution
 - Phase 14 added: Store Launch Readiness & Submission Hardening
+- Phase 15 added: Store Launch Growth Polish
+- Phase 16 added: Security UX Hardening & Safe Interaction Standards
+- Phase 15 executed opportunistically because its Android launch-polish work was not blocked by the deferred iOS archive path
+- Phase 16 executed opportunistically because its internal hardening scope was not blocked by the deferred iOS archive path
 
 ### Known Issues
-- Store launch blockers identified in release review: iOS bundle/sign-in metadata gaps, production ad IDs, release signing hygiene, and failing tests.
+- iOS archive still requires `GoogleService-Info.plist`, real Google client IDs, and Xcode/macOS verification.
+- iOS archive execution is blocked for now because no macOS environment is available.
+- Store console privacy/disclosure forms still require manual completion.
 
 ### TODOs
 - [x] Phase 12 Planning & Implementation
@@ -73,8 +79,13 @@ progress:
 - [x] Restore corrupted providers
 - [x] Complete telemetry wiring
 - [x] Final project sync (ROADMAP.md, STATE.md)
-- [ ] Plan Phase 14
-- [ ] Execute Phase 14 launch blockers
+- [x] Plan Phase 14
+- [x] Plan Phase 15
+- [x] Execute Phase 15
+- [x] Plan Phase 16
+- [x] Execute Phase 16
+- [ ] Finish external Phase 14 blockers (iOS archive inputs, store console disclosures, macOS/Xcode access)
+- [ ] Capture final Android screenshots and upload launch listing assets in Play Console
 
 ### Blockers
-- Phase 14 planning and execution required before store submission.
+- macOS/Xcode access is required before iOS archive and App Store submission work can continue.

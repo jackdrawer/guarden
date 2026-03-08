@@ -68,8 +68,7 @@ class BiometricService {
 
       throw BiometricError(
         'Biometric authentication failed: ${e.message}',
-        userMessage:
-            'Biometric authentication failed. Try again or use master password.',
+        userMessage: t.auth_login.biometric_try_master_password,
         canRetry: true,
         action: 'retry',
       );

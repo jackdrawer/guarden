@@ -1,186 +1,229 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../i18n/strings.g.dart';
 import '../services/crypto_service.dart';
 import '../services/secure_storage_service.dart';
-import 'package:crypto/crypto.dart';
-import 'dart:convert';
 import 'bank_account_provider.dart';
 import 'subscription_provider.dart';
 import 'web_password_provider.dart';
 
 class VulnerableItem {
-  final String id;
-  final String title;
-  final String type;
-  String reason;
-
-  VulnerableItem({
+  const VulnerableItem({
     required this.id,
     required this.title,
     required this.type,
-    required this.reason,
+    this.hasWeakPassword = false,
+    this.hasReusedPassword = false,
   });
+
+  final String id;
+  final String title;
+  final String type;
+  final bool hasWeakPassword;
+  final bool hasReusedPassword;
+
+  String get reason {
+    if (hasWeakPassword && hasReusedPassword) {
+      return t.security_audit.reason_weak_and_reused;
+    }
+    if (hasWeakPassword) {
+      return t.security_audit.reason_weak_password;
+    }
+    return t.security_audit.reason_reused_password;
+  }
+
+  VulnerableItem copyWith({
+    bool? hasWeakPassword,
+    bool? hasReusedPassword,
+  }) {
+    return VulnerableItem(
+      id: id,
+      title: title,
+      type: type,
+      hasWeakPassword: hasWeakPassword ?? this.hasWeakPassword,
+      hasReusedPassword: hasReusedPassword ?? this.hasReusedPassword,
+    );
+  }
 }
 
 class SecurityAuditReport {
-  final int totalChecked;
-  final int weakCount;
-  final int duplicatedCount;
-  final List<VulnerableItem> vulnerableItems;
-  final int score;
-
-  SecurityAuditReport({
+  const SecurityAuditReport({
     required this.totalChecked,
     required this.weakCount,
     required this.duplicatedCount,
     required this.vulnerableItems,
     required this.score,
   });
+
+  final int totalChecked;
+  final int weakCount;
+  final int duplicatedCount;
+  final List<VulnerableItem> vulnerableItems;
+  final int score;
 }
 
 class _DecryptedItem {
+  const _DecryptedItem(this.id, this.title, this.type, this.hash);
+
   final String id;
   final String title;
   final String type;
   final String hash;
-
-  _DecryptedItem(this.id, this.title, this.type, this.hash);
 }
 
-final securityAuditProvider = FutureProvider.autoDispose<SecurityAuditReport>((
-  ref,
-) async {
-  final cryptoService = ref.read(cryptoProvider);
-  final secureStorage = ref.read(secureStorageProvider);
+class SecurityAuditNotifier extends AutoDisposeAsyncNotifier<SecurityAuditReport> {
+  String? _lastVaultSignature;
+  SecurityAuditReport? _cachedReport;
 
-  final banksAsync = ref.watch(bankAccountProvider);
-  final websAsync = ref.watch(webPasswordProvider);
-  final subsAsync = ref.watch(subscriptionProvider);
+  @override
+  Future<SecurityAuditReport> build() async {
+    final cryptoService = ref.read(cryptoProvider);
+    final secureStorage = ref.read(secureStorageProvider);
 
-  final banks = banksAsync.valueOrNull ?? [];
-  final webs = websAsync.valueOrNull ?? [];
-  final subs = subsAsync.valueOrNull ?? [];
+    final banks = ref.watch(bankAccountProvider).valueOrNull ?? [];
+    final webs = ref.watch(webPasswordProvider).valueOrNull ?? [];
+    final subs = ref.watch(subscriptionProvider).valueOrNull ?? [];
 
-  final base64Key = await secureStorage.getEncryptionKey();
-  if (base64Key == null || base64Key.isEmpty) {
-    throw Exception('Encryption key not found.');
-  }
-
-  var totalChecked = 0;
-  final vulnerableItems = <VulnerableItem>[];
-  final passwordGroups = <String, List<_DecryptedItem>>{};
-
-  Future<void> processItem(
-    String encrypted,
-    String id,
-    String title,
-    String type,
-  ) async {
-    if (encrypted.isEmpty) {
-      return;
+    final vaultSignature = _buildVaultSignature(banks, webs, subs);
+    if (_cachedReport != null && _lastVaultSignature == vaultSignature) {
+      return _cachedReport!;
     }
 
-    totalChecked++;
+    final base64Key = await secureStorage.getEncryptionKey();
+    if (base64Key == null || base64Key.isEmpty) {
+      throw Exception(t.settings.errors.encryption_key_missing);
+    }
 
-    try {
-      final decrypted = await cryptoService.decryptWithBase64Key(
-        encrypted,
-        base64Key,
-      );
+    var totalChecked = 0;
+    final vulnerableById = <String, VulnerableItem>{};
+    final passwordGroups = <String, List<_DecryptedItem>>{};
 
-      var isWeak = false;
-      if (decrypted.length < 8) {
-        isWeak = true;
+    Future<void> processItem(
+      String encrypted,
+      String id,
+      String title,
+      String type,
+    ) async {
+      if (encrypted.isEmpty) {
+        return;
       }
-      if (!decrypted.contains(RegExp(r'[0-9]'))) {
-        isWeak = true;
-      }
-      if (!decrypted.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'))) {
-        isWeak = true;
-      }
 
-      final hashBytes = sha256.convert(utf8.encode(decrypted)).bytes;
-      final hashBase64 = base64Encode(hashBytes);
+      totalChecked++;
 
-      final item = _DecryptedItem(id, title, type, hashBase64);
-      if (isWeak) {
-        vulnerableItems.add(
-          VulnerableItem(
+      try {
+        final decrypted = await cryptoService.decryptWithBase64Key(
+          encrypted,
+          base64Key,
+        );
+
+        if (_isWeakPassword(decrypted)) {
+          vulnerableById[id] = VulnerableItem(
             id: id,
             title: title,
             type: type,
-            reason: 'Weak password',
-          ),
+            hasWeakPassword: true,
+            hasReusedPassword: vulnerableById[id]?.hasReusedPassword ?? false,
+          );
+        }
+
+        final hashBytes = sha256.convert(utf8.encode(decrypted)).bytes;
+        final hashBase64 = base64Encode(hashBytes);
+        passwordGroups.putIfAbsent(hashBase64, () => <_DecryptedItem>[]).add(
+          _DecryptedItem(id, title, type, hashBase64),
         );
+      } catch (_) {
+        // Ignore single item decrypt failures during audit.
+      }
+    }
+
+    for (final item in banks) {
+      await processItem(item.encryptedPassword, item.id, item.bankName, 'bank');
+    }
+
+    for (final item in webs) {
+      await processItem(item.encryptedPassword, item.id, item.title, 'web');
+    }
+
+    for (final item in subs) {
+      await processItem(
+        item.encryptedPassword,
+        item.id,
+        item.serviceName,
+        'subscription',
+      );
+    }
+
+    var duplicatedCount = 0;
+    for (final items in passwordGroups.values) {
+      if (items.length <= 1) {
+        continue;
       }
 
-      passwordGroups
-          .putIfAbsent(hashBase64, () => <_DecryptedItem>[])
-          .add(item);
-    } catch (_) {
-      // Ignore single item decrypt failures during audit.
+      duplicatedCount += items.length;
+      for (final item in items) {
+        final existing = vulnerableById[item.id];
+        vulnerableById[item.id] = (existing ??
+                VulnerableItem(id: item.id, title: item.title, type: item.type))
+            .copyWith(hasReusedPassword: true);
+      }
     }
-  }
 
-  for (final item in banks) {
-    await processItem(item.encryptedPassword, item.id, item.bankName, 'bank');
-  }
+    final vulnerableItems = vulnerableById.values.toList()
+      ..sort((a, b) => a.title.compareTo(b.title));
+    final weakCount = vulnerableItems.where((item) => item.hasWeakPassword).length;
 
-  for (final item in webs) {
-    await processItem(item.encryptedPassword, item.id, item.title, 'web');
-  }
+    final penalty = (weakCount * 10) + (duplicatedCount * 5);
+    var score = 100 - penalty;
+    if (score < 0) {
+      score = 0;
+    }
+    if (totalChecked == 0) {
+      score = 100;
+    }
 
-  for (final item in subs) {
-    await processItem(
-      item.encryptedPassword,
-      item.id,
-      item.serviceName,
-      'subscription',
+    final report = SecurityAuditReport(
+      totalChecked: totalChecked,
+      weakCount: weakCount,
+      duplicatedCount: duplicatedCount,
+      vulnerableItems: vulnerableItems,
+      score: score,
     );
+
+    _lastVaultSignature = vaultSignature;
+    _cachedReport = report;
+    return report;
   }
 
-  var duplicatedCount = 0;
-  passwordGroups.forEach((_, items) {
-    if (items.length <= 1) {
-      return;
+  String _buildVaultSignature(
+    List<dynamic> banks,
+    List<dynamic> webs,
+    List<dynamic> subs,
+  ) {
+    return [
+      ...banks.map((item) => 'b:${item.id}:${item.encryptedPassword}'),
+      ...webs.map((item) => 'w:${item.id}:${item.encryptedPassword}'),
+      ...subs.map((item) => 's:${item.id}:${item.encryptedPassword}'),
+    ].join('|');
+  }
+
+  bool _isWeakPassword(String value) {
+    if (value.length < 8) {
+      return true;
     }
-
-    duplicatedCount += items.length;
-    for (final item in items) {
-      final existingIndex = vulnerableItems.indexWhere((v) => v.id == item.id);
-      if (existingIndex != -1) {
-        vulnerableItems[existingIndex].reason += ', reused';
-      } else {
-        vulnerableItems.add(
-          VulnerableItem(
-            id: item.id,
-            title: item.title,
-            type: item.type,
-            reason: 'Reused password',
-          ),
-        );
-      }
+    if (!value.contains(RegExp(r'[0-9]'))) {
+      return true;
     }
-  });
-
-  final weakCount = vulnerableItems
-      .where((v) => v.reason.toLowerCase().contains('weak'))
-      .length;
-
-  final penalty = (weakCount * 10) + (duplicatedCount * 5);
-  var score = 100 - penalty;
-  if (score < 0) {
-    score = 0;
+    if (!value.contains(RegExp(r'[!@#\$%^&*(),.?":{}|<>]'))) {
+      return true;
+    }
+    return false;
   }
-  if (totalChecked == 0) {
-    score = 100;
-  }
+}
 
-  return SecurityAuditReport(
-    totalChecked: totalChecked,
-    weakCount: weakCount,
-    duplicatedCount: duplicatedCount,
-    vulnerableItems: vulnerableItems,
-    score: score,
-  );
-});
+final securityAuditProvider =
+    AsyncNotifierProvider.autoDispose<SecurityAuditNotifier, SecurityAuditReport>(
+      SecurityAuditNotifier.new,
+    );

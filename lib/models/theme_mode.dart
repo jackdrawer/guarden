@@ -33,7 +33,7 @@ extension AppThemeModeExtension on AppThemeMode {
   static AppThemeMode fromString(String? value) {
     return AppThemeMode.values.firstWhere(
       (e) => e.name == value,
-      orElse: () => AppThemeMode.system,
+      orElse: () => AppThemeMode.light,
     );
   }
 }

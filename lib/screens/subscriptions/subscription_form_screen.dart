@@ -39,6 +39,7 @@ class _SubscriptionFormScreenState
   bool _obscurePassword = true;
   bool _travelProtected = false;
   bool _isLoadingExisting = false;
+  bool _isSaving = false;
   String _selectedLogoUrl = '';
   String? _selectedCurrency;
   String _billingCycle = 'monthly'; // 'monthly' or 'yearly'
@@ -145,6 +146,10 @@ class _SubscriptionFormScreenState
   }
 
   Future<void> _saveFast() async {
+    if (_isSaving) {
+      return;
+    }
+
     final cryptoService = ref.read(cryptoProvider);
     final secureStorage = ref.read(secureStorageProvider);
     final serviceName = _serviceNameController.text.trim();
@@ -167,9 +172,13 @@ class _SubscriptionFormScreenState
       return;
     }
 
+    setState(() => _isSaving = true);
+
     try {
       final base64Key = await secureStorage.getEncryptionKey();
-      if (base64Key == null) throw Exception('Encryption key not found.');
+      if (base64Key == null) {
+        throw Exception(t.settings.errors.storage_access_failed);
+      }
 
       final encPassword = password.isNotEmpty
           ? await cryptoService.encryptWithBase64Key(password, base64Key)
@@ -218,6 +227,10 @@ class _SubscriptionFormScreenState
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(t.subscription_form.save_failed)),
         );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isSaving = false);
       }
     }
   }
@@ -607,15 +620,31 @@ class _SubscriptionFormScreenState
                         ),
                         const SizedBox(height: 32),
                         NeumorphicButton(
-                          onPressed: _saveFast,
-                          child: Text(
-                            _isEditMode ? t.general.update : t.general.save,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: AppColors.of(context).primaryAccent,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
+                          onPressed: _isSaving ? null : _saveFast,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (_isSaving) ...[
+                                SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: AppColors.of(context).primaryAccent,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                              ],
+                              Text(
+                                _isEditMode ? t.general.update : t.general.save,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: AppColors.of(context).primaryAccent,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 32),

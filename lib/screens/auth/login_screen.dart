@@ -45,6 +45,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _handleBiometricLogin() async {
+    // Only allow biometric login if enabled in settings
+    final settings = ref.read(settingsProvider).valueOrNull;
+    if (settings == null || !settings.biometricLogin) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(t.auth_login.biometric_unavailable)),
+        );
+      }
+      return;
+    }
+
     final canUse = await ref.read(authProvider.notifier).canUseBiometrics();
     if (!canUse) {
       if (mounted) {
@@ -90,6 +101,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Watch settings to show/hide biometric button
+    final settings = ref.watch(settingsProvider).valueOrNull;
+    final showBiometric = settings?.biometricLogin ?? false;
+
     return Scaffold(
       backgroundColor: AppColors.of(context).background,
       body: SafeArea(
@@ -114,9 +129,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    t.general.app_name,
+                    t.general.app_short_name,
                     style: TextStyle(
-                      fontSize: 22,
+                      fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: AppColors.of(context).textPrimary,
                     ),
@@ -131,7 +146,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 18),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      color: AppColors.of(
+                        context,
+                      ).primaryAccent.withValues(alpha: 0.08),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.shield_outlined,
+                          color: AppColors.of(context).primaryAccent,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            t.settings.info.privacy.storage_body,
+                            style: TextStyle(
+                              color: AppColors.of(context).textSecondary,
+                              fontSize: 12,
+                              height: 1.35,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 32),
                   Tooltip(
                     message: t.auth_login.master_password_tooltip,
                     child: NeumorphicTextField(
@@ -159,84 +203,101 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                         ),
-                  const SizedBox(height: 20),
-                  Tooltip(
-                    message: t.auth_login.biometric_tooltip,
-                    child: NeumorphicButton(
-                      onPressed: _handleBiometricLogin,
-                      semanticLabel: t.auth_login.use_biometrics,
-                      padding: EdgeInsets.zero,
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 18,
-                          vertical: 14,
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 68,
-                              height: 68,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: RadialGradient(
-                                  colors: [
-                                    AppColors.of(
+                  if (showBiometric) ...[
+                    const SizedBox(height: 18),
+                    Tooltip(
+                      message: t.auth_login.biometric_tooltip,
+                      child: NeumorphicButton(
+                        onPressed: _handleBiometricLogin,
+                        semanticLabel: t.auth_login.use_biometrics,
+                        padding: EdgeInsets.zero,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 14,
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 68,
+                                height: 68,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: RadialGradient(
+                                    colors: [
+                                      AppColors.of(
+                                        context,
+                                      ).primaryAccent.withValues(alpha: 0.22),
+                                      AppColors.of(
+                                        context,
+                                      ).primaryAccent.withValues(alpha: 0.05),
+                                    ],
+                                  ),
+                                  border: Border.all(
+                                    color: AppColors.of(
                                       context,
-                                    ).primaryAccent.withValues(alpha: 0.22),
-                                    AppColors.of(
-                                      context,
-                                    ).primaryAccent.withValues(alpha: 0.05),
+                                    ).primaryAccent.withValues(alpha: 0.28),
+                                  ),
+                                ),
+                                child: LottieAnimationWidget(
+                                  animation: GuardenAnimation.fingerprintScan,
+                                  size: 46,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      t.auth_login.use_biometrics,
+                                      style: TextStyle(
+                                        color: AppColors.of(
+                                          context,
+                                        ).textPrimary,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      t.auth_login.biometric_tooltip,
+                                      style: TextStyle(
+                                        color: AppColors.of(
+                                          context,
+                                        ).textSecondary,
+                                        fontSize: 12,
+                                        height: 1.35,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      t.settings.info.usage.backup_body,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: AppColors.of(
+                                          context,
+                                        ).textSecondary.withValues(alpha: 0.85),
+                                        fontSize: 11,
+                                        height: 1.3,
+                                      ),
+                                    ),
                                   ],
                                 ),
-                                border: Border.all(
-                                  color: AppColors.of(
-                                    context,
-                                  ).primaryAccent.withValues(alpha: 0.28),
-                                ),
                               ),
-                              child: LottieAnimationWidget(
-                                animation: GuardenAnimation.fingerprintScan,
-                                size: 46,
+                              const SizedBox(width: 12),
+                              Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                size: 18,
+                                color: AppColors.of(context).primaryAccent,
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    t.auth_login.use_biometrics,
-                                    style: TextStyle(
-                                      color: AppColors.of(context).textPrimary,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    t.auth_login.biometric_tooltip,
-                                    style: TextStyle(
-                                      color: AppColors.of(
-                                        context,
-                                      ).textSecondary,
-                                      fontSize: 12,
-                                      height: 1.35,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              size: 18,
-                              color: AppColors.of(context).primaryAccent,
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                   TextButton(
                     onPressed: () => _showForgotPinDialog(context),
                     child: Text(

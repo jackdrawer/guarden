@@ -241,10 +241,10 @@ class SettingsService {
   // Theme mode settings
   AppThemeMode get themeMode {
     try {
-      final value = _box.get(_themeModeKey, defaultValue: 'system');
+      final value = _box.get(_themeModeKey, defaultValue: 'light');
       return AppThemeModeExtension.fromString(value as String?);
     } catch (_) {
-      return AppThemeMode.system;
+      return AppThemeMode.light;
     }
   }
 

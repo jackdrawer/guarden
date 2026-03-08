@@ -13,9 +13,9 @@
 ### Türkçe:
 
 ```
-🛡️ Guarden PW Manager - Premium privacy that costs nothing but trust.
+🛡️ Guarden - Premium Gizlilik: Güvenden başka bedeli olmayan premium gizlilik.
 
-Save paper, save password, save time, save privacy. Guarden ile şifrelerinizi güvenle saklayın, otomatik doldurun ve asla unutmayın.
+Guarden ile şifrelerinizi güvenle saklayın, otomatik doldurun ve asla unutmayın. Şifrelerinizi, banka hesaplarınızı ve aboneliklerinizi tek bir güvenli çatı altında toplayın.
 
 ✨ Özellikler:
 
@@ -53,8 +53,7 @@ Save paper, save password, save time, save privacy. Guarden ile şifrelerinizi g
 
 📱 Neden Guarden?
 
-✓ Ücretsiz temel özellikler
-✓ Reklamsız deneyim
+✓ Ücretsiz kasanızı bugün oluşturun
 ✓ Kullanıcı gizliliği önceliğimiz
 ✓ Basit ve sezgisel arayüz
 ✓ Düzenli güncellemeler
@@ -69,9 +68,9 @@ Hesaplarınızı bugün güvenceye alın!
 ### English:
 
 ```
-🛡️ Guarden PW Manager - Premium privacy that costs nothing but trust.
+🛡️ Guarden - Premium Privacy: Premium privacy that costs nothing but trust.
 
-Save paper, save password, save time, save privacy. With Guarden, securely store your passwords, auto-fill them, and never forget again.
+With Guarden, securely store your passwords, auto-fill them, and never forget again. Manage your passwords, bank accounts, and subscriptions under one secure roof.
 
 ✨ Features:
 
@@ -109,8 +108,7 @@ Save paper, save password, save time, save privacy. With Guarden, securely store
 
 📱 Why Guarden?
 
-✓ Free basic features
-✓ Ad-free experience
+✓ Create your free vault today
 ✓ User privacy is our priority
 ✓ Simple and intuitive interface
 ✓ Regular updates

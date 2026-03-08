@@ -84,64 +84,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  Future<String?> _requestPasswordConfirmation(
-    BuildContext context, {
-    String? title,
-  }) async {
-    final controller = TextEditingController();
-    try {
-      var obscure = true;
-
-      final result = await showDialog<String>(
-        context: context,
-        builder: (ctx) {
-          return StatefulBuilder(
-            builder: (ctx, setState) {
-              return AlertDialog(
-                backgroundColor: AppColors.of(ctx).surface,
-                title: Text(
-                  title ?? t.settings.master_password_confirmation,
-                  style: TextStyle(color: AppColors.of(ctx).textPrimary),
-                ),
-                content: TextField(
-                  controller: controller,
-                  autofocus: true,
-                  obscureText: obscure,
-                  decoration: InputDecoration(
-                    labelText: t.settings.master_password,
-                    suffixIcon: IconButton(
-                      onPressed: () => setState(() => obscure = !obscure),
-                      icon: Icon(
-                        obscure ? Icons.visibility : Icons.visibility_off,
-                      ),
-                    ),
-                  ),
-                  onSubmitted: (value) => Navigator.of(ctx).pop(value),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: Text(t.general.cancel),
-                  ),
-                  FilledButton(
-                    onPressed: () => Navigator.of(ctx).pop(controller.text),
-                    child: Text(t.general.confirm),
-                  ),
-                ],
-              );
-            },
-          );
-        },
-      );
-      return result;
-    } finally {
-      // Small delay to ensure dialog animation completes before disposing controller
-      Future.delayed(const Duration(milliseconds: 200), () {
-        controller.dispose();
-      });
-    }
-  }
-
   Future<bool> _authenticate(BuildContext context) async {
     final settings =
         ref.read(settingsProvider).valueOrNull ?? SettingsState.initial();
@@ -171,42 +113,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
 
     if (!context.mounted) return false;
-    final password = await _requestPasswordConfirmation(context);
-    if (password == null || password.isEmpty) return false;
-
-    final isValid = await ref
+    final password = await ref
         .read(authProvider.notifier)
-        .verifyMasterPassword(password);
-
-    if (!isValid && context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(t.settings.master_password_wrong)));
-    }
-    return isValid;
+        .requestVerifiedMasterPassword(
+          context,
+          dialogTitle: t.settings.master_password_confirmation,
+          wrongPasswordMessage: t.settings.master_password_wrong,
+        );
+    return password != null;
   }
 
   Future<String?> _authenticateAndGetPassword(BuildContext context) async {
     if (!context.mounted) return null;
 
-    // We need raw master password text to encrypt/decrypt backup.
-    // So we do not skip this with biometrics.
-    final password = await _requestPasswordConfirmation(
+    return ref.read(authProvider.notifier).requestVerifiedMasterPassword(
       context,
-      title: t.settings.master_password_for_security,
+      dialogTitle: t.settings.master_password_for_security,
+      wrongPasswordMessage: t.settings.master_password_wrong,
     );
-    if (password == null || password.isEmpty) return null;
-
-    final isValid = await ref
-        .read(authProvider.notifier)
-        .verifyMasterPassword(password);
-    if (!isValid && context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(t.settings.master_password_wrong)));
-      return null;
-    }
-    return password;
   }
 
   Future<void> _handlePanicMode(BuildContext context) async {
@@ -1376,6 +1300,92 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
+  Widget _buildLaunchTrustCard(BuildContext context) {
+    return NeumorphicContainer(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.of(
+                    context,
+                  ).primaryAccent.withValues(alpha: 0.12),
+                ),
+                child: Icon(
+                  Icons.shield_outlined,
+                  color: AppColors.of(context).primaryAccent,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      t.general.app_short_name,
+                      style: TextStyle(
+                        color: AppColors.of(context).textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      t.settings.info.about.offline_title,
+                      style: TextStyle(
+                        color: AppColors.of(context).primaryAccent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            t.settings.info.about.offline_body,
+            style: TextStyle(
+              color: AppColors.of(context).textSecondary,
+              fontSize: 13,
+              height: 1.45,
+            ),
+          ),
+          const SizedBox(height: 14),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            children: [
+              _TrustChip(
+                icon: Icons.lock_outline_rounded,
+                label: t.settings.info.privacy.encryption_title,
+              ),
+              _TrustChip(
+                icon: Icons.fingerprint,
+                label: t.settings.labels.biometric_unlock,
+              ),
+              _TrustChip(
+                icon: Icons.cloud_upload_outlined,
+                label: t.settings.labels.backup_to_drive,
+              ),
+              _TrustChip(
+                icon: Icons.password_rounded,
+                label: t.settings.labels.autofill,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final settingsArgs =
@@ -1463,6 +1473,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           const SizedBox(height: 12),
           _buildCurrencySelector(context, settingsArgs),
           const SizedBox(height: 24),
+          _buildLaunchTrustCard(context),
+          const SizedBox(height: 24),
           Text(
             t.settings.sections.security_privacy,
             style: TextStyle(
@@ -1507,8 +1519,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             label: t.settings.labels.biometric_unlock,
             value: settingsArgs.biometricLogin,
             tooltip: t.settings.tooltips.biometric_unlock,
-            onChanged: (val) =>
-                ref.read(settingsProvider.notifier).toggleBiometricLogin(val),
+            onChanged: (val) async {
+              if (val) {
+                // Enabling: verify biometric hardware & prompt authentication
+                final canUse = await _biometricService.canCheckBiometrics();
+                final hasEnrolled =
+                    (await _biometricService.getAvailableBiometrics())
+                        .isNotEmpty;
+                if (!canUse || !hasEnrolled) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(t.auth_login.biometric_unavailable),
+                      ),
+                    );
+                  }
+                  return;
+                }
+                final ok = await _biometricService.authenticate(
+                  reason: t.settings.secure_action_reason,
+                );
+                if (!ok) return;
+              }
+              ref.read(settingsProvider.notifier).toggleBiometricLogin(val);
+            },
           ),
           const SizedBox(height: 12),
           _buildNotifToggle(
@@ -1517,8 +1551,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             label: t.settings.labels.sensitive_action_confirmation,
             value: settingsArgs.biometricConfirm,
             tooltip: t.settings.tooltips.sensitive_action_confirmation,
-            onChanged: (val) =>
-                ref.read(settingsProvider.notifier).toggleBiometricConfirm(val),
+            onChanged: (val) async {
+              if (val) {
+                // Enabling: verify biometric hardware & prompt authentication
+                final canUse = await _biometricService.canCheckBiometrics();
+                final hasEnrolled =
+                    (await _biometricService.getAvailableBiometrics())
+                        .isNotEmpty;
+                if (!canUse || !hasEnrolled) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(t.auth_login.biometric_unavailable),
+                      ),
+                    );
+                  }
+                  return;
+                }
+                final ok = await _biometricService.authenticate(
+                  reason: t.settings.secure_action_reason,
+                );
+                if (!ok) return;
+              }
+              ref.read(settingsProvider.notifier).toggleBiometricConfirm(val);
+            },
           ),
           const SizedBox(height: 24),
           Text(
@@ -1800,6 +1856,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
             child: Text(t.general.close),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TrustChip extends StatelessWidget {
+  const _TrustChip({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(999),
+        color: AppColors.of(context).surface,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: AppColors.of(context).primaryAccent),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: AppColors.of(context).textSecondary,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ],
       ),

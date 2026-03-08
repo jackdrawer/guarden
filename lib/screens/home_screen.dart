@@ -15,6 +15,7 @@ import 'dashboard/dashboard_tab.dart';
 import 'bank_accounts/bank_accounts_tab.dart';
 import 'subscriptions/subscriptions_tab.dart';
 import 'web_passwords/web_passwords_tab.dart';
+import '../providers/home_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -24,7 +25,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  int _currentIndex = 0;
+  // int _currentIndex removed, using provider instead
 
   @override
   void initState() {
@@ -301,8 +302,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     WebPasswordsTab(),
   ];
 
-  TabFabConfig? _fabConfigForTab(BuildContext context) {
-    switch (_currentIndex) {
+  TabFabConfig? _fabConfigForTab(BuildContext context, int currentIndex) {
+    switch (currentIndex) {
       case 1:
         return TabFabConfig(
           icon: Icons.account_balance_rounded,
@@ -328,13 +329,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final fabConfig = _fabConfigForTab(context);
+    final currentIndex = ref.watch(homeTabProvider);
+    final fabConfig = _fabConfigForTab(context, currentIndex);
 
     return Scaffold(
       backgroundColor: AppColors.of(context).background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        toolbarHeight: 72,
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -348,14 +351,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             const SizedBox(width: 10),
             Flexible(
-              child: Text(
-                t.general.app_short_name,
-                style: TextStyle(
-                  color: AppColors.of(context).textPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    t.general.app_short_name,
+                    style: TextStyle(
+                      color: AppColors.of(context).textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    t.settings.info.about.offline_title,
+                    style: TextStyle(
+                      color: AppColors.of(context).textSecondary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ),
           ],
@@ -372,7 +392,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
       body: SafeArea(
-        child: IndexedStack(index: _currentIndex, children: _tabs),
+        child: IndexedStack(index: currentIndex, children: _tabs),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: AnimatedTabFab(
@@ -380,8 +400,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         config: fabConfig,
       ),
       bottomNavigationBar: NeumorphicBottomNav(
-        currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+        currentIndex: currentIndex,
+        onTap: (index) => ref.read(homeTabProvider.notifier).state = index,
       ),
     );
   }

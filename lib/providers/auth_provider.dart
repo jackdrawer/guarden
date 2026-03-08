@@ -3,12 +3,15 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../i18n/strings.g.dart';
 import '../services/crypto_service.dart';
 import '../services/database_service.dart';
 import '../services/secure_storage_service.dart';
 import '../services/biometric_service.dart';
+import '../theme/app_colors.dart';
 import '../utils/crypto_utils.dart';
 import '../widgets/error_handler.dart';
+import '../services/app_lifecycle_service.dart';
 import 'settings_provider.dart';
 
 enum AuthState { initial, firstTime, unauthenticated, authenticated }
@@ -139,6 +142,126 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     }
   }
 
+  Future<String?> requestVerifiedMasterPassword(
+    BuildContext context, {
+    String? dialogTitle,
+    String? wrongPasswordMessage,
+  }) async {
+    final controller = TextEditingController();
+
+    try {
+      var obscure = true;
+      final password = await showDialog<String>(
+        context: context,
+        barrierDismissible: false,
+        builder: (ctx) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                backgroundColor: AppColors.of(ctx).surface,
+                title: Text(
+                  dialogTitle ?? t.general.authentication,
+                  style: TextStyle(color: AppColors.of(ctx).textPrimary),
+                ),
+                content: TextField(
+                  controller: controller,
+                  autofocus: false,
+                  obscureText: obscure,
+                  style: TextStyle(color: AppColors.of(ctx).textPrimary),
+                  decoration: InputDecoration(
+                    labelText: t.general.master_password_hint,
+                    labelStyle: TextStyle(
+                      color: AppColors.of(ctx).textSecondary,
+                    ),
+                    suffixIcon: IconButton(
+                      onPressed: () => setState(() => obscure = !obscure),
+                      icon: Icon(
+                        obscure ? Icons.visibility : Icons.visibility_off,
+                        color: AppColors.of(ctx).textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: Text(
+                      t.general.cancel,
+                      style: TextStyle(color: AppColors.of(ctx).textSecondary),
+                    ),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(ctx).pop(controller.text),
+                    child: Text(t.general.confirm),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+
+      if (password == null || password.isEmpty) {
+        return null;
+      }
+
+      final isValid = await verifyMasterPassword(password);
+      if (!isValid) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                wrongPasswordMessage ?? t.settings.master_password_wrong,
+              ),
+            ),
+          );
+        }
+        return null;
+      }
+
+      return password;
+    } finally {
+      Future.delayed(const Duration(milliseconds: 200), () {
+        controller.dispose();
+      });
+    }
+  }
+
+  Future<bool> authenticateForSensitiveAction(
+    BuildContext context, {
+    String? biometricReason,
+    String? passwordDialogTitle,
+    String? wrongPasswordMessage,
+  }) async {
+    final settings = ref.read(settingsProvider).valueOrNull;
+    final isConfirmEnabled = settings?.biometricConfirm ?? false;
+
+    if (!isConfirmEnabled) {
+      return true;
+    }
+
+    final canUse = await canUseBiometrics();
+    if (canUse) {
+      final unlocked = await biometricUnlock(
+        reason: biometricReason ?? t.settings.secure_action_reason,
+      );
+      if (unlocked) {
+        return true;
+      }
+    }
+
+    if (!context.mounted) {
+      return false;
+    }
+
+    final password = await requestVerifiedMasterPassword(
+      context,
+      dialogTitle: passwordDialogTitle,
+      wrongPasswordMessage: wrongPasswordMessage,
+    );
+    return password != null;
+  }
+
   Future<void> lock() async {
     try {
       await _databaseService.closeDatabase();
@@ -157,6 +280,11 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
   Future<void> resetAfterPanic() async {
     try {
       await _databaseService.deleteDatabase();
+      // Clear auth & lock flags so lifecycle service stops locking
+      ref.read(isUserAuthenticatedProvider.notifier).state = false;
+      ref.read(isLockedProvider.notifier).state = false;
+      // Reset all settings (biometric, theme, etc.)
+      await ref.read(settingsProvider.notifier).resetSettings();
       state = AsyncValue.data(AuthState.firstTime);
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
@@ -180,12 +308,10 @@ class AuthNotifier extends AsyncNotifier<AuthState> {
     return await service.canCheckBiometrics();
   }
 
-  Future<bool> biometricUnlock() async {
+  Future<bool> biometricUnlock({String? reason}) async {
     final service = BiometricService();
     try {
-      final success = await service.authenticate(
-        reason: 'Authenticate to access your vault',
-      );
+      final success = await service.authenticate(reason: reason);
       if (success) {
         await _databaseService.initDatabase();
         state = AsyncValue.data(AuthState.authenticated);

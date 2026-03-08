@@ -39,7 +39,7 @@ class SettingsState {
     this.securityNotif = true,
     this.biometricLogin = false,
     this.biometricConfirm = false,
-    this.themeMode = AppThemeMode.system,
+    this.themeMode = AppThemeMode.light,
     this.lastMasterPasswordEntry,
     this.languageCode,
     this.defaultCurrency,
@@ -53,7 +53,7 @@ class SettingsState {
     isTravelModeActive: false,
     travelProtectedIds: [],
     isInitialized: false,
-    themeMode: AppThemeMode.system,
+    themeMode: AppThemeMode.light,
   );
 
   SettingsState copyWith({
@@ -224,6 +224,9 @@ class SettingsNotifier extends AsyncNotifier<SettingsState> {
       final currentValue = state.value;
       if (currentValue != null) {
         state = AsyncValue.data(updater(currentValue, value));
+      } else {
+        // If state is not ready, re-initialize to pick up latest changes
+        await _init();
       }
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);

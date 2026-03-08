@@ -6,6 +6,7 @@ import '../services/database_service.dart';
 import '../widgets/error_handler.dart';
 import '../i18n/strings.g.dart';
 import 'settings_provider.dart';
+import 'activity_provider.dart';
 
 class WebPasswordNotifier extends AutoDisposeAsyncNotifier<List<WebPassword>> {
   late final DatabaseService _dbService = ref.read(databaseProvider);
@@ -56,6 +57,15 @@ class WebPasswordNotifier extends AutoDisposeAsyncNotifier<List<WebPassword>> {
     try {
       _dbService.webPasswordsBox.put(item.id, item);
       state = AsyncValue.data(_getItems());
+      ref
+          .read(activityProvider.notifier)
+          .recordActivity(
+            title: item.title,
+            subtitle: t.dashboard.activities.added_web_password,
+            type: 'web_password',
+            action: 'added',
+            itemId: item.id,
+          );
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
@@ -71,6 +81,15 @@ class WebPasswordNotifier extends AutoDisposeAsyncNotifier<List<WebPassword>> {
     try {
       _dbService.webPasswordsBox.put(item.id, item);
       state = AsyncValue.data(_getItems());
+      ref
+          .read(activityProvider.notifier)
+          .recordActivity(
+            title: item.title,
+            subtitle: t.dashboard.activities.updated_web_password,
+            type: 'web_password',
+            action: 'updated',
+            itemId: item.id,
+          );
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
@@ -82,15 +101,46 @@ class WebPasswordNotifier extends AutoDisposeAsyncNotifier<List<WebPassword>> {
     }
   }
 
-  void deleteWebPassword(String id) {
+  WebPassword? deleteWebPassword(String id) {
     try {
+      final item = _dbService.webPasswordsBox.get(id);
+      if (item == null) {
+        return null;
+      }
+      final title = item.title;
       _dbService.webPasswordsBox.delete(id);
       state = AsyncValue.data(_getItems());
+      ref
+          .read(activityProvider.notifier)
+          .recordActivity(
+            title: title,
+            subtitle: t.dashboard.activities.deleted_web_password,
+            type: 'web_password',
+            action: 'deleted',
+            itemId: id,
+          );
+      return item;
     } catch (e, stackTrace) {
       state = AsyncValue.error(e, stackTrace);
       ErrorHandler.handleGlobalError(
         DatabaseError(
           'Failed to delete web password: $e',
+          userMessage: t.settings.errors.setting_update_failed,
+        ),
+      );
+      return null;
+    }
+  }
+
+  void restoreWebPassword(WebPassword item) {
+    try {
+      _dbService.webPasswordsBox.put(item.id, item);
+      state = AsyncValue.data(_getItems());
+    } catch (e, stackTrace) {
+      state = AsyncValue.error(e, stackTrace);
+      ErrorHandler.handleGlobalError(
+        DatabaseError(
+          'Failed to restore web password: $e',
           userMessage: t.settings.errors.setting_update_failed,
         ),
       );

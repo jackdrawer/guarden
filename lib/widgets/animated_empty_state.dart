@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 import 'lottie_animation_widget.dart';
+import 'neumorphic/neumorphic_button.dart';
 
 class AnimatedEmptyState extends StatefulWidget {
   final IconData icon;
   final String title;
   final String subtitle;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   const AnimatedEmptyState({
     super.key,
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.actionLabel,
+    this.onAction,
   });
 
   @override
@@ -90,13 +95,14 @@ class _AnimatedEmptyStateState extends State<AnimatedEmptyState>
           const SizedBox(height: 32),
           Text(
             widget.title,
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: AppColors.of(context).textPrimary,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
@@ -109,6 +115,38 @@ class _AnimatedEmptyStateState extends State<AnimatedEmptyState>
               ),
             ),
           ),
+          if (widget.actionLabel != null && widget.onAction != null) ...[
+            const SizedBox(height: 26),
+            ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 220, maxWidth: 260),
+              child: NeumorphicButton(
+                onPressed: widget.onAction!,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      widget.icon,
+                      size: 18,
+                      color: AppColors.of(context).primaryAccent,
+                    ),
+                    const SizedBox(width: 10),
+                    Flexible(
+                      child: Text(
+                        widget.actionLabel!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.of(context).primaryAccent,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

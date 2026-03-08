@@ -12,15 +12,46 @@ import '../../services/crypto_service.dart';
 import '../../services/logo_service.dart';
 import '../../services/secure_storage_service.dart';
 import '../../theme/app_colors.dart';
+import '../../providers/activity_provider.dart';
 import '../../widgets/animated_empty_state.dart';
 import '../../widgets/neumorphic/neumorphic_container.dart';
+import '../../widgets/ads/native_ad_widget.dart';
 
 class WebPasswordsTab extends ConsumerWidget {
   const WebPasswordsTab({super.key});
 
+  void _handleDelete(BuildContext context, WidgetRef ref, wp) {
+    HapticFeedback.mediumImpact();
+    final deleted = ref
+        .read(webPasswordProvider.notifier)
+        .deleteWebPassword(wp.id);
+    if (deleted == null) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(t.general.deleted_label(label: wp.title)),
+          duration: const Duration(seconds: 6),
+          action: SnackBarAction(
+            label: t.general.undo,
+            onPressed: () {
+              ref
+                  .read(webPasswordProvider.notifier)
+                  .restoreWebPassword(deleted);
+            },
+          ),
+        ),
+      );
+  }
+
   Future<void> _copyPassword(
     BuildContext context,
     WidgetRef ref,
+    String title,
+    String id,
     String encryptedPassword,
   ) async {
     try {
@@ -36,6 +67,17 @@ class WebPasswordsTab extends ConsumerWidget {
       );
 
       await ref.read(clipboardServiceProvider).copy(password);
+
+      ref
+          .read(activityProvider.notifier)
+          .recordActivity(
+            title: title,
+            subtitle: t.dashboard.activities.copied_password,
+            type: 'web_password',
+            action: 'copied',
+            itemId: id,
+          );
+
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
@@ -77,12 +119,31 @@ class WebPasswordsTab extends ConsumerWidget {
                     icon: Icons.password_outlined,
                     title: t.web_passwords.empty.title,
                     subtitle: t.web_passwords.empty.subtitle,
+                    actionLabel: t.home.add_web_password,
+                    onAction: () => context.push('/add-web-password'),
                   )
                 : AnimationLimiter(
                     child: ListView.builder(
-                      itemCount: webPasswords.length,
+                      itemCount:
+                          webPasswords.length +
+                          (webPasswords.isNotEmpty ? 1 : 0),
                       itemBuilder: (context, index) {
-                        final wp = webPasswords[index];
+                        if (index == 1 && webPasswords.isNotEmpty) {
+                          return AnimationConfiguration.staggeredList(
+                            position: index,
+                            duration: const Duration(milliseconds: 375),
+                            child: const SlideAnimation(
+                              verticalOffset: 50.0,
+                              child: FadeInAnimation(child: NativeAdWidget()),
+                            ),
+                          );
+                        }
+
+                        final adjustedIndex =
+                            (webPasswords.isNotEmpty && index > 1)
+                            ? index - 1
+                            : index;
+                        final wp = webPasswords[adjustedIndex];
                         final username = wp.username;
                         final maskedUsername = username.length > 2
                             ? '${username.substring(0, 2)}***'
@@ -116,14 +177,8 @@ class WebPasswordsTab extends ConsumerWidget {
                                         label: t.general.edit,
                                       ),
                                       SlidableAction(
-                                        onPressed: (context) {
-                                          HapticFeedback.mediumImpact();
-                                          ref
-                                              .read(
-                                                webPasswordProvider.notifier,
-                                              )
-                                              .deleteWebPassword(wp.id);
-                                        },
+                                        onPressed: (context) =>
+                                            _handleDelete(context, ref, wp),
                                         backgroundColor: Colors.transparent,
                                         foregroundColor: AppColors.of(
                                           context,
@@ -192,6 +247,8 @@ class WebPasswordsTab extends ConsumerWidget {
                                             onPressed: () => _copyPassword(
                                               context,
                                               ref,
+                                              wp.title,
+                                              wp.id,
                                               wp.encryptedPassword,
                                             ),
                                           ),

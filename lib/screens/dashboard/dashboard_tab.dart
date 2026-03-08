@@ -11,6 +11,8 @@ import '../../utils/currency_utils.dart';
 import '../../widgets/ads/ad_banner_widget.dart';
 import '../../widgets/analytics/subscription_pie_chart.dart';
 import '../../widgets/neumorphic/neumorphic_container.dart';
+import '../../widgets/dashboard/backup_status_card.dart';
+import '../../widgets/dashboard/activity_feed_card.dart';
 
 class DashboardTab extends ConsumerStatefulWidget {
   const DashboardTab({super.key});
@@ -40,6 +42,9 @@ class _DashboardTabState extends ConsumerState<DashboardTab> {
 
     final hasMultipleCurrencies = breakdown.length > 1;
     String breakdownString = '';
+    final chartCurrency = hasMultipleCurrencies
+        ? displayCurrency
+        : (breakdown.keys.firstOrNull ?? displayCurrency);
     if (hasMultipleCurrencies) {
       breakdownString = breakdown.entries
           .map((e) => CurrencyUtils.formatAmount(e.value, e.key))
@@ -90,14 +95,19 @@ class _DashboardTabState extends ConsumerState<DashboardTab> {
             breakdownString,
             displayCurrency,
             hasMultipleCurrencies,
+            chartCurrency,
             chartData,
           ),
+          const SizedBox(height: 24),
+          const BackupStatusCard(),
           const SizedBox(height: 24),
           if (expiredBanks.isNotEmpty) ...[
             _buildAlertCard(context, expiredBanks.length),
             const SizedBox(height: 16),
           ],
           _buildSecurityAuditCard(context),
+          const SizedBox(height: 24),
+          const ActivityFeedCard(),
           const SizedBox(height: 16),
           const AdBannerWidget(),
         ],
@@ -110,6 +120,7 @@ class _DashboardTabState extends ConsumerState<DashboardTab> {
     String breakdownString,
     String displayCurrency,
     bool hasMultipleCurrencies,
+    String chartCurrency,
     Map<String, double> chartData,
   ) {
     return NeumorphicContainer(
@@ -191,7 +202,7 @@ class _DashboardTabState extends ConsumerState<DashboardTab> {
                 padding: const EdgeInsets.only(top: 16),
                 child: SubscriptionPieChart(
                   data: chartData,
-                  currency: chartData.keys.first,
+                  currency: chartCurrency,
                 ),
               ),
               crossFadeState: _showChart

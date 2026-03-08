@@ -51,6 +51,8 @@ android/key.properties
 *.keystore
 *.p12
 *.mobileprovision
+ios/Runner/GoogleService-Info.plist
+ios/Flutter/LaunchSecrets.xcconfig
 
 # VS Code Local Config (contains sensitive dart-define values)
 .vscode/launch.json
@@ -75,5 +77,5 @@ lib/i18n/strings_en.g.dart
 lib/i18n/strings_tr.g.dart
 
 # Planning and documentation (optional - remove if you want these in repo)
-# .planning/
-# .gemini/
+.planning/
+.gemini/

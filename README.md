@@ -1,4 +1,4 @@
-# 🔐 Guarden Password Manager
+# 🔐 Guarden - Premium Privacy
 
 <p align="center">
   <img src="https://img.shields.io/badge/Flutter-3.32.2+-02569B?logo=flutter" alt="Flutter">
@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
 </p>
 
-**Guarden** is a secure, offline-first password vault for managing bank accounts, subscriptions, and web credentials with **AES-256-GCM encryption** and **biometric unlock**. 
+**Guarden** is a secure, offline-first premium privacy vault for managing bank accounts, subscriptions, and web credentials with **AES-256-GCM encryption** and **biometric unlock**. 
 
 *This is a full open-source Flutter alternative to subscription-based password managers, designed explicitly with a zero-trust architecture where only you own your data.*
 
