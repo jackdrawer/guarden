@@ -16,6 +16,8 @@
             --muted: #b9c8be;
             --accent: #7de39d;
             --accent-strong: #49b86a;
+            --warm: #ffb163;
+            --warm-soft: rgba(255, 177, 99, 0.16);
             --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
         }
 
@@ -28,6 +30,7 @@
             font-family: "Segoe UI", Arial, sans-serif;
             color: var(--text);
             background:
+                radial-gradient(circle at 85% 12%, rgba(255, 177, 99, 0.18), transparent 24%),
                 radial-gradient(circle at top, rgba(73, 184, 106, 0.22), transparent 38%),
                 linear-gradient(180deg, #0b1d14 0%, var(--bg) 100%);
             line-height: 1.6;
@@ -102,7 +105,7 @@
             text-decoration: none;
             padding: 10px 14px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.05);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 177, 99, 0.05));
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
@@ -143,8 +146,8 @@
             margin-bottom: 16px;
             padding: 8px 12px;
             border-radius: 999px;
-            background: rgba(125, 227, 157, 0.12);
-            color: var(--accent);
+            background: linear-gradient(180deg, rgba(125, 227, 157, 0.12), rgba(255, 177, 99, 0.12));
+            color: #ffd2a3;
             font-size: 0.84rem;
             letter-spacing: 0.06em;
             text-transform: uppercase;
@@ -179,13 +182,13 @@
         }
 
         .button.primary {
-            background: var(--accent);
+            background: linear-gradient(135deg, var(--accent) 0%, var(--warm) 100%);
             color: #082013;
         }
 
         .button.secondary {
             background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 177, 99, 0.3);
         }
 
         .hero-panel {
@@ -221,6 +224,17 @@
         .section p {
             margin: 12px 0 0;
             color: var(--muted);
+        }
+
+        .section h2,
+        .hero-panel h2 {
+            color: #ffe1be;
+        }
+
+        .footer-links a:hover,
+        nav a:hover {
+            border-color: rgba(255, 177, 99, 0.45);
+            color: #ffe1be;
         }
 
         footer {
