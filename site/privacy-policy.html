@@ -15,7 +15,6 @@
             --muted: #b9c8be;
             --accent: #7de39d;
             --warm: #ffb163;
-            --warm-soft: rgba(255, 177, 99, 0.14);
             --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
         }
 
@@ -28,193 +27,329 @@
             font-family: "Segoe UI", Arial, sans-serif;
             color: var(--text);
             background:
-                radial-gradient(circle at 88% 10%, rgba(255, 177, 99, 0.18), transparent 24%),
-                radial-gradient(circle at top right, rgba(73, 184, 106, 0.22), transparent 30%),
+                radial-gradient(circle at 86% 12%, rgba(255, 177, 99, 0.18), transparent 24%),
+                radial-gradient(circle at top, rgba(73, 184, 106, 0.22), transparent 38%),
                 linear-gradient(180deg, #0b1d14 0%, var(--bg) 100%);
             line-height: 1.7;
         }
 
-        .shell {
-            width: min(880px, calc(100% - 32px));
-            margin: 0 auto;
-            padding: 28px 0 56px;
+        a {
+            color: inherit;
+            text-decoration: none;
         }
 
-        .panel {
-            background: var(--panel);
-            border: 1px solid var(--panel-border);
-            border-radius: 28px;
-            padding: 34px;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(10px);
+        .shell {
+            width: min(1120px, calc(100% - 32px));
+            margin: 0 auto;
+        }
+
+        header {
+            padding: 24px 0;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
         }
 
         .brand {
             display: flex;
             align-items: center;
             gap: 14px;
-            margin-bottom: 20px;
-        }
-
-        .brand img {
-            width: 56px;
-            height: 56px;
-            border-radius: 18px;
-            object-fit: cover;
-            box-shadow: var(--shadow);
-        }
-
-        .brand-copy {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .brand-copy strong {
-            color: var(--text);
-        }
-
-        .brand-copy span {
-            color: var(--muted);
-            font-size: 0.95rem;
-        }
-
-        a {
-            color: #ffe1be;
             text-decoration: none;
         }
 
-        h1 {
-            margin-top: 0;
-            font-size: clamp(2rem, 4vw, 3rem);
+        .brand img {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            object-fit: cover;
         }
 
-        h2 {
-            margin-top: 30px;
-            font-size: 1.25rem;
-            color: #ffe1be;
+        .brand-copy strong {
+            display: block;
+            font-size: 1rem;
         }
 
-        p,
-        li {
+        .brand-copy span {
+            display: block;
             color: var(--muted);
+            font-size: 0.92rem;
         }
 
-        .meta {
-            margin-bottom: 24px;
-            color: var(--muted);
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
-        .top-links a,
-        .bottom-links a {
+        nav a {
             padding: 10px 14px;
             border-radius: 999px;
             background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 177, 99, 0.05));
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        .top-links a:hover,
-        .bottom-links a:hover,
-        p a:hover {
+        nav a:hover,
+        .link-row a:hover {
             border-color: rgba(255, 177, 99, 0.45);
-            color: #fff1db;
+            color: #ffe1be;
         }
 
+        main {
+            padding: 28px 0 56px;
+        }
+
+        .hero {
+            display: grid;
+            gap: 28px;
+            grid-template-columns: 1.3fr 0.9fr;
+            align-items: start;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-copy,
+        .summary,
+        .section {
+            padding: 34px;
+        }
+
+        .hero-logo {
+            width: 88px;
+            height: 88px;
+            margin-bottom: 18px;
+            border-radius: 26px;
+            box-shadow: var(--shadow);
+            object-fit: cover;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            margin-bottom: 16px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(125, 227, 157, 0.12), rgba(255, 177, 99, 0.12));
+            color: #ffd2a3;
+            font-size: 0.84rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0 0 16px;
+            font-size: clamp(2.2rem, 4.8vw, 4rem);
+            line-height: 1.04;
+        }
+
+        h2 {
+            margin: 0 0 10px;
+            font-size: 1.25rem;
+            color: #ffe1be;
+        }
+
+        .lead,
+        .meta,
+        p,
+        li {
+            color: var(--muted);
+        }
+
+        .link-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .link-row a {
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 177, 99, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .summary-list,
+        .detail-list {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--muted);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+            margin-top: 22px;
+        }
+
+        .detail-list a,
         p a {
             color: var(--warm);
         }
 
-        .top-links,
-        .bottom-links {
+        footer {
+            padding: 0 0 48px;
+        }
+
+        .footer-card {
+            padding: 24px 28px;
             display: flex;
             flex-wrap: wrap;
-            gap: 16px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
         }
 
-        .top-links {
-            margin-bottom: 18px;
+        .footer-card p {
+            margin: 0;
         }
 
-        .bottom-links {
-            margin-top: 28px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        @media (max-width: 860px) {
+            .hero,
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-copy,
+            .summary,
+            .section {
+                padding: 24px;
+            }
+
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-    <main class="shell">
-        <article class="panel">
-            <div class="brand">
+    <header class="shell">
+        <div class="topbar">
+            <a class="brand" href="./">
                 <img src="./assets/images/app_icon.png" alt="Guarden - Premium Privacy logo">
-                <div class="brand-copy">
+                <span class="brand-copy">
                     <strong>Guarden - Premium Privacy</strong>
                     <span>Privacy and Google OAuth disclosure</span>
+                </span>
+            </a>
+            <nav aria-label="Primary">
+                <a href="./">Home</a>
+                <a href="./terms-of-service.html">Terms of Service</a>
+                <a href="mailto:jackdrawer90@gmail.com">Support</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="shell">
+        <section class="hero">
+            <article class="card hero-copy">
+                <img class="hero-logo" src="./assets/images/app_icon.png" alt="Guarden - Premium Privacy app icon">
+                <span class="eyebrow">Privacy policy</span>
+                <h1>Privacy Policy for Guarden - Premium Privacy</h1>
+                <p class="lead">
+                    Guarden - Premium Privacy is an offline-first password and private data manager. This page explains
+                    what the app handles, how optional Google Drive backup works, and how users can contact us about
+                    privacy questions.
+                </p>
+                <p class="meta">Last updated: March 9, 2026</p>
+                <div class="link-row">
+                    <a href="./">Back to Home</a>
+                    <a href="./terms-of-service.html">Terms of Service</a>
+                    <a href="mailto:jackdrawer90@gmail.com">Contact Support</a>
                 </div>
-            </div>
-            <div class="top-links">
-                <a href="./">Back to Guarden - Premium Privacy home page</a>
-                <a href="./terms-of-service.html">Terms of Service</a>
-                <a href="mailto:jackdrawer90@gmail.com">Contact support</a>
-            </div>
+            </article>
 
-            <h1>Privacy Policy for Guarden - Premium Privacy</h1>
-            <p class="meta">Last updated: March 9, 2026</p>
+            <aside class="card summary">
+                <h2>Policy Summary</h2>
+                <ul class="summary-list">
+                    <li>Core vault records stay on the user's device.</li>
+                    <li>Encryption protects content before storage or backup.</li>
+                    <li>Google OAuth is used only for optional encrypted Google Drive backup.</li>
+                    <li>Users can continue using the app without enabling cloud backup.</li>
+                </ul>
+            </aside>
+        </section>
 
-            <p>
-                Guarden - Premium Privacy is an offline-first password and private data manager. This Privacy Policy explains
-                what information the app handles, how optional Google Drive backup works, and how users can contact us
-                about privacy questions.
-            </p>
+        <section class="grid">
+            <article class="card section">
+                <h2>1. Core app data</h2>
+                <p>
+                    Guarden - Premium Privacy stores password entries, bank account records, subscription records, and
+                    private notes locally on the user's device. Core vault usage does not require a remote Guarden
+                    account.
+                </p>
+            </article>
 
-            <h2>1. Core app data</h2>
-            <p>
-                Guarden - Premium Privacy stores password entries, bank account records, subscription records, and private
-                notes locally on the user's device. The app is designed so that core vault usage does not require a
-                remote Guarden account.
-            </p>
+            <article class="card section">
+                <h2>2. Encryption and local protection</h2>
+                <p>
+                    Sensitive vault content is protected with encryption before storage. On supported devices, users
+                    can also enable biometric authentication to help protect access to the vault.
+                </p>
+            </article>
 
-            <h2>2. Encryption and local protection</h2>
-            <p>
-                Sensitive vault content is protected with encryption before storage. On supported devices, users can
-                also enable biometric authentication to help protect access to the vault.
-            </p>
+            <article class="card section">
+                <h2>3. Google OAuth and Google Drive backup</h2>
+                <p>
+                    Guarden - Premium Privacy requests Google OAuth access only if the user chooses the optional
+                    encrypted backup feature. That access is used to create, update, download, or restore the encrypted
+                    vault backup file in the user's own Google Drive.
+                </p>
+            </article>
 
-            <h2>3. Google OAuth and Google Drive backup</h2>
-            <p>
-                Guarden - Premium Privacy requests Google OAuth access only if the user chooses the optional encrypted backup
-                feature. That access is used to create, update, download, or restore the encrypted vault backup file in
-                the user's own Google Drive.
-            </p>
-            <p>
-                The app's Google Drive access is limited to the files it creates for the user's backup flow. The backup
-                file remains encrypted before upload.
-            </p>
+            <article class="card section">
+                <h2>4. Data sharing</h2>
+                <p>
+                    We do not sell vault data. Private vault contents remain under the user's control on the device or
+                    in the user's own encrypted backup file.
+                </p>
+            </article>
 
-            <h2>4. Data sharing</h2>
-            <p>
-                We do not sell vault data. Guarden - Premium Privacy is built so that private vault contents remain under the
-                user's control on the device or in the user's own encrypted backup file.
-            </p>
+            <article class="card section">
+                <h2>5. User choices</h2>
+                <p>
+                    Users may choose not to use Google Drive backup and continue using the offline-first password
+                    manager locally on the device.
+                </p>
+            </article>
 
-            <h2>5. User choices</h2>
-            <p>
-                Users may choose not to use Google Drive backup and continue using the offline-first password manager
-                locally on the device.
-            </p>
-
-            <h2>6. Contact</h2>
-            <p>
-                For privacy questions or support requests, contact
-                <a href="mailto:jackdrawer90@gmail.com">jackdrawer90@gmail.com</a>.
-            </p>
-
-            <div class="bottom-links">
-                <a href="./">Guarden - Premium Privacy home page</a>
-                <a href="./terms-of-service.html">Terms of Service</a>
-                <a href="mailto:jackdrawer90@gmail.com">Support email</a>
-            </div>
-        </article>
+            <article class="card section">
+                <h2>6. Contact</h2>
+                <ul class="detail-list">
+                    <li>Email: <a href="mailto:jackdrawer90@gmail.com">jackdrawer90@gmail.com</a></li>
+                    <li>Home page: <a href="./">Guarden - Premium Privacy</a></li>
+                    <li>Terms: <a href="./terms-of-service.html">Terms of Service</a></li>
+                </ul>
+            </article>
+        </section>
     </main>
+
+    <footer class="shell">
+        <div class="card footer-card">
+            <p>&copy; 2026 Guarden - Premium Privacy. Official public site for Google OAuth and app information.</p>
+            <div class="footer-links">
+                <a href="./">Home</a>
+                <a href="./terms-of-service.html">Terms of Service</a>
+                <a href="mailto:jackdrawer90@gmail.com">Support</a>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
