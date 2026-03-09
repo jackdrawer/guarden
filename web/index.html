@@ -1,41 +1,93 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="$FLUTTER_BASE_HREF">
-
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
-
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Guarden">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png" />
-
-  <title>Guarden</title>
-  <link rel="manifest" href="manifest.json">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guarden PW Manager - Secure Offline Vault</title>
+    <meta name="google-site-verification" content="f2c61TkC-TFAIEgjmS4U3lniSprNHQvTljqA1Ne3orA" />
+    <style>
+        :root {
+            --primary: #2E7D32;
+            --secondary: #388E3C;
+            --dark: #121212;
+            --glass: rgba(255, 255, 255, 0.05);
+            --text: #e0e0e0;
+        }
+        body {
+            background-color: var(--dark);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0;
+            line-height: 1.6;
+        }
+        .hero {
+            height: 60vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0a200a 0%, #121212 100%);
+            text-align: center;
+            padding: 20px;
+        }
+        .hero img {
+            max-width: 180px;
+            border-radius: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+        }
+        h1 { font-size: 3rem; color: #4CAF50; margin: 0; }
+        .subtitle { font-size: 1.2rem; opacity: 0.8; max-width: 600px; }
+        .content { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        .card {
+            background: var(--glass);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+        h2 { color: #81C784; }
+        footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid var(--glass);
+            font-size: 0.9rem;
+        }
+        a { color: #a5d6a7; text-decoration: none; margin: 0 10px; }
+        a:hover { text-decoration: underline; }
+    </style>
 </head>
-
 <body>
-  <script src="flutter_bootstrap.js" async></script>
-</body>
+    <div class="hero">
+        <img src="assets/images/app_icon.png" alt="Guarden App Icon">
+        <h1>Guarden PW Manager</h1>
+        <p class="subtitle">Premium privacy that costs nothing but trust. Secure, offline-first password management for the modern age.</p>
+    </div>
 
+    <div class="content">
+        <div class="card">
+            <h2>What is Guarden?</h2>
+            <p>Guarden is an offline-first password vault built for people who want local control over sensitive login data. Unlike traditional cloud-based managers, Guarden prioritizes your privacy by keeping your data where it belongs: on your device.</p>
+        </div>
+
+        <div class="card">
+            <h2>Core Purpose</h2>
+            <p>The application allows users to store web passwords, bank account credentials, subscription details, and private notes in one locally encrypted vault. It uses industry-standard AES-256 encryption and biometric authentication to ensure that only you can access your data.</p>
+        </div>
+
+        <div class="card">
+            <h2>Why Google OAuth?</h2>
+            <p>Guarden uses Google OAuth solely for the optional "Encrypted Cloud Backup" feature. This allows you to securely upload your encrypted vault to your own Google Drive space (using the "drive.file" scope), giving you an extra layer of recovery without compromising our offline-first core philosophy.</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Guarden PW Manager</p>
+        <p>
+            <a href="privacy-policy.html">Privacy Policy</a> | 
+            <a href="mailto:jackdrawer90@gmail.com">Contact Support</a>
+        </p>
+    </footer>
+</body>
 </html>
