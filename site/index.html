@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guarden PW Manager | Secure Offline Password Vault</title>
+    <meta name="description" content="Official home page for Guarden PW Manager, an offline-first password vault with local encryption, biometric unlock, and optional encrypted Google Drive backup.">
+    <meta name="google-site-verification" content="f2c61TkC-TFAIEgjmS4U3lniSprNHQvTljqA1Ne3orA">
+    <link rel="icon" href="data:,">
+    <style>
+        :root {
+            --bg: #07140d;
+            --panel: rgba(17, 40, 28, 0.88);
+            --panel-border: rgba(132, 228, 164, 0.2);
+            --text: #f1f7f3;
+            --muted: #b9c8be;
+            --accent: #7de39d;
+            --accent-strong: #49b86a;
+            --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top, rgba(73, 184, 106, 0.22), transparent 38%),
+                linear-gradient(180deg, #0b1d14 0%, var(--bg) 100%);
+            line-height: 1.6;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .shell {
+            width: min(1120px, calc(100% - 32px));
+            margin: 0 auto;
+        }
+
+        header {
+            padding: 24px 0;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            text-decoration: none;
+        }
+
+        .brand-mark {
+            width: 52px;
+            height: 52px;
+            display: grid;
+            place-items: center;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #8ef2ad 0%, #328a4b 100%);
+            color: #062512;
+            font-size: 28px;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+        }
+
+        .brand-copy strong {
+            display: block;
+            font-size: 1rem;
+        }
+
+        .brand-copy span {
+            display: block;
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        nav a {
+            text-decoration: none;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        main {
+            padding: 28px 0 56px;
+        }
+
+        .hero {
+            display: grid;
+            gap: 28px;
+            grid-template-columns: 1.4fr 1fr;
+            align-items: stretch;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .hero-copy {
+            padding: 42px;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            margin-bottom: 16px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(125, 227, 157, 0.12);
+            color: var(--accent);
+            font-size: 0.84rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0 0 16px;
+            font-size: clamp(2.4rem, 5vw, 4.6rem);
+            line-height: 1.02;
+        }
+
+        .lead {
+            margin: 0 0 22px;
+            font-size: 1.12rem;
+            color: var(--muted);
+            max-width: 60ch;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .button {
+            display: inline-block;
+            text-decoration: none;
+            padding: 13px 18px;
+            border-radius: 14px;
+            font-weight: 600;
+        }
+
+        .button.primary {
+            background: var(--accent);
+            color: #082013;
+        }
+
+        .button.secondary {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+        }
+
+        .hero-panel {
+            padding: 28px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .hero-panel h2,
+        .section h2 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .feature-list,
+        .detail-list {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--muted);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+            margin-top: 22px;
+        }
+
+        .section {
+            padding: 26px;
+        }
+
+        .section p {
+            margin: 12px 0 0;
+            color: var(--muted);
+        }
+
+        footer {
+            padding: 0 0 48px;
+        }
+
+        .footer-card {
+            padding: 24px 28px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .footer-card p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        @media (max-width: 860px) {
+            .hero,
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-copy,
+            .hero-panel,
+            .section {
+                padding: 24px;
+            }
+
+            .topbar {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="shell">
+        <div class="topbar">
+            <a class="brand" href="./">
+                <span class="brand-mark" aria-hidden="true">G</span>
+                <span class="brand-copy">
+                    <strong>Guarden PW Manager</strong>
+                    <span>Official app home page</span>
+                </span>
+            </a>
+            <nav aria-label="Primary">
+                <a href="./privacy-policy.html">Privacy Policy</a>
+                <a href="./terms-of-service.html">Terms of Service</a>
+                <a href="mailto:jackdrawer90@gmail.com">Support</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="shell">
+        <section class="hero">
+            <article class="card hero-copy">
+                <span class="eyebrow">Offline-first password vault</span>
+                <h1>Guarden PW Manager</h1>
+                <p class="lead">
+                    Guarden PW Manager is a secure password and private data manager for storing website logins,
+                    bank account details, subscription records, and personal notes in one encrypted local vault.
+                </p>
+                <p class="lead">
+                    The app is designed around local control: your sensitive data stays on your device, protected with
+                    AES-256 encryption and biometric unlock. Google OAuth is used only when you choose the optional
+                    encrypted Google Drive backup feature.
+                </p>
+                <div class="actions">
+                    <a class="button primary" href="./privacy-policy.html">Read Privacy Policy</a>
+                    <a class="button secondary" href="mailto:jackdrawer90@gmail.com">Contact Support</a>
+                </div>
+            </article>
+
+            <aside class="card hero-panel">
+                <h2>What the app does</h2>
+                <ul class="feature-list">
+                    <li>Stores passwords and sensitive records in an encrypted local vault.</li>
+                    <li>Unlocks with your master password and supported biometric authentication.</li>
+                    <li>Lets you back up your encrypted vault to your own Google Drive if you opt in.</li>
+                    <li>Does not require a Guarden cloud account to use the core password manager.</li>
+                </ul>
+            </aside>
+        </section>
+
+        <section class="grid" aria-label="Highlights">
+            <article class="card section">
+                <h2>Purpose</h2>
+                <p>
+                    Guarden PW Manager helps users organize and protect private credentials without depending on a
+                    remote server for day-to-day vault access.
+                </p>
+            </article>
+
+            <article class="card section">
+                <h2>Google OAuth usage</h2>
+                <p>
+                    OAuth access is limited to the optional encrypted backup flow so the app can create, update, and
+                    restore the backup file stored in the user's own Google Drive.
+                </p>
+            </article>
+
+            <article class="card section">
+                <h2>Privacy</h2>
+                <p>
+                    The privacy policy explains what data stays on-device, how Google Drive backup works, and how to
+                    contact support for questions about data handling.
+                </p>
+            </article>
+        </section>
+
+        <section class="grid" aria-label="Compliance details">
+            <article class="card section">
+                <h2>Stored data types</h2>
+                <ul class="detail-list">
+                    <li>Website usernames and passwords</li>
+                    <li>Bank account and card-related records</li>
+                    <li>Subscription billing details</li>
+                    <li>Private notes added by the user</li>
+                </ul>
+            </article>
+
+            <article class="card section">
+                <h2>Security model</h2>
+                <ul class="detail-list">
+                    <li>Offline-first local storage</li>
+                    <li>AES-256 encryption before storage or backup</li>
+                    <li>Biometric unlock on supported devices</li>
+                    <li>No required remote Guarden account</li>
+                </ul>
+            </article>
+
+            <article class="card section">
+                <h2>Support</h2>
+                <ul class="detail-list">
+                    <li>Email: <a href="mailto:jackdrawer90@gmail.com">jackdrawer90@gmail.com</a></li>
+                    <li>Home page: <a href="./">Guarden PW Manager</a></li>
+                    <li>Privacy policy: <a href="./privacy-policy.html">privacy-policy.html</a></li>
+                </ul>
+            </article>
+        </section>
+    </main>
+
+    <footer class="shell">
+        <div class="card footer-card">
+            <p>&copy; 2026 Guarden PW Manager. Official public site for Google OAuth and app information.</p>
+            <div class="footer-links">
+                <a href="./privacy-policy.html">Privacy Policy</a>
+                <a href="./terms-of-service.html">Terms of Service</a>
+                <a href="mailto:jackdrawer90@gmail.com">Support</a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
